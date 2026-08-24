@@ -1,0 +1,451 @@
+.dev-combat-arena-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+
+  display: grid;
+  place-items: center;
+
+  padding: 20px;
+
+  background:
+    rgba(0, 0, 0, 0.96);
+
+  backdrop-filter:
+    blur(9px);
+}
+
+.dev-combat-arena {
+  width:
+    min(
+      1050px,
+      100%
+    );
+
+  max-height: 92vh;
+  overflow-y: auto;
+
+  padding: 24px;
+
+  color: #eee4e8;
+
+  background:
+    #090709;
+
+  border:
+    1px solid #643047;
+
+  box-shadow:
+    0 40px 120px
+    rgba(0, 0, 0, 0.95);
+}
+
+.dev-combat-arena__header {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding-bottom: 18px;
+
+  border-bottom:
+    1px solid #35242b;
+}
+
+.dev-combat-arena__header span {
+  color: #dc5d8b;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing:
+    0.16em;
+}
+
+.dev-combat-arena__header h2 {
+  margin:
+    6px 0;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 30px;
+
+  font-weight: 400;
+}
+
+.dev-combat-arena__header p {
+  margin: 0;
+
+  color: #948087;
+
+  font-size: 10px;
+}
+
+.dev-combat-arena__header > button {
+  width: 40px;
+  height: 40px;
+
+  color: white;
+
+  background: #160e12;
+
+  border:
+    1px solid #543043;
+
+  cursor: pointer;
+
+  font-size: 20px;
+}
+
+.dev-combat-arena__templates {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin:
+    18px 0;
+}
+
+.dev-combat-arena__templates button {
+  padding:
+    8px 10px;
+
+  color: #a9949d;
+
+  background:
+    #100b0e;
+
+  border:
+    1px solid #38262e;
+
+  cursor: pointer;
+
+  font-size: 9px;
+}
+
+.dev-combat-arena__templates button:hover,
+.dev-combat-arena__templates button.selected {
+  color: #f0dce4;
+
+  background:
+    #2a111c;
+
+  border-color:
+    #813652;
+}
+
+.dev-combat-arena__editor {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 12px;
+}
+
+.dev-combat-arena__block {
+  padding: 15px;
+
+  background:
+    #0e0a0c;
+
+  border:
+    1px solid #38272e;
+}
+
+.dev-combat-arena__block h3 {
+  margin:
+    0 0 13px;
+
+  color: #d35b84;
+
+  font-size: 10px;
+
+  letter-spacing:
+    0.12em;
+
+  text-transform:
+    uppercase;
+}
+
+.dev-combat-arena__block label {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  margin-bottom: 10px;
+
+  color: #97838b;
+
+  font-size: 9px;
+}
+
+.dev-combat-arena input,
+.dev-combat-arena select {
+  width: 100%;
+
+  min-height: 36px;
+
+  box-sizing:
+    border-box;
+
+  padding:
+    7px 9px;
+
+  color: #eee1e6;
+
+  background:
+    #080608;
+
+  border:
+    1px solid #412b35;
+
+  outline: none;
+}
+
+.dev-combat-arena input:focus,
+.dev-combat-arena select:focus {
+  border-color:
+    #873956;
+}
+
+.dev-combat-arena__disciplines {
+  grid-column:
+    1 / -1;
+}
+
+.dev-combat-arena__discipline-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 8px;
+}
+
+.dev-combat-arena__discipline-grid label {
+  margin: 0;
+}
+
+.dev-combat-arena__toggles {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 6px;
+}
+
+.dev-combat-arena__toggles button {
+  padding:
+    7px 9px;
+
+  color: #99868e;
+
+  background:
+    #0c080a;
+
+  border:
+    1px solid #3e2932;
+
+  cursor: pointer;
+
+  font-size: 8px;
+}
+
+.dev-combat-arena__toggles button.selected {
+  color: #f0d8e1;
+
+  background:
+    #43182a;
+
+  border-color:
+    #934163;
+}
+
+.dev-combat-arena__footer {
+  margin-top: 18px;
+
+  padding-top: 18px;
+
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  align-items: center;
+
+  gap: 16px;
+
+  border-top:
+    1px solid #35242b;
+}
+
+.dev-combat-arena__footer > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.dev-combat-arena__footer span {
+  color: #866f78;
+
+  font-size: 8px;
+
+  letter-spacing:
+    0.12em;
+}
+
+.dev-combat-arena__footer strong {
+  font-size: 15px;
+}
+
+.dev-combat-arena__footer small {
+  color: #a18c94;
+
+  font-size: 9px;
+
+  text-transform:
+    capitalize;
+}
+
+.dev-combat-arena__footer > button {
+  min-width: 190px;
+  min-height: 48px;
+
+  padding:
+    10px 18px;
+
+  color: white;
+
+  background:
+    #7e294c;
+
+  border:
+    1px solid #ad456e;
+
+  cursor: pointer;
+
+  font-weight: 800;
+
+  letter-spacing:
+    0.08em;
+}
+
+.dev-combat-arena__footer > button:hover {
+  background:
+    #99345c;
+}
+
+@media (
+  max-width: 800px
+) {
+  .dev-combat-arena__editor {
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+  .dev-combat-arena__discipline-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      );
+  }
+}
+
+@media (
+  max-width: 560px
+) {
+  .dev-combat-arena {
+    padding: 15px;
+  }
+
+  .dev-combat-arena__editor {
+    grid-template-columns:
+      1fr;
+  }
+
+  .dev-combat-arena__discipline-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+  .dev-combat-arena__footer {
+    flex-direction:
+      column;
+
+    align-items:
+      stretch;
+  }
+
+  .dev-combat-arena__footer > button {
+    width: 100%;
+  }
+}
+.dev-combat-arena__wide {
+  grid-column:
+    1 / -1;
+}
+
+.dev-combat-arena__numeric-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap: 8px;
+}
+
+.dev-combat-arena__numeric-grid label {
+  margin: 0;
+}
+
+@media (
+  max-width: 800px
+) {
+  .dev-combat-arena__numeric-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      );
+  }
+}
+
+@media (
+  max-width: 560px
+) {
+  .dev-combat-arena__numeric-grid {
+    grid-template-columns:
+      1fr;
+  }
+}

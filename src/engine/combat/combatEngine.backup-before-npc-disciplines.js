@@ -1,0 +1,4785 @@
+import {
+  getDisciplineLevel,
+} from '../vampire/disciplines/disciplineEngine'
+
+import {
+  advanceNpcFrenzy,
+  checkAutomaticNpcFrenzy,
+  getNpcFrenzyPreferredAttack,
+  processNpcFrenzyTurn,
+  shouldCheckNpcFrenzyAfterDamage,
+  triggerNpcFrenzy,
+} from '../vampire/frenzy/npcFrenzyEngine'
+import {
+  rollDicePool,
+} from '../dice/rollTest'
+
+import {
+  getArmor,
+  getWeapon,
+} from '../../data/items'
+
+import {
+  addDamage,
+  convertDamageForTarget,
+  getDamageSlots,
+  getSoakPool,
+  getTotalDamage,
+  isIncapacitated,
+  normalizeHealth,
+} from './damageEngine'
+
+import {
+  chooseEnemyCombatAction,
+} from './ai/enemyCombatAI'
+
+const HEALTH_LEVELS = [
+  {
+    id: 'healthy',
+    label: 'Saudável',
+    penalty: 0,
+  },
+
+  {
+    id: 'bruised',
+    label: 'Escoriado',
+    penalty: 0,
+  },
+
+  {
+    id: 'hurt',
+    label: 'Machucado',
+    penalty: -1,
+  },
+
+  {
+    id: 'injured',
+    label: 'Ferido',
+    penalty: -1,
+  },
+
+  {
+    id: 'wounded',
+    label: 'Ferido Gravemente',
+    penalty: -2,
+  },
+
+  {
+    id: 'mauled',
+    label: 'Espancado',
+    penalty: -2,
+  },
+
+  {
+    id: 'crippled',
+    label: 'Aleijado',
+    penalty: -5,
+  },
+
+  {
+    id: 'incapacitated',
+    label: 'Incapacitado',
+    penalty: null,
+  },
+]
+
+function safeNumber(
+  value,
+  fallback = 0
+) {
+  const result =
+    Number(value)
+
+  return Number.isNaN(
+    result
+  )
+    ? fallback
+    : result
+}
+
+function rollD10() {
+  return (
+    Math.floor(
+      Math.random() * 10
+    ) + 1
+  )
+}
+
+function getPlayerArmor(
+  game
+) {
+  return getArmor(
+    game?.equipment
+      ?.armor ??
+      'none'
+  )
+}
+
+function getPlayerWeapon(
+  game
+) {
+  return getWeapon(
+    game?.equipment
+      ?.weapon ??
+      'fists'
+  ) ?? getWeapon('fists')
+}
+
+function getEnemyArmor(
+  combat
+) {
+  return getArmor(
+    combat?.enemy
+      ?.armorId ??
+      'none'
+  )
+}
+
+function getEnemyWeapon(
+  combat
+) {
+  return getWeapon(
+    combat?.enemy
+      ?.weaponId ??
+      'fists'
+  ) ?? getWeapon('fists')
+}
+
+function getPhysicalBoost(
+  game,
+  key
+) {
+  return safeNumber(
+    game?.combatBoosts
+      ?.[key],
+    0
+  )
+}
+
+function getPlayerAttribute(
+  game,
+  group,
+  key
+) {
+  const base =
+    safeNumber(
+      game?.attributes
+        ?.[group]
+        ?.[key],
+      0
+    )
+
+  const boost =
+    group === 'physical'
+      ? getPhysicalBoost(
+          game,
+          key
+        )
+      : 0
+
+  let value =
+    base + boost
+
+  /*
+    Armadura pesada reduz Destreza.
+  */
+
+  if (
+    group === 'physical' &&
+    key === 'dexterity'
+  ) {
+    const armor =
+      getPlayerArmor(
+        game
+      )
+
+    value -=
+      safeNumber(
+        armor
+          ?.dexterityPenalty,
+        0
+      )
+  }
+
+  return Math.max(
+    0,
+    value
+  )
+}
+
+function getPlayerCombatStrength(
+  game
+) {
+  const base =
+    getPlayerAttribute(
+      game,
+      'physical',
+      'strength'
+    )
+
+  const potency =
+    Math.max(
+      0,
+      safeNumber(
+        getDisciplineLevel(
+          game,
+          'potency'
+        ),
+        0
+      )
+    )
+
+  return {
+    base,
+    potency,
+    total:
+      base + potency,
+  }
+}
+
+function getPlayerFortitude(
+  game
+) {
+  return Math.max(
+    0,
+    safeNumber(
+      getDisciplineLevel(
+        game,
+        'fortitude'
+      ),
+      0
+    )
+  )
+}
+
+function getActiveFeralClaws(
+  game
+) {
+  const effect =
+    game?.disciplineEffects
+      ?.feralClaws
+
+  const protean =
+    Math.max(
+      0,
+      safeNumber(
+        getDisciplineLevel(
+          game,
+          'protean'
+        ),
+        0
+      )
+    )
+
+  if (
+    protean < 2 ||
+    !effect?.active
+  ) {
+    return null
+  }
+
+  return {
+    id:
+      'feralClaws',
+
+    name:
+      'Garras da Besta',
+
+    category:
+      'natural',
+
+    sourceType:
+      'natural',
+
+    attackAttribute:
+      'dexterity',
+
+    attackAbility:
+      'brawl',
+
+    difficulty: 6,
+
+    damageMode:
+      'strength',
+
+    damageBonus:
+      safeNumber(
+        effect.damageBonus,
+        1
+      ),
+
+    damageType:
+      'aggravated',
+
+    supernatural:
+      true,
+  }
+}
+
+function getCelerityExtraActions(
+  game
+) {
+  const level =
+    Math.max(
+      0,
+      safeNumber(
+        getDisciplineLevel(
+          game,
+          'celerity'
+        ),
+        0
+      )
+    )
+
+  const effect =
+    game?.disciplineEffects
+      ?.celerity
+
+  if (
+    level <= 0 ||
+    !effect?.active
+  ) {
+    return 0
+  }
+
+  return Math.max(
+    0,
+    Math.min(
+      level,
+      safeNumber(
+        effect.extraActions,
+        effect.level ??
+          level
+      )
+    )
+  )
+}
+
+function createCombatTurnState(
+  game
+) {
+  const extraActions =
+    getCelerityExtraActions(
+      game
+    )
+
+  return {
+    enemyActed: false,
+
+    normalActionAvailable:
+      true,
+
+    celerityActionsRemaining:
+      extraActions,
+
+    playerActionsRemaining:
+      1 + extraActions,
+  }
+}
+
+function getPlayerAbility(
+  game,
+  key
+) {
+  return safeNumber(
+    game?.abilities
+      ?.[key],
+    0
+  )
+}
+
+function getEnemyAttribute(
+  combat,
+  key
+) {
+  let value =
+    safeNumber(
+      combat?.enemy
+        ?.attributes
+        ?.[key],
+      0
+    )
+
+  if (
+    key === 'dexterity'
+  ) {
+    const armor =
+      getEnemyArmor(
+        combat
+      )
+
+    value -=
+      safeNumber(
+        armor
+          ?.dexterityPenalty,
+        0
+      )
+  }
+
+  return Math.max(
+    0,
+    value
+  )
+}
+
+function getEnemyAbility(
+  combat,
+  key
+) {
+  return safeNumber(
+    combat?.enemy
+      ?.abilities
+      ?.[key],
+    0
+  )
+}
+
+export function getHealthInfo(
+  healthOrDamage
+) {
+  let damage = 0
+
+  if (
+    typeof healthOrDamage ===
+    'number'
+  ) {
+    damage =
+      healthOrDamage
+  } else {
+    damage =
+      getTotalDamage(
+        healthOrDamage
+      )
+  }
+
+  const safeDamage =
+    Math.max(
+      0,
+      damage
+    )
+
+  if (
+    safeDamage <= 0
+  ) {
+    return {
+      damage: 0,
+
+      label:
+        'Saudável',
+
+      penalty: 0,
+
+      incapacitated:
+        false,
+    }
+  }
+
+  const index =
+    Math.min(
+      safeDamage,
+      7
+    )
+
+  const level =
+    HEALTH_LEVELS[index]
+
+  return {
+    damage:
+      safeDamage,
+
+    label:
+      level.label,
+
+    penalty:
+      level.penalty,
+
+    incapacitated:
+      safeDamage >= 7,
+  }
+}
+
+export function getPlayerHealthPenalty(
+  game
+) {
+  const health =
+    normalizeHealth(
+      game?.health
+    )
+
+  const info =
+    getHealthInfo(
+      health
+    )
+
+  return (
+    info.penalty ?? 0
+  )
+}
+
+export function rollInitiative(
+  dexterity,
+  wits
+) {
+  const die =
+    rollD10()
+
+  const base =
+    Math.max(
+      0,
+      safeNumber(
+        dexterity,
+        0
+      )
+    ) +
+    Math.max(
+      0,
+      safeNumber(
+        wits,
+        0
+      )
+    )
+
+  return {
+    die,
+
+    base,
+
+    total:
+      base + die,
+  }
+}
+
+function createEnemyHealth(
+  maximum = 7
+) {
+  return {
+    bashing: 0,
+
+    lethal: 0,
+
+    aggravated: 0,
+
+    currentLevel: 0,
+
+    maximum:
+      safeNumber(
+        maximum,
+        7
+      ),
+  }
+}
+
+export function createCombatState(
+  game,
+  encounter
+) {
+  const playerDexterity =
+    getPlayerAttribute(
+      game,
+      'physical',
+      'dexterity'
+    )
+
+  const playerWits =
+    getPlayerAttribute(
+      game,
+      'mental',
+      'wits'
+    )
+
+  const enemyDexterity =
+    Math.max(
+      0,
+      safeNumber(
+        encounter.enemy
+          ?.attributes
+          ?.dexterity,
+        2
+      ) -
+        safeNumber(
+          getArmor(
+            encounter.enemy
+              ?.armorId ??
+              'none'
+          )
+            ?.dexterityPenalty,
+          0
+        )
+    )
+
+  const enemyWits =
+    safeNumber(
+      encounter.enemy
+        ?.attributes
+        ?.wits,
+      2
+    )
+
+  const playerInitiative =
+    rollInitiative(
+      playerDexterity,
+      playerWits
+    )
+
+  const enemyInitiative =
+    rollInitiative(
+      enemyDexterity,
+      enemyWits
+    )
+
+  return {
+    encounterId:
+      encounter.id,
+
+    round: 1,
+
+    status:
+      'active',
+
+    winner: null,
+
+    endingReason:
+      null,
+
+    environment: {
+      ...(encounter.environment ??
+        {}),
+    },
+
+    flags: {
+      ...(encounter.flags ??
+        {}),
+    },
+
+    playerInitiative,
+
+    enemyInitiative,
+
+    playerActsFirst:
+      playerInitiative.total >=
+      enemyInitiative.total,
+
+    turn:
+      createCombatTurnState(
+        game
+      ),
+
+    grapple: {
+      active: false,
+
+      controller:
+        null,
+    },
+
+    enemy: {
+      id:
+        encounter.enemy.id,
+
+      name:
+        encounter.enemy.name,
+
+      type:
+        encounter.enemy.type ??
+        'human',
+
+      vampire:
+        Boolean(
+          encounter.enemy.vampire ||
+          encounter.enemy.type ===
+            'vampire'
+        ),
+
+      generation:
+        encounter.enemy
+          ?.generation ??
+        null,
+
+      willpower:
+        safeNumber(
+          encounter.enemy
+            ?.willpower,
+          6
+        ),
+
+      humanity:
+        safeNumber(
+          encounter.enemy
+            ?.humanity,
+          7
+        ),
+
+      virtues: {
+        selfControl:
+          safeNumber(
+            encounter.enemy
+              ?.virtues
+              ?.selfControl ??
+            encounter.enemy
+              ?.selfControl,
+            3
+          ),
+
+        courage:
+          safeNumber(
+            encounter.enemy
+              ?.virtues
+              ?.courage ??
+            encounter.enemy
+              ?.courage,
+            3
+          ),
+
+        conscience:
+          safeNumber(
+            encounter.enemy
+              ?.virtues
+              ?.conscience ??
+            encounter.enemy
+              ?.conscience,
+            3
+          ),
+      },
+
+      blood: {
+        current:
+          safeNumber(
+            encounter.enemy
+              ?.blood
+              ?.current,
+            encounter.enemy.type ===
+              'vampire'
+              ? 6
+              : 0
+          ),
+
+        maximum:
+          safeNumber(
+            encounter.enemy
+              ?.blood
+              ?.maximum,
+            encounter.enemy.type ===
+              'vampire'
+              ? 10
+              : 0
+          ),
+      },
+
+      armorId:
+        encounter.enemy
+          ?.armorId ??
+        'none',
+
+      weaponId:
+        encounter.enemy
+          ?.weaponId ??
+        'fists',
+
+      combatPersonality:
+        encounter.enemy
+          ?.combatPersonality ??
+        encounter.enemy
+          ?.personality ??
+        'balanced',
+
+      disciplines: {
+        ...(encounter.enemy
+          ?.disciplines ??
+          {}),
+      },
+
+      ammo: {
+        loaded:
+          safeNumber(
+            encounter.enemy
+              ?.ammo
+              ?.loaded,
+            getWeapon(
+              encounter.enemy
+                ?.weaponId ??
+                'fists'
+            )
+              ?.ammunition
+              ?.magazine ??
+              0
+          ),
+
+        reserve:
+          safeNumber(
+            encounter.enemy
+              ?.ammo
+              ?.reserve,
+            0
+          ),
+      },
+
+      status: {
+        staked: false,
+
+        paralyzed: false,
+      },
+
+      attributes: {
+        dexterity:
+          safeNumber(
+            encounter.enemy
+              ?.attributes
+              ?.dexterity,
+            2
+          ),
+
+        strength:
+          safeNumber(
+            encounter.enemy
+              ?.attributes
+              ?.strength,
+            2
+          ),
+
+        stamina:
+          safeNumber(
+            encounter.enemy
+              ?.attributes
+              ?.stamina,
+            2
+          ),
+
+        wits:
+          enemyWits,
+
+        charisma:
+          safeNumber(
+            encounter.enemy
+              ?.attributes
+              ?.charisma,
+            2
+          ),
+
+        manipulation:
+          safeNumber(
+            encounter.enemy
+              ?.attributes
+              ?.manipulation,
+            2
+          ),
+      },
+
+      abilities: {
+        brawl:
+          safeNumber(
+            encounter.enemy
+              ?.abilities
+              ?.brawl,
+            2
+          ),
+
+        dodge:
+          safeNumber(
+            encounter.enemy
+              ?.abilities
+              ?.dodge,
+            1
+          ),
+
+        athletics:
+          safeNumber(
+            encounter.enemy
+              ?.abilities
+              ?.athletics,
+            1
+          ),
+
+        melee:
+          safeNumber(
+            encounter.enemy
+              ?.abilities
+              ?.melee,
+            encounter.enemy
+              ?.abilities
+              ?.brawl ??
+              2
+          ),
+
+        firearms:
+          safeNumber(
+            encounter.enemy
+              ?.abilities
+              ?.firearms,
+            0
+          ),
+
+        intimidation:
+          safeNumber(
+            encounter.enemy
+              ?.abilities
+              ?.intimidation,
+            2
+          ),
+      },
+
+      health:
+        createEnemyHealth(
+          encounter.enemy
+            ?.health ??
+            7
+        ),
+    },
+
+    log: [
+      {
+        type:
+          'initiative',
+
+        text:
+          `Iniciativa: você ${playerInitiative.total} | ${encounter.enemy.name} ${enemyInitiative.total}.`,
+      },
+
+      {
+        type:
+          'system',
+
+        text:
+          playerInitiative.total >=
+          enemyInitiative.total
+            ? 'Você age primeiro.'
+            : `${encounter.enemy.name} age primeiro.`,
+      },
+    ],
+  }
+}
+
+function rollDamage({
+  damagePool,
+  soakPool,
+}) {
+  const damageRoll =
+    rollDicePool({
+      pool:
+        Math.max(
+          1,
+          damagePool
+        ),
+
+      difficulty: 6,
+    })
+
+  const soakRoll =
+    soakPool > 0
+      ? rollDicePool({
+          pool:
+            Math.max(
+              1,
+              soakPool
+            ),
+
+          difficulty: 6,
+        })
+      : {
+          dice: [],
+
+          successes: 0,
+
+          result:
+            'failure',
+        }
+
+  const damageSuccesses =
+    damageRoll.result ===
+    'success'
+      ? damageRoll.successes
+      : 0
+
+  const soakSuccesses =
+    soakRoll.result ===
+    'success'
+      ? soakRoll.successes
+      : 0
+
+  return {
+    damageRoll,
+
+    soakRoll,
+
+    damageSuccesses,
+
+    soakSuccesses,
+
+    inflicted:
+      Math.max(
+        0,
+        damageSuccesses -
+          soakSuccesses
+      ),
+  }
+}
+
+function getWeaponDamagePool({
+  weapon,
+  strength,
+  attackSuccesses,
+}) {
+  const extraSuccesses =
+    Math.max(
+      0,
+      attackSuccesses - 1
+    )
+
+  if (
+    weapon.damageMode ===
+    'fixed'
+  ) {
+    return Math.max(
+      1,
+      safeNumber(
+        weapon.damagePool,
+        1
+      ) +
+        extraSuccesses
+    )
+  }
+
+  return Math.max(
+    1,
+    strength +
+      safeNumber(
+        weapon.damageBonus,
+        0
+      ) +
+      extraSuccesses
+  )
+}
+
+function getPlayerAmmo(
+  game,
+  weapon
+) {
+  if (
+    weapon.category !==
+    'firearm'
+  ) {
+    return null
+  }
+
+  const stored =
+    game?.weaponState
+      ?.[weapon.id]
+      ?.ammo
+
+  if (
+    typeof stored ===
+    'number'
+  ) {
+    return stored
+  }
+
+  return (
+    weapon.ammunition
+      ?.current ??
+    weapon.ammunition
+      ?.magazine ??
+    0
+  )
+}
+
+function consumePlayerAmmo(
+  game,
+  weapon
+) {
+  if (
+    weapon.category !==
+    'firearm'
+  ) {
+    return game
+  }
+
+  const current =
+    getPlayerAmmo(
+      game,
+      weapon
+    )
+
+  return {
+    ...game,
+
+    weaponState: {
+      ...(game.weaponState ??
+        {}),
+
+      [weapon.id]: {
+        ...(game.weaponState
+          ?.[weapon.id] ??
+          {}),
+
+        ammo:
+          Math.max(
+            0,
+            current - 1
+          ),
+      },
+    },
+  }
+}
+
+function performPlayerWeaponAttack(
+  game,
+  combat,
+  weaponOverride = null
+) {
+  const weapon =
+    weaponOverride ??
+    getPlayerWeapon(
+      game
+    )
+
+  const currentAmmo =
+    getPlayerAmmo(
+      game,
+      weapon
+    )
+
+  if (
+    weapon.category ===
+      'firearm' &&
+    currentAmmo <= 0
+  ) {
+    return {
+      game,
+
+      combat,
+
+      log: [
+        {
+          type:
+            'empty',
+
+          text:
+            `${weapon.name}: sem munição no carregador.`,
+        },
+      ],
+    }
+  }
+
+  const dexterity =
+    getPlayerAttribute(
+      game,
+      'physical',
+      weapon.attackAttribute ??
+        'dexterity'
+    )
+
+  const ability =
+    getPlayerAbility(
+      game,
+      weapon.attackAbility ??
+        'brawl'
+    )
+
+  const healthPenalty =
+    getPlayerHealthPenalty(
+      game
+    )
+
+  let difficulty =
+    safeNumber(
+      weapon.difficulty,
+      6
+    )
+
+  /*
+    Estaca contra coração.
+  */
+
+  if (
+    weapon.stakeRules
+      ?.enabled &&
+    combat.enemy.type ===
+      'vampire'
+  ) {
+    difficulty =
+      weapon.stakeRules
+        .heartDifficulty ??
+      9
+  }
+
+  const attackPool =
+    Math.max(
+      1,
+      dexterity +
+        ability +
+        healthPenalty
+    )
+
+  const attackRoll =
+    rollDicePool({
+      pool:
+        attackPool,
+
+      difficulty,
+    })
+
+  let updatedGame =
+    consumePlayerAmmo(
+      game,
+      weapon
+    )
+
+  const log = [
+    {
+      type:
+        'player-attack',
+
+      text:
+        `${weapon.name}: ${attackPool} dados, dificuldade ${difficulty}.`,
+    },
+
+    {
+      type:
+        'dice',
+
+      text:
+        `Ataque: [${attackRoll.dice.join(', ')}] → ${attackRoll.successes} sucesso(s).`,
+    },
+  ]
+
+  if (
+    attackRoll.result !==
+    'success'
+  ) {
+    log.push({
+      type:
+        attackRoll.result ===
+        'botch'
+          ? 'botch'
+          : 'miss',
+
+      text:
+        attackRoll.result ===
+        'botch'
+          ? `Falha crítica usando ${weapon.name}.`
+          : 'O ataque não acerta.',
+    })
+
+    return {
+      game:
+        updatedGame,
+
+      combat,
+
+      log,
+    }
+  }
+
+  /*
+    ESTACA.
+
+    Se acertar o coração com sucessos
+    suficientes contra um vampiro,
+    ele é paralisado.
+  */
+
+  if (
+    weapon.stakeRules
+      ?.enabled &&
+    combat.enemy.type ===
+      'vampire' &&
+    attackRoll.successes >=
+      (
+        weapon.stakeRules
+          .requiredAttackSuccesses ??
+        3
+      )
+  ) {
+    const updatedCombat = {
+      ...combat,
+
+      status:
+        'finished',
+
+      winner:
+        'player',
+
+      endingReason:
+        'staked',
+
+      enemy: {
+        ...combat.enemy,
+
+        status: {
+          ...(combat.enemy
+            .status ?? {}),
+
+          staked: true,
+
+          paralyzed: true,
+        },
+      },
+    }
+
+    log.push({
+      type:
+        'stake',
+
+      text:
+        `A estaca atravessa o peito de ${combat.enemy.name} e atinge o coração.`,
+    })
+
+    log.push({
+      type:
+        'victory',
+
+      text:
+        `${combat.enemy.name} fica completamente paralisado.`,
+    })
+
+    return {
+      game:
+        updatedGame,
+
+      combat:
+        updatedCombat,
+
+      log,
+    }
+  }
+
+  const combatStrength =
+    getPlayerCombatStrength(
+      game
+    )
+
+  const usesStrength =
+    weapon.damageMode !==
+    'fixed'
+
+  const strength =
+    usesStrength
+      ? combatStrength.total
+      : combatStrength.base
+
+  const damagePool =
+    getWeaponDamagePool({
+      weapon,
+
+      strength,
+
+      attackSuccesses:
+        attackRoll.successes,
+    })
+
+  if (
+    usesStrength &&
+    combatStrength.potency > 0
+  ) {
+    log.push({
+      type:
+        'potency',
+
+      text:
+        `Potência ${combatStrength.potency}: +${combatStrength.potency} dado(s) de dano corpo a corpo.`,
+    })
+  }
+
+  const actualDamageType =
+    convertDamageForTarget({
+      targetType:
+        combat.enemy.type,
+
+      damageType:
+        weapon.damageType,
+
+      sourceType:
+        weapon.sourceType,
+    })
+
+  const soak =
+    getSoakPool({
+      targetType:
+        combat.enemy.type,
+
+      stamina:
+        combat.enemy
+          .attributes
+          .stamina,
+
+      armorId:
+        combat.enemy
+          .armorId,
+
+      damageType:
+        actualDamageType,
+
+      sourceType:
+        weapon.sourceType,
+    })
+
+  const damage =
+    rollDamage({
+      damagePool,
+
+      soakPool:
+        soak.total,
+    })
+
+  let enemyHealth =
+    combat.enemy.health
+
+  if (
+    damage.inflicted > 0
+  ) {
+    enemyHealth =
+      addDamage({
+        health:
+          enemyHealth,
+
+        damageType:
+          actualDamageType,
+
+        amount:
+          damage.inflicted,
+      })
+  }
+
+  const totalEnemyDamage =
+    getTotalDamage(
+      enemyHealth
+    )
+
+  const defeated =
+    totalEnemyDamage >=
+    (
+      combat.enemy
+        .health
+        .maximum ??
+      7
+    )
+
+  const updatedCombat = {
+    ...combat,
+
+    enemy: {
+      ...combat.enemy,
+
+      health: {
+        ...enemyHealth,
+
+        maximum:
+          combat.enemy
+            .health
+            .maximum ??
+          7,
+      },
+    },
+
+    ...(defeated
+      ? {
+          status:
+            'finished',
+
+          winner:
+            'player',
+
+          endingReason:
+            'incapacitated',
+        }
+      : {}),
+  }
+
+  log.push({
+    type:
+      'damage',
+
+    text:
+      `Dano ${actualDamageType}: ${damage.damageSuccesses} sucesso(s).`,
+  })
+
+  log.push({
+    type:
+      'soak',
+
+    text:
+      `${combat.enemy.name} absorve ${damage.soakSuccesses} sucesso(s) (${soak.total} dados de absorção).`,
+  })
+
+  if (
+    damage.inflicted > 0
+  ) {
+    log.push({
+      type:
+        actualDamageType ===
+        'aggravated'
+          ? 'aggravated'
+          : actualDamageType ===
+              'lethal'
+            ? 'lethal'
+            : 'bashing',
+
+      text:
+        `${combat.enemy.name} sofre ${damage.inflicted} nível(is) de dano.`,
+    })
+  } else {
+    log.push({
+      type:
+        'soaked',
+
+      text:
+        `${combat.enemy.name} absorve todo o dano.`,
+    })
+  }
+
+  if (
+    defeated
+  ) {
+    log.push({
+      type:
+        'victory',
+
+      text:
+        `${combat.enemy.name} não consegue continuar lutando.`,
+    })
+  }
+
+  let finalCombat =
+    updatedCombat
+
+  if (
+    !defeated &&
+    updatedCombat.status ===
+      'active'
+  ) {
+    const frenzyCheck =
+      shouldCheckNpcFrenzyAfterDamage({
+        combat:
+          updatedCombat,
+
+        damageType:
+          actualDamageType,
+
+        inflicted:
+          damage.inflicted,
+      })
+
+    if (frenzyCheck) {
+      const frenzyResult =
+        triggerNpcFrenzy({
+          combat:
+            updatedCombat,
+
+          ...frenzyCheck,
+        })
+
+      finalCombat =
+        frenzyResult.combat
+
+      log.push(
+        ...(frenzyResult.log ?? [])
+      )
+
+      if (frenzyResult.roll) {
+        log.push({
+          type:
+            'frenzy-test',
+
+          text:
+            `Teste da Besta: ${frenzyResult.roll.dice.join(', ')} · ${frenzyResult.roll.result}.`,
+        })
+      }
+    }
+  }
+
+  return {
+    game:
+      updatedGame,
+
+    combat:
+      finalCombat,
+
+    log,
+  }
+}
+
+
+function getEnemyDisciplineStatus(
+  combat
+) {
+  return (
+    combat?.enemy
+      ?.status ??
+    {}
+  )
+}
+
+function consumeEnemySkippedAction(
+  combat
+) {
+  const status =
+    getEnemyDisciplineStatus(
+      combat
+    )
+
+  const current =
+    Math.max(
+      0,
+      safeNumber(
+        status.skipActions,
+        0
+      )
+    )
+
+  if (
+    current <= 0
+  ) {
+    return {
+      skipped: false,
+      combat,
+      log: [],
+    }
+  }
+
+  const remaining =
+    Math.max(
+      0,
+      current - 1
+    )
+
+  const nextStatus = {
+    ...status,
+
+    skipActions:
+      remaining,
+  }
+
+  if (
+    remaining <= 0
+  ) {
+    nextStatus.dominated =
+      false
+
+    nextStatus.madness =
+      false
+  }
+
+  const reason =
+    status.dominated
+      ? 'A ordem sobrenatural ainda prende a mente do inimigo.'
+      : status.madness
+        ? 'A loucura impede o inimigo de agir.'
+        : 'O inimigo perde a ação.'
+
+  return {
+    skipped: true,
+
+    combat: {
+      ...combat,
+
+      enemy: {
+        ...combat.enemy,
+
+        status:
+          nextStatus,
+      },
+    },
+
+    log: [
+      {
+        type:
+          'discipline',
+
+        text:
+          `${combat.enemy.name} não consegue agir. ${reason}`,
+      },
+    ],
+  }
+}
+
+function getEnemyDisciplineAttackPenalty(
+  combat
+) {
+  const status =
+    getEnemyDisciplineStatus(
+      combat
+    )
+
+  let penalty = 0
+
+  if (
+    status.frightened
+  ) {
+    penalty +=
+      Math.max(
+        1,
+        safeNumber(
+          status.fearLevel,
+          1
+        )
+      )
+  }
+
+  if (
+    status.dementiaFear
+  ) {
+    penalty +=
+      Math.max(
+        1,
+        safeNumber(
+          status.fearLevel,
+          1
+        )
+      )
+  }
+
+  if (
+    status.beastQuelled
+  ) {
+    penalty +=
+      Math.max(
+        1,
+        safeNumber(
+          status.aggressionPenalty,
+          1
+        )
+      )
+  }
+
+  return Math.min(
+    5,
+    penalty
+  )
+}
+
+
+function getEnemyAmmoState(
+  combat,
+  weapon
+) {
+  if (
+    weapon?.category !==
+    'firearm'
+  ) {
+    return {
+      loaded: null,
+      reserve: null,
+      magazine: null,
+    }
+  }
+
+  return {
+    loaded:
+      Math.max(
+        0,
+        safeNumber(
+          combat?.enemy
+            ?.ammo
+            ?.loaded,
+          weapon?.ammunition
+            ?.magazine ??
+            0
+        )
+      ),
+
+    reserve:
+      Math.max(
+        0,
+        safeNumber(
+          combat?.enemy
+            ?.ammo
+            ?.reserve,
+          0
+        )
+      ),
+
+    magazine:
+      Math.max(
+        0,
+        safeNumber(
+          weapon?.ammunition
+            ?.magazine,
+          0
+        )
+      ),
+  }
+}
+
+function consumeEnemyAmmo(
+  combat,
+  weapon
+) {
+  if (
+    weapon?.category !==
+    'firearm'
+  ) {
+    return combat
+  }
+
+  const ammo =
+    getEnemyAmmoState(
+      combat,
+      weapon
+    )
+
+  return {
+    ...combat,
+
+    enemy: {
+      ...combat.enemy,
+
+      ammo: {
+        ...(combat.enemy
+          ?.ammo ??
+          {}),
+
+        loaded:
+          Math.max(
+            0,
+            ammo.loaded - 1
+          ),
+
+        reserve:
+          ammo.reserve,
+      },
+    },
+  }
+}
+
+function reloadEnemyWeapon(
+  combat
+) {
+  const weapon =
+    getEnemyWeapon(
+      combat
+    )
+
+  if (
+    weapon?.category !==
+    'firearm'
+  ) {
+    return {
+      combat,
+
+      log: [
+        {
+          type:
+            'enemy-ai',
+
+          text:
+            `${combat.enemy.name} não consegue recarregar a arma atual.`,
+        },
+      ],
+    }
+  }
+
+  const ammo =
+    getEnemyAmmoState(
+      combat,
+      weapon
+    )
+
+  const missing =
+    Math.max(
+      0,
+      ammo.magazine -
+        ammo.loaded
+    )
+
+  const moved =
+    Math.min(
+      missing,
+      ammo.reserve
+    )
+
+  if (
+    moved <= 0
+  ) {
+    return {
+      combat,
+
+      log: [
+        {
+          type:
+            'enemy-ai',
+
+          text:
+            `${combat.enemy.name} está sem munição de reserva.`,
+        },
+      ],
+    }
+  }
+
+  return {
+    combat: {
+      ...combat,
+
+      enemy: {
+        ...combat.enemy,
+
+        ammo: {
+          ...(combat.enemy
+            ?.ammo ??
+            {}),
+
+          loaded:
+            ammo.loaded +
+            moved,
+
+          reserve:
+            ammo.reserve -
+            moved,
+        },
+      },
+    },
+
+    log: [
+      {
+        type:
+          'enemy-ai',
+
+        text:
+          `${combat.enemy.name} recarrega ${weapon.name}.`,
+      },
+    ],
+  }
+}
+
+function performEnemyAdvance(
+  game,
+  combat
+) {
+  return {
+    game,
+
+    combat: {
+      ...combat,
+
+      distance:
+        'close',
+
+      environment: {
+        ...(combat.environment ??
+          {}),
+
+        distance:
+          'close',
+      },
+    },
+
+    log: [
+      {
+        type:
+          'enemy-ai',
+
+        text:
+          `${combat.enemy.name} avança para curta distância.`,
+      },
+    ],
+  }
+}
+
+function performEnemyEscape(
+  game,
+  combat
+) {
+  const enemyRoll =
+    rollDicePool({
+      pool:
+        Math.max(
+          1,
+          getEnemyAttribute(
+            combat,
+            'dexterity'
+          ) +
+          getEnemyAbility(
+            combat,
+            'athletics'
+          )
+        ),
+
+      difficulty: 6,
+    })
+
+  const playerRoll =
+    rollDicePool({
+      pool:
+        Math.max(
+          1,
+          getPlayerAttribute(
+            game,
+            'physical',
+            'dexterity'
+          ) +
+          getPlayerAbility(
+            game,
+            'athletics'
+          )
+        ),
+
+      difficulty: 6,
+    })
+
+  const enemySuccesses =
+    enemyRoll.result ===
+      'success'
+      ? enemyRoll.successes
+      : 0
+
+  const playerSuccesses =
+    playerRoll.result ===
+      'success'
+      ? playerRoll.successes
+      : 0
+
+  const escaped =
+    enemySuccesses >
+    playerSuccesses
+
+  return {
+    game,
+
+    combat:
+      escaped
+        ? {
+            ...combat,
+
+            status:
+              'finished',
+
+            winner:
+              'player',
+
+            endingReason:
+              'enemy-fled',
+          }
+        : combat,
+
+    log: [
+      {
+        type:
+          'enemy-ai',
+
+        text:
+          `${combat.enemy.name} tenta fugir.`,
+      },
+
+      {
+        type:
+          escaped
+            ? 'escape'
+            : 'miss',
+
+        text:
+          escaped
+            ? `${combat.enemy.name} consegue escapar.`
+            : 'Você bloqueia a fuga.',
+      },
+    ],
+  }
+}
+
+function performEnemyGrapple(
+  game,
+  combat
+) {
+  const enemyRoll =
+    rollDicePool({
+      pool:
+        Math.max(
+          1,
+          getEnemyAttribute(
+            combat,
+            'strength'
+          ) +
+          getEnemyAbility(
+            combat,
+            'brawl'
+          )
+        ),
+
+      difficulty: 6,
+    })
+
+  const playerRoll =
+    rollDicePool({
+      pool:
+        Math.max(
+          1,
+          getPlayerAttribute(
+            game,
+            'physical',
+            'strength'
+          ) +
+          getPlayerAbility(
+            game,
+            'brawl'
+          )
+        ),
+
+      difficulty: 6,
+    })
+
+  const enemySuccesses =
+    enemyRoll.result ===
+      'success'
+      ? enemyRoll.successes
+      : 0
+
+  const playerSuccesses =
+    playerRoll.result ===
+      'success'
+      ? playerRoll.successes
+      : 0
+
+  const success =
+    enemySuccesses >
+    playerSuccesses
+
+  return {
+    game,
+
+    combat:
+      success
+        ? {
+            ...combat,
+
+            grapple: {
+              active: true,
+
+              controller:
+                'enemy',
+            },
+          }
+        : combat,
+
+    log: [
+      {
+        type:
+          'enemy-ai',
+
+        text:
+          `${combat.enemy.name} tenta agarrar você.`,
+      },
+
+      {
+        type:
+          'dice',
+
+        text:
+          `Agarrão: inimigo ${enemySuccesses} sucesso(s) | você ${playerSuccesses}.`,
+      },
+
+      {
+        type:
+          success
+            ? 'grapple'
+            : 'miss',
+
+        text:
+          success
+            ? `${combat.enemy.name} consegue imobilizar você.`
+            : 'Você evita o agarrão.',
+      },
+    ],
+  }
+}
+
+function performEnemyBite(
+  game,
+  combat
+) {
+  const controls =
+    Boolean(
+      combat?.grapple
+        ?.active &&
+      combat?.grapple
+        ?.controller ===
+        'enemy'
+    )
+
+  if (!controls) {
+    return performEnemyGrapple(
+      game,
+      combat
+    )
+  }
+
+  const strength =
+    getEnemyAttribute(
+      combat,
+      'strength'
+    )
+
+  const damage =
+    rollDamage({
+      damagePool:
+        Math.max(
+          1,
+          strength + 1
+        ),
+
+      soakPool:
+        getSoakPool({
+          targetType:
+            'vampire',
+
+          stamina:
+            getPlayerAttribute(
+              game,
+              'physical',
+              'stamina'
+            ),
+
+          armorId:
+            game?.equipment
+              ?.armor ??
+            'none',
+
+          damageType:
+            'aggravated',
+
+          sourceType:
+            'natural',
+
+          fortitude:
+            getPlayerFortitude(
+              game
+            ),
+        }).total,
+    })
+
+  let updatedGame =
+    game
+
+  if (
+    damage.inflicted > 0
+  ) {
+    updatedGame = {
+      ...updatedGame,
+
+      health:
+        addDamage({
+          health:
+            normalizeHealth(
+              updatedGame.health
+            ),
+
+          damageType:
+            'aggravated',
+
+          amount:
+            damage.inflicted,
+        }),
+    }
+  }
+
+  const currentBlood =
+    Math.max(
+      0,
+      safeNumber(
+        combat.enemy
+          ?.blood
+          ?.current,
+        0
+      )
+    )
+
+  const maximumBlood =
+    Math.max(
+      1,
+      safeNumber(
+        combat.enemy
+          ?.blood
+          ?.maximum,
+        10
+      )
+    )
+
+  let updatedCombat = {
+    ...combat,
+
+    enemy: {
+      ...combat.enemy,
+
+      blood: {
+        ...(combat.enemy
+          ?.blood ??
+          {}),
+
+        current:
+          Math.min(
+            maximumBlood,
+            currentBlood + 1
+          ),
+
+        maximum:
+          maximumBlood,
+      },
+    },
+  }
+
+  if (
+    isIncapacitated(
+      updatedGame.health
+    )
+  ) {
+    updatedCombat = {
+      ...updatedCombat,
+
+      status:
+        'finished',
+
+      winner:
+        'enemy',
+
+      endingReason:
+        'incapacitated',
+    }
+  }
+
+  return {
+    game:
+      updatedGame,
+
+    combat:
+      updatedCombat,
+
+    log: [
+      {
+        type:
+          'enemy-ai',
+
+        text:
+          `${combat.enemy.name} morde você e tenta beber vitae.`,
+      },
+
+      {
+        type:
+          'aggravated',
+
+        text:
+          damage.inflicted > 0
+            ? `A mordida causa ${damage.inflicted} nível(is) de dano agravado.`
+            : 'Você absorve o dano da mordida.',
+      },
+    ],
+  }
+}
+
+function performEnemySimpleDiscipline(
+  game,
+  combat,
+  actionId
+) {
+  const enemy =
+    combat.enemy
+
+  if (
+    actionId ===
+    'discipline_celerity'
+  ) {
+    return {
+      game,
+
+      combat: {
+        ...combat,
+
+        enemy: {
+          ...enemy,
+
+          status: {
+            ...(enemy.status ??
+              {}),
+
+            celerityActive:
+              true,
+
+            celerityLevel:
+              Math.max(
+                1,
+                safeNumber(
+                  enemy?.disciplines
+                    ?.celerity,
+                  1
+                )
+              ),
+          },
+        },
+      },
+
+      log: [
+        {
+          type:
+            'discipline',
+
+          text:
+            `${enemy.name} ativa Celeridade.`,
+        },
+      ],
+    }
+  }
+
+  if (
+    actionId ===
+    'discipline_feral_claws'
+  ) {
+    return {
+      game,
+
+      combat: {
+        ...combat,
+
+        enemy: {
+          ...enemy,
+
+          weaponId:
+            'feralClaws',
+
+          status: {
+            ...(enemy.status ??
+              {}),
+
+            feralClaws:
+              true,
+          },
+        },
+      },
+
+      log: [
+        {
+          type:
+            'discipline',
+
+          text:
+            `${enemy.name} manifesta Garras da Besta.`,
+        },
+      ],
+    }
+  }
+
+  /*
+    Por enquanto os poderes sociais do
+    NPC produzem um teste simples contra
+    a Força de Vontade do personagem.
+  */
+
+  if (
+    actionId ===
+      'discipline_dominate' ||
+    actionId ===
+      'discipline_dread_gaze'
+  ) {
+    const pool =
+      Math.max(
+        1,
+        safeNumber(
+          actionId ===
+            'discipline_dominate'
+            ? enemy?.attributes
+                ?.manipulation
+            : enemy?.attributes
+                ?.charisma,
+          2
+        ) +
+        safeNumber(
+          enemy?.abilities
+            ?.intimidation,
+          2
+        )
+      )
+
+    const difficulty =
+      Math.max(
+        4,
+        Math.min(
+          10,
+          safeNumber(
+            game?.willpower
+              ?.current ??
+            game?.willpower
+              ?.maximum,
+            6
+          )
+        )
+      )
+
+    const roll =
+      rollDicePool({
+        pool,
+        difficulty,
+      })
+
+    const success =
+      roll.result ===
+      'success'
+
+    const effectId =
+      actionId ===
+        'discipline_dominate'
+        ? 'dominated'
+        : 'frightened'
+
+    return {
+      game:
+        success
+          ? {
+              ...game,
+
+              combatEffects: {
+                ...(game.combatEffects ??
+                  {}),
+
+                [effectId]: {
+                  active:
+                    true,
+
+                  level:
+                    roll.successes,
+
+                  source:
+                    enemy.id,
+
+                  expiresAfterActions:
+                    Math.max(
+                      1,
+                      roll.successes
+                    ),
+                },
+              },
+            }
+          : game,
+
+      combat,
+
+      log: [
+        {
+          type:
+            'discipline',
+
+          text:
+            success
+              ? (
+                  actionId ===
+                    'discipline_dominate'
+                    ? `${enemy.name} atravessa sua vontade com Dominação.`
+                    : `${enemy.name} desperta um medo sobrenatural em você.`
+                )
+              : `${enemy.name} usa uma Disciplina mental, mas você resiste.`,
+        },
+
+        {
+          type:
+            'dice',
+
+          text:
+            `Disciplina inimiga: [${roll.dice.join(', ')}] → ${roll.successes} sucesso(s).`,
+        },
+      ],
+    }
+  }
+
+  return {
+    game,
+    combat,
+    log: [],
+  }
+}
+
+function executeEnemyAiAction(
+  game,
+  combat,
+  decision
+) {
+  if (!decision) {
+    return null
+  }
+
+  if (
+    decision.id ===
+    'reload'
+  ) {
+    const result =
+      reloadEnemyWeapon(
+        combat
+      )
+
+    return {
+      game,
+
+      combat:
+        result.combat,
+
+      log:
+        result.log,
+    }
+  }
+
+  if (
+    decision.id ===
+    'advance'
+  ) {
+    return performEnemyAdvance(
+      game,
+      combat
+    )
+  }
+
+  if (
+    decision.id ===
+    'escape'
+  ) {
+    return performEnemyEscape(
+      game,
+      combat
+    )
+  }
+
+  if (
+    decision.id ===
+    'grapple'
+  ) {
+    return performEnemyGrapple(
+      game,
+      combat
+    )
+  }
+
+  if (
+    decision.id ===
+    'bite'
+  ) {
+    return performEnemyBite(
+      game,
+      combat
+    )
+  }
+
+  if (
+    decision.id.startsWith(
+      'discipline_'
+    )
+  ) {
+    return performEnemySimpleDiscipline(
+      game,
+      combat,
+      decision.id
+    )
+  }
+
+  return null
+}
+
+function performEnemyAttack(
+  game,
+  combat,
+  dodgeSuccesses = 0
+) {
+  if (
+    combat.status !==
+    'active'
+  ) {
+    return {
+      game,
+
+      combat,
+
+      log: [],
+    }
+  }
+
+  /*
+    Antes da ação do NPC, verificamos
+    gatilhos automáticos como fome,
+    fogo, sol e provocação.
+  */
+
+  let automaticFrenzy =
+    checkAutomaticNpcFrenzy(
+      combat
+    )
+
+  let frenzySourceCombat =
+    automaticFrenzy.combat
+
+  const frenzyTurn =
+    processNpcFrenzyTurn(
+      frenzySourceCombat
+    )
+
+  let actingCombat =
+    frenzyTurn.combat
+
+  if (
+    frenzyTurn.active &&
+    frenzyTurn.forceEscape
+  ) {
+    const advanced =
+      advanceNpcFrenzy(
+        actingCombat
+      )
+
+    return {
+      game,
+
+      combat: {
+        ...advanced.combat,
+
+        status:
+          'finished',
+
+        winner:
+          'player',
+
+        endingReason:
+          'enemy-rotschreck-fled',
+      },
+
+      log: [
+        ...(frenzyTurn.log ?? []),
+
+        {
+          type:
+            'frenzy',
+
+          text:
+            `${combat.enemy.name} foge em pânico sobrenatural. O combate termina.`,
+        },
+      ],
+    }
+  }
+
+  const skipResult =
+    consumeEnemySkippedAction(
+      actingCombat
+    )
+
+  if (
+    skipResult.skipped
+  ) {
+    return {
+      game,
+
+      combat:
+        skipResult.combat,
+
+      log:
+        skipResult.log,
+    }
+  }
+
+  actingCombat =
+    skipResult.combat
+
+  const decision =
+    chooseEnemyCombatAction(
+      game,
+      actingCombat
+    )
+
+  const decisionLog = [
+    {
+      type:
+        'enemy-ai',
+
+      text:
+        `${actingCombat.enemy.name} escolhe ${decision.id}.`,
+    },
+
+    ...(decision.reasons ?? [])
+      .slice(
+        0,
+        2
+      )
+      .map(
+        (reason) => ({
+          type:
+            'enemy-ai-reason',
+
+          text:
+            `Motivo: ${reason}`,
+        })
+      ),
+  ]
+
+  if (
+    ![
+      'shoot',
+      'melee',
+    ].includes(
+      decision.id
+    )
+  ) {
+    const specialResult =
+      executeEnemyAiAction(
+        game,
+        actingCombat,
+        decision
+      )
+
+    if (specialResult) {
+      return {
+        game:
+          specialResult.game,
+
+        combat:
+          specialResult.combat,
+
+        log: [
+          ...decisionLog,
+
+          ...(automaticFrenzy.log ??
+            []),
+
+          ...(frenzyTurn.log ??
+            []),
+
+          ...(specialResult.log ??
+            []),
+        ],
+      }
+    }
+  }
+
+  const enemy =
+    actingCombat.enemy
+
+  const frenzyPreferredAttack =
+    getNpcFrenzyPreferredAttack(
+      actingCombat
+    )
+
+  const preferredWeapon =
+    frenzyPreferredAttack
+      ? getWeapon(
+          frenzyPreferredAttack
+        )
+      : null
+
+  let weapon =
+    preferredWeapon ??
+    getEnemyWeapon(
+      actingCombat
+    )
+
+  if (
+    decision.id ===
+      'melee' &&
+    weapon?.category ===
+      'firearm'
+  ) {
+    weapon =
+      getWeapon(
+        'fists'
+      )
+  }
+
+  if (
+    decision.id ===
+      'shoot' &&
+    weapon?.category ===
+      'firearm'
+  ) {
+    const ammo =
+      getEnemyAmmoState(
+        actingCombat,
+        weapon
+      )
+
+    if (
+      ammo.loaded <= 0
+    ) {
+      const reloadResult =
+        reloadEnemyWeapon(
+          actingCombat
+        )
+
+      return {
+        game,
+
+        combat:
+          reloadResult.combat,
+
+        log: [
+          ...decisionLog,
+
+          ...(reloadResult.log ??
+            []),
+        ],
+      }
+    }
+
+    actingCombat =
+      consumeEnemyAmmo(
+        actingCombat,
+        weapon
+      )
+  }
+
+  const dexterity =
+    getEnemyAttribute(
+      actingCombat,
+      'dexterity'
+    )
+
+  const ability =
+    getEnemyAbility(
+      actingCombat,
+      weapon.attackAbility ??
+        'brawl'
+    )
+
+  const disciplinePenalty =
+    getEnemyDisciplineAttackPenalty(
+      actingCombat
+    )
+
+  const frenzyAttackBonus =
+    frenzyTurn.active &&
+    frenzyTurn.type ===
+      'violent'
+      ? Math.max(
+          0,
+          safeNumber(
+            frenzyTurn.attackBonus,
+            0
+          )
+        )
+      : 0
+
+  const attackPool =
+    Math.max(
+      1,
+      dexterity +
+        ability -
+        disciplinePenalty +
+        frenzyAttackBonus
+    )
+
+  const attackRoll =
+    rollDicePool({
+      pool:
+        attackPool,
+
+      difficulty:
+        weapon.difficulty ??
+        6,
+    })
+
+  const log = [
+    ...decisionLog,
+
+    ...(automaticFrenzy.log ?? []),
+
+    ...(automaticFrenzy.roll
+      ? [
+          {
+            type:
+              'frenzy-test',
+
+            text:
+              `Teste automático da Besta: ${automaticFrenzy.roll.dice.join(', ')} · ${automaticFrenzy.roll.result}.`,
+          },
+        ]
+      : []),
+
+    ...(frenzyTurn.log ?? []),
+
+    ...(frenzyPreferredAttack
+      ? [
+          {
+            type:
+              'frenzy',
+
+            text:
+              frenzyPreferredAttack ===
+                'bite'
+                ? `${enemy.name} sente a fome dominar o frenesi e tenta atacar com os caninos.`
+                : `${enemy.name} abandona a cautela e parte para o ataque físico.`,
+          },
+        ]
+      : []),
+
+    ...(frenzyAttackBonus > 0
+      ? [
+          {
+            type:
+              'frenzy',
+
+            text:
+              `Frenesi de violência: +${frenzyAttackBonus} dado(s) no ataque de ${enemy.name}.`,
+          },
+        ]
+      : []),
+
+    ...(disciplinePenalty > 0
+      ? [
+          {
+            type:
+              'discipline',
+
+            text:
+              `${enemy.name} sofre -${disciplinePenalty} dado(s) por efeitos sobrenaturais ativos.`,
+          },
+        ]
+      : []),
+
+    {
+      type:
+        'enemy-attack',
+
+      text:
+        `${enemy.name} ataca com ${weapon.name}.`,
+    },
+
+    {
+      type:
+        'dice',
+
+      text:
+        `Ataque inimigo: [${attackRoll.dice.join(', ')}] → ${attackRoll.successes} sucesso(s).`,
+    },
+  ]
+
+  let netSuccesses =
+    attackRoll.result ===
+    'success'
+      ? attackRoll.successes
+      : 0
+
+  if (
+    dodgeSuccesses > 0
+  ) {
+    const cancelled =
+      Math.min(
+        dodgeSuccesses,
+        netSuccesses
+      )
+
+    netSuccesses =
+      Math.max(
+        0,
+        netSuccesses -
+          dodgeSuccesses
+      )
+
+    log.push({
+      type:
+        'dodge',
+
+      text:
+        `Sua esquiva cancela ${cancelled} sucesso(s).`,
+    })
+  }
+
+  if (
+    netSuccesses <= 0
+  ) {
+    log.push({
+      type:
+        'miss',
+
+      text:
+        'O ataque não atinge você.',
+    })
+
+    return {
+      game,
+
+      combat:
+        actingCombat,
+
+      log,
+    }
+  }
+
+  const strength =
+    enemy.attributes
+      .strength
+
+  const damagePool =
+    getWeaponDamagePool({
+      weapon,
+
+      strength,
+
+      attackSuccesses:
+        netSuccesses,
+    })
+
+  /*
+    O jogador é vampiro.
+  */
+
+  const actualDamageType =
+    convertDamageForTarget({
+      targetType:
+        'vampire',
+
+      damageType:
+        weapon.damageType,
+
+      sourceType:
+        weapon.sourceType,
+    })
+
+  const stamina =
+    getPlayerAttribute(
+      game,
+      'physical',
+      'stamina'
+    )
+
+  const armorId =
+    game?.equipment
+      ?.armor ??
+    'none'
+
+  const fortitude =
+    getPlayerFortitude(
+      game
+    )
+
+  const soak =
+    getSoakPool({
+      targetType:
+        'vampire',
+
+      stamina,
+
+      armorId,
+
+      damageType:
+        actualDamageType,
+
+      sourceType:
+        weapon.sourceType,
+
+      fortitude,
+    })
+
+  const damage =
+    rollDamage({
+      damagePool,
+
+      soakPool:
+        soak.total,
+    })
+
+  if (
+    damage.inflicted <= 0
+  ) {
+    log.push({
+      type:
+        'soaked',
+
+      text:
+        `Você absorve todo o dano com ${soak.total} dado(s).`,
+    })
+
+    return {
+      game,
+
+      combat:
+        actingCombat,
+
+      log,
+    }
+  }
+
+  const currentHealth =
+    normalizeHealth(
+      game.health
+    )
+
+  const updatedHealth =
+    addDamage({
+      health:
+        currentHealth,
+
+      damageType:
+        actualDamageType,
+
+      amount:
+        damage.inflicted,
+    })
+
+  const updatedGame = {
+    ...game,
+
+    health:
+      updatedHealth,
+  }
+
+  let updatedCombat =
+    actingCombat
+
+  log.push({
+    type:
+      actualDamageType ===
+      'aggravated'
+        ? 'aggravated'
+        : actualDamageType ===
+            'lethal'
+          ? 'lethal'
+          : 'bashing',
+
+    text:
+      `Você sofre ${damage.inflicted} nível(is) de dano ${actualDamageType}.`,
+  })
+
+  /*
+    Mostra a armadura utilizada.
+  */
+
+  if (
+    soak.armor &&
+    soak.armor.id !==
+      'none'
+  ) {
+    log.push({
+      type:
+        'armor',
+
+      text:
+        `${soak.armor.name}: ${soak.armorSoak ?? soak.breakdown?.armor ?? 0} dado(s) de proteção.`,
+    })
+  }
+
+  if (
+    soak.fortitudeSoak > 0
+  ) {
+    log.push({
+      type:
+        'fortitude',
+
+      text:
+        `Fortitude ${soak.fortitudeSoak}: +${soak.fortitudeSoak} dado(s) de absorção sobrenatural.`,
+    })
+  }
+
+  if (
+    isIncapacitated(
+      updatedHealth
+    )
+  ) {
+    updatedCombat = {
+      ...combat,
+
+      status:
+        'finished',
+
+      winner:
+        'enemy',
+
+      endingReason:
+        'incapacitated',
+    }
+
+    log.push({
+      type:
+        'defeat',
+
+      text:
+        'Você está incapacitado.',
+    })
+  }
+
+  if (
+    frenzyTurn.active &&
+    frenzyTurn.type ===
+      'violent' &&
+    updatedCombat.status ===
+      'active'
+  ) {
+    const advanced =
+      advanceNpcFrenzy(
+        updatedCombat
+      )
+
+    updatedCombat =
+      advanced.combat
+
+    log.push(
+      ...(advanced.log ?? [])
+    )
+  }
+
+  return {
+    game:
+      updatedGame,
+
+    combat:
+      updatedCombat,
+
+    log,
+  }
+}
+
+function performDodge(
+  game
+) {
+  const dexterity =
+    getPlayerAttribute(
+      game,
+      'physical',
+      'dexterity'
+    )
+
+  const dodge =
+    getPlayerAbility(
+      game,
+      'dodge'
+    )
+
+  const healthPenalty =
+    getPlayerHealthPenalty(
+      game
+    )
+
+  const pool =
+    Math.max(
+      1,
+      dexterity +
+        dodge +
+        healthPenalty
+    )
+
+  const roll =
+    rollDicePool({
+      pool,
+
+      difficulty: 6,
+    })
+
+  return {
+    successes:
+      roll.result ===
+      'success'
+        ? roll.successes
+        : 0,
+
+    log: [
+      {
+        type:
+          'dodge',
+
+        text:
+          `Esquiva: [${roll.dice.join(', ')}] → ${roll.successes} sucesso(s).`,
+      },
+    ],
+  }
+}
+
+function performEscape(
+  game,
+  combat
+) {
+  const dexterity =
+    getPlayerAttribute(
+      game,
+      'physical',
+      'dexterity'
+    )
+
+  const athletics =
+    getPlayerAbility(
+      game,
+      'athletics'
+    )
+
+  const healthPenalty =
+    getPlayerHealthPenalty(
+      game
+    )
+
+  const pool =
+    Math.max(
+      1,
+      dexterity +
+        athletics +
+        healthPenalty
+    )
+
+  const roll =
+    rollDicePool({
+      pool,
+
+      difficulty: 6,
+    })
+
+  if (
+    roll.result ===
+    'success'
+  ) {
+    return {
+      combat: {
+        ...combat,
+
+        status:
+          'finished',
+
+        winner:
+          'escaped',
+
+        endingReason:
+          'escaped',
+      },
+
+      success: true,
+
+      log: [
+        {
+          type:
+            'escape-success',
+
+          text:
+            'Você consegue fugir do combate.',
+        },
+      ],
+    }
+  }
+
+  return {
+    combat,
+
+    success: false,
+
+    log: [
+      {
+        type:
+          'escape-failure',
+
+        text:
+          'Você não consegue escapar.',
+      },
+    ],
+  }
+}
+
+function performGrapple(
+  game,
+  combat
+) {
+  const combatStrength =
+    getPlayerCombatStrength(
+      game
+    )
+
+  const strength =
+    combatStrength.total
+
+  const brawl =
+    getPlayerAbility(
+      game,
+      'brawl'
+    )
+
+  const playerRoll =
+    rollDicePool({
+      pool:
+        Math.max(
+          1,
+          strength + brawl
+        ),
+
+      difficulty: 6,
+    })
+
+  const enemyRoll =
+    rollDicePool({
+      pool:
+        Math.max(
+          1,
+          combat.enemy
+            .attributes
+            .strength +
+            combat.enemy
+              .abilities
+              .brawl
+        ),
+
+      difficulty: 6,
+    })
+
+  const playerSuccesses =
+    playerRoll.result ===
+    'success'
+      ? playerRoll.successes
+      : 0
+
+  const enemySuccesses =
+    enemyRoll.result ===
+    'success'
+      ? enemyRoll.successes
+      : 0
+
+  if (
+    playerSuccesses >
+    enemySuccesses
+  ) {
+    return {
+      combat: {
+        ...combat,
+
+        grapple: {
+          active: true,
+
+          controller:
+            'player',
+        },
+      },
+
+      log: [
+        ...(combatStrength.potency > 0
+          ? [
+              {
+                type:
+                  'potency',
+
+                text:
+                  `Potência ${combatStrength.potency}: sua força sobrenatural ajuda no agarrão.`,
+              },
+            ]
+          : []),
+
+        {
+          type:
+            'grapple',
+
+          text:
+            `Você imobiliza ${combat.enemy.name}.`,
+        },
+      ],
+    }
+  }
+
+  return {
+    combat,
+
+    log: [
+      {
+        type:
+          'grapple-failure',
+
+        text:
+          `${combat.enemy.name} consegue impedir o agarrão.`,
+      },
+    ],
+  }
+}
+
+function performBite(
+  game,
+  combat
+) {
+  if (
+    !combat.grapple
+      ?.active ||
+    combat.grapple
+      ?.controller !==
+      'player'
+  ) {
+    return {
+      game,
+
+      combat,
+
+      log: [
+        {
+          type:
+            'bite-failure',
+
+          text:
+            'Você precisa controlar o alvo antes de usar a mordida em combate.',
+        },
+      ],
+    }
+  }
+
+  const weapon =
+    getWeapon(
+      'vampireBite'
+    )
+
+  const combatStrength =
+    getPlayerCombatStrength(
+      game
+    )
+
+  const strength =
+    combatStrength.total
+
+  const damagePool =
+    Math.max(
+      1,
+      strength +
+        safeNumber(
+          weapon.damageBonus,
+          1
+        )
+    )
+
+  const damageType =
+    weapon.damageType
+
+  const soak =
+    getSoakPool({
+      targetType:
+        combat.enemy.type,
+
+      stamina:
+        combat.enemy
+          .attributes
+          .stamina,
+
+      armorId:
+        combat.enemy
+          .armorId,
+
+      damageType,
+
+      sourceType:
+        weapon.sourceType,
+    })
+
+  const damage =
+    rollDamage({
+      damagePool,
+
+      soakPool:
+        soak.total,
+    })
+
+  /*
+    Mordida causa no mínimo um nível
+    quando já existe agarrão bem sucedido.
+  */
+
+  const inflicted =
+    Math.max(
+      1,
+      damage.inflicted
+    )
+
+  const enemyHealth =
+    addDamage({
+      health:
+        combat.enemy
+          .health,
+
+      damageType:
+        'aggravated',
+
+      amount:
+        inflicted,
+    })
+
+  const defeated =
+    getTotalDamage(
+      enemyHealth
+    ) >=
+    combat.enemy
+      .health
+      .maximum
+
+  return {
+    game,
+
+    combat: {
+      ...combat,
+
+      enemy: {
+        ...combat.enemy,
+
+        health: {
+          ...enemyHealth,
+
+          maximum:
+            combat.enemy
+              .health
+              .maximum,
+        },
+      },
+
+      ...(defeated
+        ? {
+            status:
+              'finished',
+
+            winner:
+              'player',
+
+            endingReason:
+              'bite',
+          }
+        : {}),
+    },
+
+    log: [
+      ...(combatStrength.potency > 0
+        ? [
+            {
+              type:
+                'potency',
+
+              text:
+                `Potência ${combatStrength.potency}: +${combatStrength.potency} dado(s) de dano na mordida.`,
+            },
+          ]
+        : []),
+
+      {
+        type:
+          'aggravated',
+
+        text:
+          `Você crava os caninos em ${combat.enemy.name}: ${inflicted} dano agravado.`,
+      },
+    ],
+  }
+}
+
+function executePlayerAction({
+  game,
+  combat,
+  actionId,
+}) {
+  if (
+    actionId ===
+    'weaponAttack'
+  ) {
+    const result =
+      performPlayerWeaponAttack(
+        game,
+        combat
+      )
+
+    return {
+      game:
+        result.game,
+
+      combat:
+        result.combat,
+
+      log:
+        result.log,
+
+      dodgeSuccesses: 0,
+
+      skipEnemyAttack:
+        result.combat
+          .status !==
+        'active',
+    }
+  }
+
+  if (
+    actionId ===
+    'feralClawsAttack'
+  ) {
+    const claws =
+      getActiveFeralClaws(
+        game
+      )
+
+    if (!claws) {
+      return {
+        game,
+
+        combat,
+
+        log: [
+          {
+            type:
+              'system',
+
+            text:
+              'As Garras da Besta não estão ativas.',
+          },
+        ],
+
+        dodgeSuccesses: 0,
+
+        skipEnemyAttack:
+          false,
+      }
+    }
+
+    const result =
+      performPlayerWeaponAttack(
+        game,
+        combat,
+        claws
+      )
+
+    return {
+      game:
+        result.game,
+
+      combat:
+        result.combat,
+
+      log:
+        result.log,
+
+      dodgeSuccesses: 0,
+
+      skipEnemyAttack:
+        result.combat
+          .status !==
+        'active',
+    }
+  }
+
+  if (
+    actionId ===
+    'kick'
+  ) {
+    const originalWeapon =
+      game?.equipment
+        ?.weapon
+
+    const temporaryGame = {
+      ...game,
+
+      equipment: {
+        ...(game.equipment ??
+          {}),
+
+        weapon:
+          'kick',
+      },
+    }
+
+    const result =
+      performPlayerWeaponAttack(
+        temporaryGame,
+        combat
+      )
+
+    return {
+      game: {
+        ...result.game,
+
+        equipment: {
+          ...(result.game
+            .equipment ?? {}),
+
+          weapon:
+            originalWeapon ??
+            'fists',
+        },
+      },
+
+      combat:
+        result.combat,
+
+      log:
+        result.log,
+
+      dodgeSuccesses: 0,
+
+      skipEnemyAttack:
+        result.combat
+          .status !==
+        'active',
+    }
+  }
+
+  if (
+    actionId ===
+    'grapple'
+  ) {
+    const result =
+      performGrapple(
+        game,
+        combat
+      )
+
+    return {
+      game,
+
+      combat:
+        result.combat,
+
+      log:
+        result.log,
+
+      dodgeSuccesses: 0,
+
+      skipEnemyAttack:
+        false,
+    }
+  }
+
+  if (
+    actionId ===
+    'bite'
+  ) {
+    const result =
+      performBite(
+        game,
+        combat
+      )
+
+    return {
+      game:
+        result.game,
+
+      combat:
+        result.combat,
+
+      log:
+        result.log,
+
+      dodgeSuccesses: 0,
+
+      skipEnemyAttack:
+        result.combat
+          .status !==
+        'active',
+    }
+  }
+
+  if (
+    actionId ===
+    'dodge'
+  ) {
+    const result =
+      performDodge(
+        game
+      )
+
+    return {
+      game,
+
+      combat,
+
+      log:
+        result.log,
+
+      dodgeSuccesses:
+        result.successes,
+
+      skipEnemyAttack:
+        false,
+    }
+  }
+
+  if (
+    actionId ===
+    'escape'
+  ) {
+    const result =
+      performEscape(
+        game,
+        combat
+      )
+
+    return {
+      game,
+
+      combat:
+        result.combat,
+
+      log:
+        result.log,
+
+      dodgeSuccesses: 0,
+
+      skipEnemyAttack:
+        result.success,
+    }
+  }
+
+  return {
+    game,
+
+    combat,
+
+    log: [],
+
+    dodgeSuccesses: 0,
+
+    skipEnemyAttack:
+      false,
+  }
+}
+
+
+export function provokeCombatEnemy({
+  combat,
+  level = 2,
+  source = 'player',
+}) {
+  if (!combat?.enemy) {
+    return combat
+  }
+
+  return {
+    ...combat,
+
+    enemy: {
+      ...combat.enemy,
+
+      status: {
+        ...(combat.enemy
+          ?.status ??
+          {}),
+
+        provoked:
+          true,
+
+        provocationLevel:
+          Math.max(
+            1,
+            Math.min(
+              5,
+              safeNumber(
+                level,
+                2
+              )
+            )
+          ),
+
+        provokedBy:
+          source,
+      },
+    },
+  }
+}
+
+export function setCombatEnvironment(
+  combat,
+  environment = {}
+) {
+  if (!combat) {
+    return combat
+  }
+
+  return {
+    ...combat,
+
+    environment: {
+      ...(combat.environment ??
+        {}),
+
+      ...environment,
+    },
+  }
+}
+
+export function setCombatFrenzyFlag(
+  combat,
+  key,
+  value = true
+) {
+  if (!combat) {
+    return combat
+  }
+
+  return {
+    ...combat,
+
+    flags: {
+      ...(combat.flags ??
+        {}),
+
+      [key]:
+        value,
+    },
+  }
+}
+
+export function performCombatAction({
+  game,
+  combat,
+  actionId,
+}) {
+  if (
+    !game ||
+    !combat ||
+    combat.status !==
+      'active'
+  ) {
+    return {
+      game,
+
+      combat,
+    }
+  }
+
+  let updatedGame =
+    game
+
+  let updatedCombat = {
+    ...combat,
+
+    turn:
+      combat.turn ?? {
+        enemyActed: false,
+
+        normalActionAvailable:
+          true,
+
+        celerityActionsRemaining:
+          getCelerityExtraActions(
+            game
+          ),
+
+        playerActionsRemaining:
+          1 +
+          getCelerityExtraActions(
+            game
+          ),
+      },
+  }
+
+  const isFirstPlayerAction =
+    updatedCombat.turn
+      .playerActionsRemaining ===
+    (
+      1 +
+      getCelerityExtraActions(
+        updatedGame
+      )
+    )
+
+  const roundLog = [
+    ...(isFirstPlayerAction
+      ? [
+          {
+            type:
+              'round',
+
+            text:
+              `— TURNO ${combat.round} —`,
+          },
+        ]
+      : []),
+  ]
+
+  /*
+    ========================================
+    INIMIGO GANHOU A INICIATIVA
+
+    Ele age apenas uma vez no turno,
+    mesmo que o jogador tenha Celeridade.
+    ========================================
+  */
+
+  if (
+    !updatedCombat.playerActsFirst &&
+    !updatedCombat.turn
+      .enemyActed
+  ) {
+    const enemyResult =
+      performEnemyAttack(
+        updatedGame,
+        updatedCombat
+      )
+
+    updatedGame =
+      enemyResult.game
+
+    updatedCombat = {
+      ...enemyResult.combat,
+
+      turn: {
+        ...(updatedCombat.turn ??
+          {}),
+
+        enemyActed: true,
+      },
+    }
+
+    roundLog.push(
+      ...enemyResult.log
+    )
+
+    if (
+      updatedCombat.status !==
+      'active'
+    ) {
+      return {
+        game:
+          updatedGame,
+
+        combat: {
+          ...updatedCombat,
+
+          log: [
+            ...(combat.log ??
+              []),
+
+            ...roundLog,
+          ],
+        },
+      }
+    }
+  }
+
+  /*
+    ========================================
+    AÇÃO DO JOGADOR
+    ========================================
+  */
+
+  const playerResult =
+    executePlayerAction({
+      game:
+        updatedGame,
+
+      combat:
+        updatedCombat,
+
+      actionId,
+    })
+
+  updatedGame =
+    playerResult.game
+
+  updatedCombat =
+    playerResult.combat
+
+  roundLog.push(
+    ...playerResult.log
+  )
+
+  if (
+    updatedCombat.status !==
+    'active'
+  ) {
+    return {
+      game:
+        updatedGame,
+
+      combat: {
+        ...updatedCombat,
+
+        log: [
+          ...(combat.log ??
+            []),
+
+          ...roundLog,
+        ],
+      },
+    }
+  }
+
+  const previousTurn =
+    updatedCombat.turn ??
+    combat.turn ??
+    createCombatTurnState(
+      updatedGame
+    )
+
+  const remainingActions =
+    Math.max(
+      0,
+      safeNumber(
+        previousTurn
+          .playerActionsRemaining,
+        1
+      ) - 1
+    )
+
+  let normalActionAvailable =
+    Boolean(
+      previousTurn
+        .normalActionAvailable
+    )
+
+  let celerityActionsRemaining =
+    Math.max(
+      0,
+      safeNumber(
+        previousTurn
+          .celerityActionsRemaining,
+        0
+      )
+    )
+
+  if (
+    normalActionAvailable
+  ) {
+    normalActionAvailable =
+      false
+  } else if (
+    celerityActionsRemaining > 0
+  ) {
+    celerityActionsRemaining -=
+      1
+  }
+
+  updatedCombat = {
+    ...updatedCombat,
+
+    turn: {
+      ...previousTurn,
+
+      normalActionAvailable,
+
+      celerityActionsRemaining,
+
+      playerActionsRemaining:
+        remainingActions,
+    },
+  }
+
+  /*
+    ========================================
+    JOGADOR GANHOU A INICIATIVA
+
+    O inimigo age depois da ação normal
+    do jogador e apenas uma vez.
+
+    As ações extras de Celeridade vêm
+    depois disso.
+    ========================================
+  */
+
+  if (
+    updatedCombat.playerActsFirst &&
+    !updatedCombat.turn
+      .enemyActed &&
+    !playerResult
+      .skipEnemyAttack
+  ) {
+    const enemyResult =
+      performEnemyAttack(
+        updatedGame,
+        updatedCombat,
+        playerResult
+          .dodgeSuccesses ??
+          0
+      )
+
+    updatedGame =
+      enemyResult.game
+
+    updatedCombat = {
+      ...enemyResult.combat,
+
+      turn: {
+        ...(updatedCombat.turn ??
+          {}),
+
+        enemyActed: true,
+      },
+    }
+
+    roundLog.push(
+      ...enemyResult.log
+    )
+
+    if (
+      updatedCombat.status !==
+      'active'
+    ) {
+      return {
+        game:
+          updatedGame,
+
+        combat: {
+          ...updatedCombat,
+
+          log: [
+            ...(combat.log ??
+              []),
+
+            ...roundLog,
+          ],
+        },
+      }
+    }
+  }
+
+  /*
+    ========================================
+    AÇÕES EXTRAS DE CELERIDADE
+
+    Enquanto houver ações restantes,
+    NÃO avançamos o turno e NÃO fazemos
+    o inimigo atacar novamente.
+    ========================================
+  */
+
+  if (
+    updatedCombat.turn
+      .playerActionsRemaining > 0
+  ) {
+    roundLog.push({
+      type:
+        'celerity',
+
+      text:
+        `Celeridade: ${updatedCombat.turn.playerActionsRemaining} ação(ões) restante(s) neste turno.`,
+    })
+
+    return {
+      game:
+        updatedGame,
+
+      combat: {
+        ...updatedCombat,
+
+        log: [
+          ...(combat.log ??
+            []),
+
+          ...roundLog,
+        ],
+      },
+    }
+  }
+
+  /*
+    ========================================
+    NOVA INICIATIVA
+    ========================================
+  */
+
+  if (
+    updatedCombat.status ===
+    'active'
+  ) {
+    const playerInitiative =
+      rollInitiative(
+        getPlayerAttribute(
+          updatedGame,
+          'physical',
+          'dexterity'
+        ),
+
+        getPlayerAttribute(
+          updatedGame,
+          'mental',
+          'wits'
+        )
+      )
+
+    const enemyInitiative =
+      rollInitiative(
+        getEnemyAttribute(
+          updatedCombat,
+          'dexterity'
+        ),
+
+        getEnemyAttribute(
+          updatedCombat,
+          'wits'
+        )
+      )
+
+    updatedCombat = {
+      ...updatedCombat,
+
+      round:
+        combat.round + 1,
+
+      playerInitiative,
+
+      enemyInitiative,
+
+      playerActsFirst:
+        playerInitiative.total >=
+        enemyInitiative.total,
+
+      turn:
+        createCombatTurnState(
+          updatedGame
+        ),
+    }
+
+    roundLog.push({
+      type:
+        'initiative',
+
+      text:
+        `Nova iniciativa: você ${playerInitiative.total} | ${updatedCombat.enemy.name} ${enemyInitiative.total}.`,
+    })
+
+    const celerityExtra =
+      getCelerityExtraActions(
+        updatedGame
+      )
+
+    if (
+      celerityExtra > 0
+    ) {
+      roundLog.push({
+        type:
+          'celerity',
+
+        text:
+          `Celeridade ${celerityExtra}: você terá ${1 + celerityExtra} ações neste turno.`,
+      })
+    }
+  }
+
+  return {
+    game:
+      updatedGame,
+
+    combat: {
+      ...updatedCombat,
+
+      log: [
+        ...(combat.log ??
+          []),
+
+        ...roundLog,
+      ],
+    },
+  }
+}
+
+export function spendBloodForPhysicalBoost({
+  game,
+  attribute,
+}) {
+  const allowed = [
+    'strength',
+    'dexterity',
+    'stamina',
+  ]
+
+  if (
+    !allowed.includes(
+      attribute
+    )
+  ) {
+    return {
+      success: false,
+
+      game,
+    }
+  }
+
+  const blood =
+    game?.blood
+      ?.current ?? 0
+
+  if (
+    blood <= 0
+  ) {
+    return {
+      success: false,
+
+      game,
+    }
+  }
+
+  const currentBoost =
+    game?.combatBoosts
+      ?.[attribute] ??
+    0
+
+  return {
+    success: true,
+
+    game: {
+      ...game,
+
+      blood: {
+        ...(game.blood ??
+          {}),
+
+        current:
+          blood - 1,
+      },
+
+      combatBoosts: {
+        ...(game.combatBoosts ??
+          {}),
+
+        [attribute]:
+          currentBoost + 1,
+      },
+
+      history: [
+        ...(game.history ??
+          []),
+
+        {
+          type:
+            'blood-physical-boost',
+
+          attribute,
+
+          timestamp:
+            new Date()
+              .toISOString(),
+        },
+      ],
+    },
+  }
+}
+
+export function clearCombatBoosts(
+  game
+) {
+  return {
+    ...game,
+
+    combatBoosts: {
+      strength: 0,
+
+      dexterity: 0,
+
+      stamina: 0,
+    },
+  }
+}
+
+export function getCombatActions(
+  game,
+  combat
+) {
+  const weapon =
+    getPlayerWeapon(
+      game
+    )
+
+  const claws =
+    getActiveFeralClaws(
+      game
+    )
+
+  const grappled =
+    combat?.grapple
+      ?.active &&
+    combat?.grapple
+      ?.controller ===
+      'player'
+
+  const ammo =
+    getPlayerAmmo(
+      game,
+      weapon
+    )
+
+  const celerityRemaining =
+    Math.max(
+      0,
+      safeNumber(
+        combat?.turn
+          ?.playerActionsRemaining,
+        1
+      )
+    )
+
+  const actions = [
+    {
+      id:
+        'weaponAttack',
+
+      label:
+        weapon.name,
+
+      description:
+        weapon.category ===
+        'firearm'
+          ? `${weapon.damageType} · munição ${ammo}/${weapon.ammunition?.magazine ?? 0}`
+          : `${weapon.damageType} · ${weapon.attackAbility}`,
+
+      disabled:
+        weapon.category ===
+          'firearm' &&
+        ammo <= 0,
+    },
+
+    ...(claws
+      ? [
+          {
+            id:
+              'feralClawsAttack',
+
+            label:
+              'Garras da Besta',
+
+            description:
+              'Destreza + Briga · Força + Potência + 1 · dano agravado.',
+
+            disabled:
+              false,
+          },
+        ]
+      : []),
+
+    {
+      id:
+        'kick',
+
+      label:
+        'Chute',
+
+      description:
+        'Destreza + Briga · contusão · Força + Potência + 1.',
+    },
+
+    {
+      id:
+        'grapple',
+
+      label:
+        grappled
+          ? 'Manter Agarrão'
+          : 'Agarrar',
+
+      description:
+        'Força + Potência + Briga contra o alvo.',
+    },
+
+    {
+      id:
+        'bite',
+
+      label:
+        'Mordida',
+
+      description:
+        grappled
+          ? 'Ataque vampírico agravado · Força + Potência.'
+          : 'Você precisa controlar o alvo primeiro.',
+
+      disabled:
+        !grappled,
+    },
+
+    {
+      id:
+        'dodge',
+
+      label:
+        'Esquivar',
+
+      description:
+        'Destreza + Esquiva.',
+    },
+
+    {
+      id:
+        'escape',
+
+      label:
+        'Fugir',
+
+      description:
+        'Destreza + Esportes.',
+    },
+  ]
+
+  return actions.map(
+    (action) => ({
+      ...action,
+
+      celerityActionsRemaining:
+        celerityRemaining,
+    })
+  )
+}
+
+export function getCombatHealthSlots(
+  health
+) {
+  return getDamageSlots(
+    health,
+    7
+  )
+}

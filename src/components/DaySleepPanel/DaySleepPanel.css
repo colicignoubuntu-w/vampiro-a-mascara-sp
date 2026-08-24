@@ -1,0 +1,232 @@
+.day-sleep-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 540;
+
+  display: grid;
+  place-items: center;
+
+  padding: 20px;
+
+  background:
+    rgba(0, 0, 0, 0.96);
+
+  backdrop-filter:
+    blur(9px);
+}
+
+.day-sleep-panel {
+  width:
+    min(
+      560px,
+      100%
+    );
+
+  padding: 28px;
+
+  color: #e6dcda;
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      #211014,
+      #0d090a 48%,
+      #060506
+    );
+
+  border:
+    1px solid #583039;
+
+  box-shadow:
+    0 40px 130px
+    rgba(0, 0, 0, 0.9);
+}
+
+.day-sleep-header {
+  padding-bottom: 18px;
+
+  text-align: center;
+
+  border-bottom:
+    1px solid #352428;
+}
+
+.day-sleep-header > span {
+  color: #ad4956;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing:
+    0.18em;
+}
+
+.day-sleep-header h2 {
+  margin:
+    7px
+    0;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 29px;
+
+  font-weight: 400;
+}
+
+.day-sleep-header p {
+  margin: 0;
+
+  color: #827577;
+
+  font-size: 10px;
+}
+
+.day-sleep-description {
+  margin-top: 18px;
+
+  padding: 16px;
+
+  background: #0b0809;
+
+  border:
+    1px solid #35262a;
+}
+
+.day-sleep-description p {
+  margin:
+    0
+    0
+    8px;
+
+  color: #9a8d8d;
+
+  font-size: 11px;
+
+  line-height: 1.7;
+}
+
+.day-sleep-description p:last-child {
+  margin-bottom: 0;
+}
+
+.day-sleep-info {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 8px;
+
+  margin-top: 16px;
+}
+
+.day-sleep-info > div {
+  padding: 14px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 5px;
+
+  background: #0b0809;
+
+  border:
+    1px solid #35262a;
+}
+
+.day-sleep-info span {
+  color: #75696b;
+
+  font-size: 8px;
+
+  letter-spacing:
+    0.12em;
+}
+
+.day-sleep-info strong {
+  color: #c8505e;
+
+  font-size: 20px;
+}
+
+.day-sleep-healing {
+  margin-top: 16px;
+
+  padding: 14px;
+
+  background: #251217;
+
+  border-left:
+    3px solid #9c3947;
+}
+
+.day-sleep-healing span {
+  color: #ca4c5b;
+
+  font-size: 8px;
+
+  font-weight: 700;
+
+  letter-spacing:
+    0.12em;
+}
+
+.day-sleep-healing p {
+  margin:
+    7px
+    0
+    0;
+
+  color: #9a8b8c;
+
+  font-size: 10px;
+
+  line-height: 1.6;
+}
+
+.day-sleep-warning {
+  margin-top: 16px;
+
+  color: #766a6b;
+
+  font-size: 9px;
+
+  text-align: center;
+}
+
+.day-sleep-button {
+  width: 100%;
+
+  min-height: 48px;
+
+  margin-top: 16px;
+
+  color: #eee4e2;
+
+  background: #611e29;
+
+  border:
+    1px solid #8d3442;
+
+  cursor: pointer;
+}
+
+.day-sleep-button:hover {
+  background: #7b2634;
+}
+
+@media (max-width: 550px) {
+  .day-sleep-panel {
+    padding: 20px;
+  }
+
+  .day-sleep-info {
+    grid-template-columns:
+      1fr;
+  }
+}

@@ -1,0 +1,333 @@
+.feeding-overlay {
+  position: fixed;
+  inset: 0;
+
+  z-index: 320;
+
+  display: grid;
+  place-items: center;
+
+  padding: 20px;
+
+  background:
+    rgba(0, 0, 0, 0.9);
+
+  backdrop-filter:
+    blur(7px);
+}
+
+.feeding-panel {
+  width:
+    min(
+      620px,
+      100%
+    );
+
+  padding: 28px;
+
+  color: #e9dfdd;
+
+  background:
+    linear-gradient(
+      180deg,
+      #160b0e,
+      #080607
+    );
+
+  border:
+    1px solid #702936;
+}
+
+.feeding-header {
+  padding-bottom: 20px;
+
+  text-align: center;
+
+  border-bottom:
+    1px solid #3d2228;
+}
+
+.feeding-header > span {
+  color: #b84050;
+
+  font-size: 9px;
+
+  letter-spacing: 0.2em;
+}
+
+.feeding-header h2 {
+  margin:
+    7px
+    0
+    0;
+
+  color: #eee4e2;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 31px;
+
+  font-weight: 400;
+}
+
+.feeding-columns {
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    auto
+    1fr;
+
+  align-items: center;
+
+  gap: 15px;
+
+  margin:
+    28px
+    0;
+}
+
+.feeding-character {
+  padding: 18px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 5px;
+
+  background: #0c0809;
+
+  border:
+    1px solid #3b252a;
+}
+
+.feeding-character span {
+  color: #867879;
+
+  font-size: 8px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.12em;
+}
+
+.feeding-character strong {
+  color: #d84b5c;
+
+  font-size: 26px;
+}
+
+.feeding-character small {
+  color: #716667;
+
+  font-size: 9px;
+}
+
+.feeding-transfer {
+  color: #7e303a;
+
+  font-size: 25px;
+}
+
+.feeding-victim-state {
+  padding: 17px;
+
+  text-align: center;
+
+  background: #0b0809;
+
+  border:
+    1px solid #38252a;
+}
+
+.feeding-victim-state > span {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #756a6b;
+
+  font-size: 8px;
+
+  letter-spacing: 0.12em;
+}
+
+.feeding-victim-state strong {
+  color: #c9bcba;
+
+  font-size: 17px;
+}
+
+.feeding-victim-state p {
+  margin:
+    7px
+    0
+    0;
+
+  color: #867a7b;
+
+  font-size: 11px;
+}
+
+.feeding-victim-state.weak strong {
+  color: #be8552;
+}
+
+.feeding-victim-state.veryWeak strong {
+  color: #c76750;
+}
+
+.feeding-victim-state.critical strong,
+.feeding-victim-state.dying strong {
+  color: #db4556;
+}
+
+.feeding-victim-state.dead {
+  border-color: #8a2835;
+}
+
+.feeding-victim-state.dead strong {
+  color: #e04657;
+}
+
+.feeding-description {
+  margin:
+    22px
+    0;
+
+  color: #978a89;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 13px;
+
+  line-height: 1.7;
+
+  text-align: center;
+}
+
+.feeding-actions {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr 1fr;
+
+  gap: 8px;
+}
+
+.feeding-actions button,
+.feeding-message button,
+.feeding-death button {
+  min-height: 44px;
+
+  padding:
+    9px
+    12px;
+
+  color: #d5c9c7;
+
+  background: #160d0f;
+
+  border:
+    1px solid #593039;
+
+  cursor: pointer;
+}
+
+.feeding-actions button:hover,
+.feeding-message button:hover,
+.feeding-death button:hover {
+  color: #f1e5e3;
+
+  background: #30151b;
+
+  border-color: #943747;
+}
+
+.feeding-actions .feeding-stop {
+  background: #451620;
+
+  border-color: #7e2937;
+}
+
+.feeding-message,
+.feeding-death {
+  margin-top: 22px;
+
+  padding: 20px;
+
+  text-align: center;
+
+  background: #0b0809;
+
+  border:
+    1px solid #3e282d;
+}
+
+.feeding-message strong,
+.feeding-death strong {
+  display: block;
+
+  color: #d7cac8;
+
+  margin-bottom: 8px;
+}
+
+.feeding-message p,
+.feeding-death p {
+  color: #897c7d;
+
+  font-size: 11px;
+
+  line-height: 1.6;
+}
+
+.feeding-death {
+  border-color: #762532;
+}
+
+.feeding-death > span {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #b93e4e;
+
+  font-size: 8px;
+
+  letter-spacing: 0.18em;
+}
+
+.feeding-death strong {
+  color: #df4658;
+}
+
+@media (max-width: 550px) {
+  .feeding-panel {
+    padding: 20px;
+  }
+
+  .feeding-columns {
+    grid-template-columns:
+      1fr;
+  }
+
+  .feeding-transfer {
+    transform:
+      rotate(90deg);
+
+    text-align: center;
+  }
+
+  .feeding-actions {
+    grid-template-columns:
+      1fr;
+  }
+}

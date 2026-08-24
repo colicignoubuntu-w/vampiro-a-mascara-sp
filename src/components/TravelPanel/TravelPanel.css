@@ -1,0 +1,602 @@
+.travel-panel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background:
+    rgba(0, 0, 0, 0.78);
+
+  backdrop-filter:
+    blur(6px);
+
+  overflow-y: auto;
+}
+
+.travel-panel {
+  width: min(
+    720px,
+    100%
+  );
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(25, 25, 25, 0.98),
+      rgba(10, 10, 10, 0.98)
+    );
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.12);
+
+  box-shadow:
+    0 30px 80px
+    rgba(0, 0, 0, 0.7);
+
+  color:
+    #f2f2f2;
+}
+
+.travel-panel-header {
+  position: relative;
+
+  padding:
+    30px 32px 24px;
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.08);
+}
+
+.travel-panel-kicker {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  letter-spacing:
+    0.22em;
+
+  text-transform:
+    uppercase;
+
+  color:
+    rgba(255, 255, 255, 0.45);
+}
+
+.travel-panel-header h2 {
+  margin: 0;
+
+  font-size: 16px;
+
+  font-weight: 400;
+
+  color:
+    rgba(255, 255, 255, 0.65);
+}
+
+.travel-panel-header h1 {
+  margin:
+    4px 0 4px;
+
+  font-size: 30px;
+
+  line-height: 1.1;
+
+  font-weight: 700;
+}
+
+.travel-panel-header p {
+  margin: 0;
+
+  color:
+    rgba(255, 255, 255, 0.45);
+
+  font-size: 14px;
+}
+
+.travel-close-button {
+  position: absolute;
+
+  top: 20px;
+  right: 22px;
+
+  width: 40px;
+  height: 40px;
+
+  border: none;
+
+  background:
+    transparent;
+
+  color:
+    rgba(255, 255, 255, 0.55);
+
+  font-size: 30px;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s,
+    background 0.2s;
+}
+
+.travel-close-button:hover {
+  color:
+    #fff;
+
+  background:
+    rgba(255, 255, 255, 0.08);
+}
+
+.travel-route {
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    60px
+    1fr;
+
+  align-items: center;
+
+  padding:
+    24px 32px;
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.08);
+}
+
+.travel-route-location {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.travel-route-location:last-child {
+  text-align: right;
+}
+
+.travel-route-location span {
+  font-size: 10px;
+
+  font-weight: 700;
+
+  letter-spacing:
+    0.16em;
+
+  color:
+    rgba(255, 255, 255, 0.35);
+}
+
+.travel-route-location strong {
+  font-size: 16px;
+}
+
+.travel-route-line {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color:
+    rgba(255, 255, 255, 0.35);
+
+  font-size: 24px;
+}
+
+.travel-options {
+  padding:
+    24px 32px;
+}
+
+.travel-section-title {
+  margin-bottom: 14px;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  letter-spacing:
+    0.12em;
+
+  text-transform:
+    uppercase;
+
+  color:
+    rgba(255, 255, 255, 0.5);
+}
+
+.travel-option {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    50px
+    1fr
+    auto;
+
+  align-items: center;
+
+  gap: 16px;
+
+  margin-bottom: 10px;
+
+  padding:
+    15px 16px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.09);
+
+  background:
+    rgba(255, 255, 255, 0.025);
+
+  color:
+    #fff;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+}
+
+.travel-option:hover {
+  background:
+    rgba(255, 255, 255, 0.06);
+
+  border-color:
+    rgba(255, 255, 255, 0.22);
+
+  transform:
+    translateY(-1px);
+}
+
+.travel-option-selected {
+  border-color:
+    rgba(255, 255, 255, 0.55);
+
+  background:
+    rgba(255, 255, 255, 0.09);
+}
+
+.travel-option-icon {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.12);
+
+  background:
+    rgba(0, 0, 0, 0.3);
+
+  font-size: 21px;
+}
+
+.travel-option-main {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+}
+
+.travel-option-main strong {
+  font-size: 15px;
+}
+
+.travel-option-main span {
+  font-size: 12px;
+
+  color:
+    rgba(255, 255, 255, 0.45);
+}
+
+.travel-option-info {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-end;
+
+  gap: 5px;
+}
+
+.travel-option-info strong {
+  font-size: 14px;
+}
+
+.travel-risk {
+  font-size: 11px;
+
+  font-weight: 600;
+}
+
+.travel-risk-low {
+  color:
+    #8bcf8b;
+}
+
+.travel-risk-medium {
+  color:
+    #d8b56a;
+}
+
+.travel-risk-high {
+  color:
+    #d87575;
+}
+
+.travel-summary {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  margin:
+    0 32px 24px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.08);
+
+  background:
+    rgba(0, 0, 0, 0.25);
+}
+
+.travel-summary > div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+
+  padding:
+    15px;
+
+  text-align: center;
+
+  border-right:
+    1px solid
+    rgba(255, 255, 255, 0.08);
+}
+
+.travel-summary > div:last-child {
+  border-right:
+    none;
+}
+
+.travel-summary span {
+  font-size: 9px;
+
+  font-weight: 700;
+
+  letter-spacing:
+    0.15em;
+
+  color:
+    rgba(255, 255, 255, 0.35);
+}
+
+.travel-summary strong {
+  font-size: 14px;
+}
+
+.travel-error {
+  margin:
+    0 32px 20px;
+
+  padding:
+    12px 14px;
+
+  border:
+    1px solid
+    rgba(190, 70, 70, 0.35);
+
+  background:
+    rgba(120, 20, 20, 0.12);
+
+  color:
+    #e5a0a0;
+
+  font-size: 13px;
+}
+
+.travel-panel-footer {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  padding:
+    20px 32px 30px;
+
+  border-top:
+    1px solid
+    rgba(255, 255, 255, 0.08);
+}
+
+.travel-button {
+  min-width: 120px;
+
+  padding:
+    12px 18px;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.15);
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.2s;
+}
+
+.travel-button:hover:not(:disabled) {
+  transform:
+    translateY(-1px);
+}
+
+.travel-button:disabled {
+  opacity: 0.4;
+
+  cursor: not-allowed;
+}
+
+.travel-button-secondary {
+  background:
+    rgba(255, 255, 255, 0.04);
+
+  color:
+    rgba(255, 255, 255, 0.75);
+}
+
+.travel-button-secondary:hover {
+  background:
+    rgba(255, 255, 255, 0.08);
+}
+
+.travel-button-primary {
+  background:
+    rgba(255, 255, 255, 0.92);
+
+  border-color:
+    rgba(255, 255, 255, 0.92);
+
+  color:
+    #111;
+}
+
+.travel-button-primary:hover:not(:disabled) {
+  background:
+    #fff;
+}
+
+.travel-panel-error {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding:
+    35px 32px;
+
+  text-align: center;
+}
+
+.travel-panel-error p {
+  margin: 0;
+
+  max-width: 500px;
+
+  color:
+    rgba(255, 255, 255, 0.6);
+
+  line-height: 1.6;
+}
+
+.travel-panel-error strong {
+  font-size: 18px;
+}
+
+@media (
+  max-width: 600px
+) {
+  .travel-panel-overlay {
+    padding: 10px;
+  }
+
+  .travel-panel-header {
+    padding:
+      24px 20px 20px;
+  }
+
+  .travel-panel-header h1 {
+    font-size: 25px;
+  }
+
+  .travel-route {
+    grid-template-columns:
+      1fr 40px 1fr;
+
+    padding:
+      20px;
+  }
+
+  .travel-options {
+    padding:
+      20px;
+  }
+
+  .travel-option {
+    grid-template-columns:
+      42px
+      1fr;
+
+    gap: 12px;
+  }
+
+  .travel-option-info {
+    grid-column:
+      2;
+
+    align-items: flex-start;
+
+    flex-direction: row;
+
+    gap: 12px;
+  }
+
+  .travel-summary {
+    margin:
+      0 20px 20px;
+  }
+
+  .travel-panel-footer {
+    padding:
+      18px 20px 24px;
+  }
+
+  .travel-button {
+    flex: 1;
+  }
+}

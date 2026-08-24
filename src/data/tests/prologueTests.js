@@ -1,0 +1,311 @@
+const prologueTests = {
+  'awakening.look_around': {
+    id:
+      'awakening-look-around',
+
+    label:
+      'Percepção + Prontidão',
+
+    attributeGroup:
+      'mental',
+
+    attribute:
+      'perception',
+
+    attributeLabel:
+      'Percepção',
+
+    ability:
+      'alertness',
+
+    abilityLabel:
+      'Prontidão',
+
+    difficulty: 6,
+
+    modifier: 0,
+
+    outcomes: {
+      success: {
+        nextScene:
+          'look_around_success',
+
+        timeMinutes: 2,
+
+        flags: {
+          examinedRoom: true,
+          noticedImportantDetails:
+            true,
+        },
+      },
+
+      failure: {
+        nextScene:
+          'look_around_failure',
+
+        timeMinutes: 3,
+
+        flags: {
+          examinedRoom: true,
+          missedRoomDetails: true,
+        },
+      },
+
+      botch: {
+        nextScene:
+          'look_around_botch',
+
+        timeMinutes: 4,
+
+        flags: {
+          examinedRoom: true,
+          malkavianDistortion:
+            true,
+        },
+      },
+    },
+
+    successText:
+      'Você consegue separar os detalhes reais da confusão do despertar.',
+
+    failureText:
+      'Sua mente ainda está confusa demais para montar uma imagem clara do ambiente.',
+
+    botchText:
+      'Sua percepção se fragmenta. Por alguns segundos, realidade e alucinação parecem a mesma coisa.',
+  },
+
+  'look_around_success.check_phone': {
+    id:
+      'look-around-check-phone',
+
+    label:
+      'Raciocínio + Computador',
+
+    attributeGroup:
+      'mental',
+
+    attribute:
+      'wits',
+
+    attributeLabel:
+      'Raciocínio',
+
+    ability:
+      'computer',
+
+    abilityLabel:
+      'Computador',
+
+    difficulty: 5,
+
+    modifier: 0,
+
+    outcomes: {
+      success: {
+        nextScene:
+          'check_phone',
+
+        timeMinutes: 2,
+
+        flags: {
+          checkedPhone: true,
+          organizedNotifications:
+            true,
+        },
+      },
+
+      failure: {
+        nextScene:
+          'check_phone_confused',
+
+        timeMinutes: 4,
+
+        flags: {
+          checkedPhone: true,
+          confusedNotifications:
+            true,
+        },
+      },
+
+      botch: {
+        nextScene:
+          'check_phone_botch',
+
+        timeMinutes: 5,
+
+        flags: {
+          checkedPhone: true,
+          nearlyLockedPhone: true,
+        },
+      },
+    },
+
+    successText:
+      'Você organiza rapidamente as notificações e percebe quais mensagens são importantes.',
+
+    failureText:
+      'As notificações parecem se misturar e você demora para entender a sequência.',
+
+    botchText:
+      'Você toca na tela rápido demais e quase bloqueia o aparelho.',
+  },
+
+  'door.ask_man': {
+    id:
+      'door-read-jack',
+
+    label:
+      'Percepção + Empatia',
+
+    attributeGroup:
+      'mental',
+
+    attribute:
+      'perception',
+
+    attributeLabel:
+      'Percepção',
+
+    ability:
+      'empathy',
+
+    abilityLabel:
+      'Empatia',
+
+    difficulty: 6,
+
+    modifier: 0,
+
+    outcomes: {
+      success: {
+        nextScene:
+          'jack_intro_read',
+
+        timeMinutes: 1,
+
+        flags: {
+          readJackCorrectly: true,
+        },
+      },
+
+      failure: {
+        nextScene:
+          'jack_intro',
+
+        timeMinutes: 1,
+
+        flags: {
+          failedToReadJack: true,
+        },
+      },
+
+      botch: {
+        nextScene:
+          'jack_intro_misread',
+
+        timeMinutes: 2,
+
+        flags: {
+          misreadJack: true,
+        },
+      },
+    },
+
+    successText:
+      'Você percebe que ele é perigoso, mas não demonstra intenção imediata de atacar.',
+
+    failureText:
+      'Você não consegue decidir se ele está ali para ajudar ou terminar o serviço.',
+
+    botchText:
+      'Você interpreta completamente errado a expressão dele e sente uma ameaça maior do que realmente existe.',
+  },
+
+  'door.stay_silent': {
+    id:
+      'door-stay-silent',
+
+    label:
+      'Raciocínio + Manha',
+
+    attributeGroup:
+      'mental',
+
+    attribute:
+      'wits',
+
+    attributeLabel:
+      'Raciocínio',
+
+    ability:
+      'streetwise',
+
+    abilityLabel:
+      'Manha',
+
+    difficulty: 6,
+
+    modifier: 0,
+
+    outcomes: {
+      success: {
+        nextScene:
+          'jack_intro_silent_success',
+
+        timeMinutes: 1,
+
+        flags: {
+          handledStreetSituation:
+            true,
+        },
+      },
+
+      failure: {
+        nextScene:
+          'jack_intro',
+
+        timeMinutes: 1,
+
+        flags: {
+          awkwardSilence: true,
+        },
+      },
+
+      botch: {
+        nextScene:
+          'jack_intro_silent_botch',
+
+        timeMinutes: 2,
+
+        flags: {
+          hostileSilence: true,
+        },
+      },
+    },
+
+    successText:
+      'Você lê a situação e percebe que observar antes de falar é a escolha certa.',
+
+    failureText:
+      'Você permanece quieto, mas não consegue entender se isso ajuda.',
+
+    botchText:
+      'Seu silêncio parece hostil e aumenta a tensão no corredor.',
+  },
+}
+
+export function getChoiceTest(
+  sceneId,
+  choiceId
+) {
+  const key =
+    `${sceneId}.${choiceId}`
+
+  return (
+    prologueTests[key] ??
+    null
+  )
+}
+
+export default prologueTests

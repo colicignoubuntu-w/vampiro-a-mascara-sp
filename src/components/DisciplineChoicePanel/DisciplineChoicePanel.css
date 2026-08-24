@@ -1,0 +1,237 @@
+.discipline-choice-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4200;
+
+  display: grid;
+  place-items: center;
+
+  padding: 20px;
+
+  background:
+    rgba(0, 0, 0, 0.95);
+
+  backdrop-filter:
+    blur(9px);
+}
+
+.discipline-choice-panel {
+  width:
+    min(
+      720px,
+      100%
+    );
+
+  max-height:
+    calc(100vh - 40px);
+
+  overflow-y: auto;
+
+  padding: 28px;
+
+  color: #e8e0de;
+
+  background:
+    radial-gradient(
+      circle at top,
+      #211017,
+      #0d090c 48%,
+      #060506
+    );
+
+  border:
+    1px solid #653446;
+
+  box-shadow:
+    0 40px 120px
+    rgba(0, 0, 0, 0.92);
+}
+
+.discipline-choice-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 20px;
+
+  padding-bottom: 20px;
+
+  border-bottom:
+    1px solid #38262e;
+}
+
+.discipline-choice-header span {
+  color: #b74e74;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing:
+    0.18em;
+}
+
+.discipline-choice-header h2 {
+  margin:
+    7px 0;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 28px;
+
+  font-weight: 400;
+}
+
+.discipline-choice-header p {
+  margin: 0;
+
+  color: #8d8086;
+
+  font-size: 10px;
+
+  line-height: 1.6;
+}
+
+.discipline-choice-header button {
+  width: 38px;
+  height: 38px;
+
+  flex: 0 0 auto;
+
+  color: #a9979d;
+
+  background: transparent;
+
+  border:
+    1px solid #45323a;
+
+  cursor: pointer;
+
+  font-size: 22px;
+}
+
+.discipline-choice-list {
+  display: grid;
+
+  gap: 10px;
+
+  margin-top: 20px;
+}
+
+.discipline-choice-button {
+  width: 100%;
+
+  padding: 16px;
+
+  color: #ddd2d8;
+
+  background: #100b0e;
+
+  border:
+    1px solid #3e2b34;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.discipline-choice-button:hover {
+  background: #201018;
+
+  border-color: #78384f;
+}
+
+.discipline-choice-top {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 10px;
+}
+
+.discipline-choice-discipline {
+  color: #cf5b85;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing:
+    0.1em;
+}
+
+.discipline-choice-power {
+  color: #817279;
+
+  font-size: 9px;
+}
+
+.discipline-choice-button strong {
+  display: block;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+}
+
+.discipline-choice-button p {
+  margin:
+    7px 0 0;
+
+  color: #908187;
+
+  font-size: 10px;
+
+  line-height: 1.6;
+}
+
+.discipline-choice-meta {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin-top: 12px;
+}
+
+.discipline-choice-meta span {
+  padding:
+    4px 7px;
+
+  color: #9d818d;
+
+  background: #180e13;
+
+  border:
+    1px solid #462a35;
+
+  font-size: 8px;
+}
+
+.discipline-choice-cancel {
+  width: 100%;
+
+  min-height: 44px;
+
+  margin-top: 18px;
+
+  color: #b7a9ae;
+
+  background: transparent;
+
+  border:
+    1px solid #433139;
+
+  cursor: pointer;
+}
+
+.discipline-choice-cancel:hover {
+  background: #151013;
+}

@@ -1,0 +1,324 @@
+.combat-discipline-test-overlay {
+  position: fixed;
+  inset: 0;
+
+  z-index: 7000;
+
+  display: grid;
+  place-items: center;
+
+  padding: 20px;
+
+  background:
+    rgba(0, 0, 0, 0.96);
+
+  backdrop-filter:
+    blur(9px);
+}
+
+.combat-discipline-test-panel {
+  width:
+    min(
+      620px,
+      100%
+    );
+
+  padding: 28px;
+
+  color: #eee2e7;
+
+  background:
+    radial-gradient(
+      circle at top,
+      #251019,
+      #0e090c 50%,
+      #060506
+    );
+
+  border:
+    1px solid #783a54;
+
+  box-shadow:
+    0 40px 130px
+    rgba(0, 0, 0, 0.95);
+}
+
+.combat-discipline-test-header {
+  padding-bottom: 18px;
+
+  text-align: center;
+
+  border-bottom:
+    1px solid #3e2932;
+}
+
+.combat-discipline-test-header > span {
+  color: #dc648f;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing:
+    0.16em;
+}
+
+.combat-discipline-test-header h2 {
+  margin:
+    8px 0 7px;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 29px;
+
+  font-weight: 400;
+}
+
+.combat-discipline-test-header p {
+  margin: 0;
+
+  color: #9d8991;
+
+  font-size: 10px;
+
+  line-height: 1.6;
+}
+
+.combat-discipline-test-info {
+  margin-top: 20px;
+}
+
+.combat-discipline-test-pool {
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    auto
+    1fr
+    auto
+    1fr;
+
+  gap: 8px;
+
+  align-items: center;
+}
+
+.combat-discipline-test-pool > div {
+  min-height: 72px;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 5px;
+
+  background:
+    #0e090c;
+
+  border:
+    1px solid #412b34;
+}
+
+.combat-discipline-test-pool span {
+  color: #8e7982;
+
+  font-size: 8px;
+
+  text-align: center;
+
+  text-transform: uppercase;
+}
+
+.combat-discipline-test-pool strong {
+  color: #de658e;
+
+  font-size: 23px;
+}
+
+.combat-discipline-test-pool b {
+  color: #75646b;
+}
+
+.combat-discipline-test-difficulty {
+  margin-top: 12px;
+
+  text-align: center;
+
+  color: #927e86;
+
+  font-size: 10px;
+}
+
+.combat-discipline-test-difficulty strong {
+  color: #dd648e;
+}
+
+.combat-discipline-test-automatic {
+  padding: 18px;
+
+  text-align: center;
+
+  color: #d96a91;
+
+  background:
+    #100a0e;
+
+  border:
+    1px solid #492b36;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing:
+    0.12em;
+}
+
+.combat-discipline-roll-button,
+.combat-discipline-continue-button {
+  width: 100%;
+
+  min-height: 48px;
+
+  margin-top: 20px;
+
+  color: white;
+
+  background:
+    #77284b;
+
+  border:
+    1px solid #a14169;
+
+  cursor: pointer;
+
+  font-weight: 800;
+}
+
+.combat-discipline-roll-button:hover,
+.combat-discipline-continue-button:hover {
+  background:
+    #94345c;
+}
+
+.combat-discipline-cancel-button {
+  width: 100%;
+
+  min-height: 42px;
+
+  margin-top: 8px;
+
+  color: #b9a7ae;
+
+  background:
+    transparent;
+
+  border:
+    1px solid #49343c;
+
+  cursor: pointer;
+}
+
+.combat-discipline-dice {
+  display: flex;
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  margin-top: 20px;
+}
+
+.combat-discipline-die {
+  width: 45px;
+  height: 45px;
+
+  display: grid;
+  place-items: center;
+
+  color: #c8b8be;
+
+  background:
+    #100c0e;
+
+  border:
+    1px solid #544149;
+
+  font-size: 17px;
+
+  font-weight: 800;
+}
+
+.combat-discipline-die.success {
+  color: #e7cf9d;
+
+  background:
+    #2c2415;
+
+  border-color:
+    #76602f;
+}
+
+.combat-discipline-die.one {
+  color: #ff5e7d;
+
+  background:
+    #3c0c19;
+
+  border-color:
+    #9d2946;
+}
+
+.combat-discipline-result {
+  margin-top: 18px;
+
+  padding: 15px;
+
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  background:
+    #0e090c;
+
+  border:
+    1px solid #432c35;
+}
+
+.combat-discipline-result strong {
+  font-size: 11px;
+
+  letter-spacing:
+    0.1em;
+}
+
+.combat-discipline-result span {
+  font-size: 10px;
+}
+
+.combat-discipline-result.success strong {
+  color: #e1c582;
+}
+
+.combat-discipline-result.failure strong {
+  color: #ca7b91;
+}
+
+.combat-discipline-result.botch strong {
+  color: #ff5978;
+}
+
+@media (
+  max-width: 520px
+) {
+  .combat-discipline-test-pool {
+    grid-template-columns:
+      1fr;
+  }
+}

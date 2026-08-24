@@ -1,0 +1,387 @@
+.police-search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3900;
+
+  display: grid;
+  place-items: center;
+
+  padding: 20px;
+
+  background:
+    rgba(0, 0, 0, 0.94);
+
+  backdrop-filter:
+    blur(8px);
+}
+
+.police-search-panel {
+  width:
+    min(
+      620px,
+      100%
+    );
+
+  max-height:
+    calc(100vh - 40px);
+
+  overflow-y: auto;
+
+  padding: 28px;
+
+  color: #ece7e4;
+
+  background:
+    radial-gradient(
+      circle at top,
+      #151b24,
+      #0b0c0f 45%,
+      #060607
+    );
+
+  border:
+    1px solid #35455b;
+
+  box-shadow:
+    0 40px 120px
+    rgba(0, 0, 0, 0.9);
+}
+
+.police-search-header {
+  padding-bottom: 18px;
+
+  text-align: center;
+
+  border-bottom:
+    1px solid #29323e;
+}
+
+.police-search-header > span {
+  color: #6c90bc;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing:
+    0.18em;
+}
+
+.police-search-header h2 {
+  margin:
+    7px 0;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 29px;
+
+  font-weight: 400;
+}
+
+.police-search-header p {
+  margin: 0;
+
+  color: #89929d;
+
+  font-size: 11px;
+}
+
+.police-search-description {
+  margin-top: 18px;
+
+  padding: 16px;
+
+  background: #090b0e;
+
+  border:
+    1px solid #27303b;
+}
+
+.police-search-description p {
+  margin:
+    0 0 9px;
+
+  color: #a1a7ae;
+
+  font-size: 11px;
+
+  line-height: 1.7;
+}
+
+.police-search-description p:last-child {
+  margin-bottom: 0;
+}
+
+.police-search-main-button {
+  width: 100%;
+
+  min-height: 48px;
+
+  margin-top: 18px;
+
+  color: #f2f4f7;
+
+  background: #273b55;
+
+  border:
+    1px solid #496585;
+
+  cursor: pointer;
+
+  font-weight: 700;
+}
+
+.police-search-main-button:hover {
+  background: #324c6d;
+}
+
+.police-search-danger {
+  margin-top: 18px;
+
+  padding: 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border:
+    1px solid #313944;
+
+  background: #0b0d10;
+}
+
+.police-search-danger span {
+  color: #747f8d;
+
+  font-size: 8px;
+
+  letter-spacing:
+    0.14em;
+}
+
+.police-search-danger strong {
+  font-size: 12px;
+}
+
+.police-search-danger-none strong {
+  color: #91b899;
+}
+
+.police-search-danger-low strong {
+  color: #c8b979;
+}
+
+.police-search-danger-medium strong {
+  color: #d79a66;
+}
+
+.police-search-danger-high strong {
+  color: #df746b;
+}
+
+.police-search-danger-critical strong {
+  color: #f04e5b;
+}
+
+.police-search-items {
+  margin-top: 18px;
+
+  padding: 15px;
+
+  background: #090b0e;
+
+  border:
+    1px solid #27303b;
+}
+
+.police-search-section-title {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: #707b88;
+
+  font-size: 8px;
+
+  font-weight: 700;
+
+  letter-spacing:
+    0.14em;
+}
+
+.police-search-item {
+  min-height: 44px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+
+  padding:
+    9px 10px;
+
+  margin-bottom: 6px;
+
+  background: #0e1115;
+
+  border:
+    1px solid #242c35;
+}
+
+.police-search-item:last-child {
+  margin-bottom: 0;
+}
+
+.police-search-item > div:first-child {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+.police-search-item strong {
+  font-size: 11px;
+}
+
+.police-search-item small {
+  color: #77818c;
+
+  font-size: 9px;
+}
+
+.police-search-item-classification {
+  color: #77818c;
+
+  font-size: 9px;
+}
+
+.police-search-item-suspicious {
+  background: #171012;
+
+  border-color: #59323a;
+}
+
+.police-search-item-suspicious
+.police-search-item-classification {
+  color: #d07780;
+}
+
+.police-search-empty {
+  margin: 0;
+
+  color: #818994;
+
+  font-size: 11px;
+}
+
+.police-search-suspicious {
+  margin-top: 18px;
+
+  padding: 15px;
+
+  background: #170d10;
+
+  border-left:
+    3px solid #8e3340;
+}
+
+.police-search-suspicious > span {
+  display: block;
+
+  margin-bottom: 12px;
+
+  color: #c24857;
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  letter-spacing:
+    0.14em;
+}
+
+.police-search-suspicious > div {
+  margin-bottom: 13px;
+}
+
+.police-search-suspicious > div:last-child {
+  margin-bottom: 0;
+}
+
+.police-search-suspicious strong {
+  color: #dd727d;
+
+  font-size: 11px;
+}
+
+.police-search-suspicious p {
+  margin:
+    5px 0 0;
+
+  color: #97878a;
+
+  font-size: 10px;
+
+  line-height: 1.6;
+}
+
+.police-search-log {
+  margin-top: 18px;
+
+  padding: 14px;
+
+  background: #08090b;
+
+  border:
+    1px solid #242b34;
+}
+
+.police-search-log p {
+  margin:
+    0 0 7px;
+
+  color: #8d959f;
+
+  font-size: 10px;
+
+  line-height: 1.6;
+}
+
+.police-search-log p:last-child {
+  margin-bottom: 0;
+}
+
+.police-search-log-found {
+  color: #d49a73 !important;
+}
+
+.police-search-log-critical {
+  color: #ef5966 !important;
+
+  font-weight: 700;
+}
+
+.police-search-log-serious {
+  color: #df7c72 !important;
+}
+
+.police-search-log-success {
+  color: #9db89f !important;
+}
+
+@media (
+  max-width: 520px
+) {
+  .police-search-panel {
+    padding: 20px;
+  }
+
+  .police-search-item {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+}
