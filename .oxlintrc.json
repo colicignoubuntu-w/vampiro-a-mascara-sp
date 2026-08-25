@@ -1,5 +1,12 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": [
+    "dist/**",
+    "src/**/*.backup-*",
+    "src/**/*.pre-*",
+    "src/**/*erro-backup*",
+    "src/**/*.backup-antes-*"
+  ],
   "plugins": ["react", "oxc"],
   "rules": {
     "react/rules-of-hooks": "error",

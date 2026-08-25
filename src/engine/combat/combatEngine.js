@@ -3,6 +3,11 @@ import {
 } from '../vampire/disciplines/disciplineEngine'
 
 import {
+  getBloodRemainingThisTurn,
+  spendBloodThisTurn,
+} from '../vampire/bloodTurnEngine'
+
+import {
   advanceNpcFrenzy,
   checkAutomaticNpcFrenzy,
   getNpcFrenzyPreferredAttack,
@@ -32,6 +37,17 @@ import {
 import {
   chooseEnemyCombatAction,
 } from './ai/enemyCombatAI'
+
+import {
+  applyAttackerBloodSplatter,
+} from './bloodSplatterEngine'
+import {
+  createPoliceResponse,
+} from '../police/policeResponseEngine'
+
+import {
+  rollCombatExposure,
+} from './combatExposureEngine'
 
 import {
   advanceTowardEnemy,
@@ -1598,6 +1614,42 @@ function performPlayerWeaponAttack(
         amount:
           damage.inflicted,
       })
+
+    /*
+      ========================================
+      RESPINGO DE SANGUE NO JOGADOR
+      ========================================
+
+      Só acontece quando o golpe realmente
+      causou dano depois da absorção.
+    */
+
+   const bloodSplatter =
+  applyAttackerBloodSplatter({
+    game:
+      updatedGame,
+
+    weapon,
+
+    damageInflicted:
+      damage.inflicted,
+
+    distance,
+
+    targetType:
+      combat.enemy.type,
+  })
+
+    updatedGame =
+      bloodSplatter.game
+
+    if (
+      bloodSplatter.log
+    ) {
+      log.push(
+        bloodSplatter.log
+      )
+    }
   }
 
   const totalEnemyDamage =
@@ -1613,7 +1665,207 @@ function performPlayerWeaponAttack(
         .maximum ??
       7
     )
+/*
+  ========================================
+  EXPOSIÇÃO PÚBLICA DO COMBATE
+  ========================================
 
+  Verifica se o ataque chamou atenção
+  de testemunhas ou da polícia.
+
+  crowdLevel 0:
+  ninguém pode testemunhar.
+
+  policePresence 0:
+  não existe resposta policial direta
+  gerada por este sistema.
+
+  Armas de fogo aumentam bastante
+  o risco por causa do barulho.
+*/
+
+/*
+  ========================================
+  EXPOSIÇÃO PÚBLICA DO COMBATE
+  ========================================
+*/
+
+const combatExposure =
+  rollCombatExposure({
+    game:
+      updatedGame,
+
+    combat,
+
+    weapon,
+
+    damageInflicted:
+      damage.inflicted,
+
+    defeated,
+  })
+
+/*
+  ========================================
+  TESTEMUNHAS
+  ========================================
+*/
+
+if (
+  combatExposure.witnessed
+) {
+  log.push({
+    type:
+      'combat-witness',
+
+    text:
+      'Alguém percebeu a violência.',
+  })
+}
+
+/*
+  ========================================
+  POLÍCIA CHAMADA
+  ========================================
+
+  A polícia NÃO aparece imediatamente.
+
+  O policeResponseEngine registra:
+  - local da ocorrência;
+  - horário;
+  - tempo de resposta;
+  - chegada futura da viatura.
+*/
+
+if (
+  combatExposure.policeAlerted
+) {
+  updatedGame =
+    createPoliceResponse(
+      updatedGame,
+      {
+        locationId:
+          updatedGame?.world
+            ?.location
+            ?.id ??
+          null,
+
+        locationName:
+          updatedGame?.world
+            ?.location
+            ?.name ??
+          'Local desconhecido',
+
+        policePresence:
+          combatExposure
+            .policePresence,
+
+        reason:
+          'combat',
+
+        severity:
+          combatExposure.level,
+      }
+    )
+
+  const response =
+    updatedGame
+      ?.policeResponse
+
+  log.push({
+    type:
+      'police-alert',
+
+    text:
+      response?.responseMinutes
+        ? `Alguém chamou a polícia. Uma viatura pode chegar em aproximadamente ${response.responseMinutes} minuto(s).`
+        : 'Alguém chamou a polícia.',
+  })
+}
+
+/*
+  ========================================
+  ALERTA INTERNO
+  ========================================
+*/
+
+if (
+  combatExposure.hostileAlerted
+) {
+  log.push({
+    type:
+      'hostile-alert',
+
+    text:
+      'O barulho pode ter alertado outras presenças hostis dentro da área.',
+  })
+}
+
+/*
+  ========================================
+  MENSAGENS DO AMBIENTE
+  ========================================
+*/
+
+if (
+  Array.isArray(
+    combatExposure.messages
+  )
+) {
+  combatExposure.messages.forEach(
+    (message) => {
+      log.push({
+        type:
+          'combat-exposure',
+
+        text:
+          message,
+      })
+    }
+  )
+}
+
+if (
+  combatExposure.witnessed
+) {
+  log.push({
+    type:
+      'combat-witness',
+
+    text:
+      'Alguém percebeu a violência.',
+  })
+}
+
+if (
+  combatExposure.policeAlerted
+) {
+  log.push({
+    type:
+      'police-alert',
+
+    text:
+      'A violência chamou a atenção da polícia.',
+  })
+}
+
+if (
+  Array.isArray(
+    combatExposure.messages
+  )
+) {
+  combatExposure.messages.forEach(
+    (message) => {
+      log.push({
+        type:
+          'combat-exposure',
+
+        text:
+          message,
+      })
+    }
+  )
+}
   const updatedCombat = {
     ...combat,
 
@@ -3571,11 +3823,46 @@ function performEnemyAttack(
         damage.inflicted,
     })
 
-  const updatedGame = {
+  let updatedGame = {
     ...game,
 
     health:
       updatedHealth,
+  }
+
+  /*
+    ========================================
+    SANGUE DO PRÓPRIO PERSONAGEM
+    ========================================
+
+    O ataque inimigo realmente causou dano.
+    Agora verificamos se o ferimento deixa
+    sangue visível no corpo ou nas roupas.
+  */
+
+  const bloodMessResult =
+    applyVictimBloodMess({
+      game:
+        updatedGame,
+
+      weapon,
+
+      damageInflicted:
+        damage.inflicted,
+
+      damageType:
+        actualDamageType,
+    })
+
+  updatedGame =
+    bloodMessResult.game
+
+  if (
+    bloodMessResult.log
+  ) {
+    log.push(
+      bloodMessResult.log
+    )
   }
 
   let updatedCombat =
@@ -5222,45 +5509,82 @@ export function spendBloodForPhysicalBoost({
     return {
       success: false,
 
+      reason:
+        'invalid-attribute',
+
       game,
     }
   }
 
-  const blood =
-    game?.blood
-      ?.current ?? 0
+  const remaining =
+    getBloodRemainingThisTurn(
+      game
+    )
 
   if (
-    blood <= 0
+    remaining <= 0
   ) {
     return {
       success: false,
 
+      reason:
+        'blood-per-turn-limit',
+
       game,
+
+      message:
+        `Você já atingiu o limite de ${game?.blood?.perTurn ?? 1} ponto(s) de sangue neste turno.`,
+    }
+  }
+
+  const spendResult =
+    spendBloodThisTurn({
+      game,
+
+      amount: 1,
+
+      reason:
+        `physical-boost-${attribute}`,
+    })
+
+  if (
+    !spendResult.success
+  ) {
+    return {
+      success: false,
+
+      reason:
+        spendResult.reason,
+
+      game,
+
+      message:
+        spendResult.message,
     }
   }
 
   const currentBoost =
-    game?.combatBoosts
+    spendResult.game
+      ?.combatBoosts
       ?.[attribute] ??
     0
 
   return {
     success: true,
 
+    reason: null,
+
+    spent: 1,
+
+    remainingThisTurn:
+      spendResult.remainingThisTurn,
+
     game: {
-      ...game,
-
-      blood: {
-        ...(game.blood ??
-          {}),
-
-        current:
-          blood - 1,
-      },
+      ...spendResult.game,
 
       combatBoosts: {
-        ...(game.combatBoosts ??
+        ...(spendResult.game
+          ?.combatBoosts ??
           {}),
 
         [attribute]:
@@ -5268,7 +5592,8 @@ export function spendBloodForPhysicalBoost({
       },
 
       history: [
-        ...(game.history ??
+        ...(spendResult.game
+          ?.history ??
           []),
 
         {
@@ -5276,6 +5601,14 @@ export function spendBloodForPhysicalBoost({
             'blood-physical-boost',
 
           attribute,
+
+          bloodSpent: 1,
+
+          bloodSpentThisTurn:
+            spendResult.spentThisTurn,
+
+          bloodPerTurn:
+            spendResult.limit,
 
           timestamp:
             new Date()

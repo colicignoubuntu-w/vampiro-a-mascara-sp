@@ -1,7 +1,14 @@
-function clamp(value, min, max) {
+function clamp(
+  value,
+  min,
+  max
+) {
   return Math.max(
     min,
-    Math.min(max, value)
+    Math.min(
+      max,
+      value
+    )
   )
 }
 
@@ -32,9 +39,11 @@ function rollPool(
 
   const dice =
     Array.from({
-      length: safePool,
-    }).map(() =>
-      rollD10()
+      length:
+        safePool,
+    }).map(
+      () =>
+        rollD10()
     )
 
   const rawSuccesses =
@@ -60,7 +69,9 @@ function rollPool(
   let result =
     'failure'
 
-  if (successes > 0) {
+  if (
+    successes > 0
+  ) {
     result =
       'success'
   } else if (
@@ -90,9 +101,11 @@ function rollPool(
   }
 }
 
-/* ==========================================
-   ESTADO DA MÁSCARA
-========================================== */
+/*
+  ========================================
+  ESTADO DA MÁSCARA
+  ========================================
+*/
 
 export function getMasqueradeState(
   game
@@ -100,78 +113,126 @@ export function getMasqueradeState(
   return {
     suspicion:
       Number(
-        game.masquerade
+        game?.masquerade
           ?.suspicion ?? 0
       ),
 
     violations:
       Number(
-        game.masquerade
+        game?.masquerade
           ?.violations ?? 0
       ),
 
     policeAttention:
       Number(
-        game.masquerade
+        game?.masquerade
           ?.policeAttention ?? 0
       ),
 
     witnesses:
       Array.isArray(
-        game.masquerade
+        game?.masquerade
           ?.witnesses
       )
-        ? game.masquerade.witnesses
+        ? game.masquerade
+            .witnesses
         : [],
 
     evidence:
       Array.isArray(
-        game.masquerade
+        game?.masquerade
           ?.evidence
       )
-        ? game.masquerade.evidence
+        ? game.masquerade
+            .evidence
         : [],
   }
 }
 
+/*
+  ========================================
+  RÓTULOS
+  ========================================
+*/
+
 export function getSuspicionLabel(
   suspicion
 ) {
-  if (suspicion <= 0) {
+  if (
+    suspicion <= 0
+  ) {
     return 'Nenhuma'
   }
 
-  if (suspicion <= 2) {
+  if (
+    suspicion <= 2
+  ) {
     return 'Baixa'
   }
 
-  if (suspicion <= 5) {
+  if (
+    suspicion <= 5
+  ) {
     return 'Moderada'
   }
 
-  if (suspicion <= 8) {
+  if (
+    suspicion <= 8
+  ) {
     return 'Alta'
   }
 
   return 'Crítica'
 }
 
-/* ==========================================
-   SANGUE VISÍVEL
-========================================== */
+export function getPoliceAttentionLabel(
+  value
+) {
+  if (
+    value <= 0
+  ) {
+    return 'Nenhuma'
+  }
+
+  if (
+    value <= 2
+  ) {
+    return 'Baixa'
+  }
+
+  if (
+    value <= 5
+  ) {
+    return 'Moderada'
+  }
+
+  if (
+    value <= 8
+  ) {
+    return 'Alta'
+  }
+
+  return 'Crítica'
+}
+
+/*
+  ========================================
+  SANGUE VISÍVEL
+  ========================================
+*/
 
 export function getBloodSeverity(
   game
 ) {
   const body =
     Number(
-      game.appearance
+      game?.appearance
         ?.bodyBlood ?? 0
     )
 
   const clothes =
     Number(
-      game.appearance
+      game?.appearance
         ?.clothesBlood ?? 0
     )
 
@@ -181,37 +242,86 @@ export function getBloodSeverity(
   )
 }
 
-/* ==========================================
-   HUMANIDADE
-========================================== */
+/*
+  ========================================
+  HUMANIDADE
+  ========================================
+*/
 
 function getHumanityFearModifier(
   game
 ) {
   const humanity =
     Number(
-      game.humanity
+      game?.humanity
         ?.current ?? 7
     )
 
-  if (humanity >= 6) {
+  if (
+    humanity >= 6
+  ) {
     return 0
   }
 
-  if (humanity >= 4) {
+  if (
+    humanity >= 4
+  ) {
     return 1
   }
 
-  if (humanity >= 2) {
+  if (
+    humanity >= 2
+  ) {
     return 2
   }
 
   return 3
 }
 
-/* ==========================================
-   REAÇÃO PÚBLICA
-========================================== */
+/*
+  ========================================
+  MODIFICADOR POLICIAL
+  ========================================
+
+  Quanto mais atenção policial
+  acumulada, mais perigoso circular
+  publicamente em situação suspeita.
+*/
+
+function getPoliceReactionModifier(
+  game
+) {
+  const police =
+    getMasqueradeState(
+      game
+    ).policeAttention
+
+  if (
+    police <= 2
+  ) {
+    return 0
+  }
+
+  if (
+    police <= 5
+  ) {
+    return 5
+  }
+
+  if (
+    police <= 8
+  ) {
+    return 12
+  }
+
+  return 20
+}
+
+/*
+  ========================================
+  CHANCE DE REAÇÃO PÚBLICA
+  ========================================
+*/
 
 export function calculatePublicReactionChance(
   game,
@@ -222,12 +332,10 @@ export function calculatePublicReactionChance(
       game
     )
 
-  if (severity <= 0) {
+  if (
+    severity <= 0
+  ) {
     return 0
-  }
-
-  if (severity >= 3) {
-    return 100
   }
 
   const humanityFear =
@@ -235,39 +343,127 @@ export function calculatePublicReactionChance(
       game
     )
 
-  if (severity === 1) {
-    return clamp(
-      20 +
-        humanityFear * 5,
+  const policeModifier =
+    getPoliceReactionModifier(
+      game
+    )
+
+  const crowdLevel =
+    clamp(
+      Number(
+        location?.crowdLevel ??
+        0.5
+      ),
       0,
-      80
+      1
+    )
+
+  const policePresence =
+    clamp(
+      Number(
+        location?.policePresence ??
+        0.3
+      ),
+      0,
+      1
+    )
+
+  /*
+    ========================================
+    PEQUENAS MANCHAS
+    ========================================
+  */
+
+  if (
+    severity === 1
+  ) {
+    let chance =
+      12
+
+    chance +=
+      crowdLevel *
+      35
+
+    chance +=
+      policePresence *
+      8
+
+    chance +=
+      humanityFear *
+      5
+
+    chance +=
+      Math.floor(
+        policeModifier /
+        2
+      )
+
+    return clamp(
+      Math.round(
+        chance
+      ),
+      5,
+      75
     )
   }
 
-  let chance =
-    65 +
-    humanityFear * 5
+  /*
+    ========================================
+    VISIVELMENTE ENSANGUENTADO
+    ========================================
+  */
 
   if (
-    location?.type ===
-      'bar' ||
-    location?.type ===
-      'nightclub'
+    severity === 2
   ) {
-    chance += 10
+    let chance =
+      40
+
+    chance +=
+      crowdLevel *
+      45
+
+    chance +=
+      policePresence *
+      15
+
+    chance +=
+      humanityFear *
+      5
+
+    chance +=
+      policeModifier
+
+    return clamp(
+      Math.round(
+        chance
+      ),
+      35,
+      99
+    )
   }
+
+  /*
+    ========================================
+    COBERTO DE SANGUE
+    ========================================
+
+    Em local público movimentado,
+    alguém inevitavelmente percebe.
+
+    Em área extremamente isolada ainda
+    existe uma pequena possibilidade
+    de ninguém estar por perto naquele
+    momento.
+  */
 
   if (
-    location?.wealthLevel >= 4
+    crowdLevel <= 0.15
   ) {
-    chance += 10
+    return 85
   }
 
-  return clamp(
-    chance,
-    0,
-    95
-  )
+  return 100
 }
 
 function selectReactionType(
@@ -279,102 +475,347 @@ function selectReactionType(
       game
     )
 
-  const roll =
-    Math.random() * 100
+  const masquerade =
+    getMasqueradeState(
+      game
+    )
 
-  if (severity === 1) {
-    if (roll < 65) {
+  const policeAttention =
+    masquerade
+      .policeAttention
+
+  const crowdLevel =
+    clamp(
+      Number(
+        location?.crowdLevel ??
+        0.5
+      ),
+      0,
+      1
+    )
+
+  const policePresence =
+    clamp(
+      Number(
+        location?.policePresence ??
+        0.3
+      ),
+      0,
+      1
+    )
+
+  /*
+    Transformamos características do
+    local em pesos.
+
+    Exemplo:
+
+    Paulista:
+    crowdLevel 1.0
+    policePresence 0.8
+
+    Portanto celular, segurança e
+    polícia se tornam bem mais
+    prováveis.
+  */
+
+  const crowdWeight =
+    crowdLevel *
+    100
+
+  const policeWeight =
+    policePresence *
+    100
+
+  const roll =
+    Math.random() *
+    100
+
+  /*
+    ========================================
+    PEQUENAS MANCHAS
+    ========================================
+  */
+
+  if (
+    severity === 1
+  ) {
+    /*
+      Só existe chance relevante de
+      polícia se já houver grande atenção
+      policial sobre o personagem.
+    */
+
+    const directPoliceChance =
+      clamp(
+        (
+          policeAttention >= 8
+            ? 4
+            : 0
+        ) +
+        (
+          policeAttention >= 10
+            ? 5
+            : 0
+        ) +
+        policePresence *
+          2,
+        0,
+        12
+      )
+
+    if (
+      roll <
+      directPoliceChance
+    ) {
+      return 'police'
+    }
+
+    /*
+      Lugares muito cheios produzem
+      mais observadores.
+    */
+
+    const concernChance =
+      45 +
+      crowdLevel *
+        25
+
+    if (
+      roll <
+      concernChance
+    ) {
       return 'concern'
     }
 
     return 'avoid'
   }
 
-  if (severity === 2) {
-    if (roll < 35) {
-      return 'concern'
-    }
-
-    if (roll < 60) {
-      return 'phone'
-    }
-
-    if (roll < 85) {
-      return 'security'
-    }
-
-    return 'police'
-  }
-
   /*
-    COBERTO DE SANGUE.
+    ========================================
+    VISIVELMENTE ENSANGUENTADO
+    ========================================
   */
 
   if (
-    location?.type === 'bar'
+    severity === 2
   ) {
-    if (roll < 35) {
-      return 'phone'
+    /*
+      Chance direta de polícia.
+
+      Ela depende de:
+      - presença policial da região;
+      - atenção policial já acumulada.
+    */
+
+    let policeChance =
+      5 +
+      policePresence *
+        20
+
+    if (
+      policeAttention >= 3
+    ) {
+      policeChance += 5
     }
 
-    if (roll < 70) {
+    if (
+      policeAttention >= 6
+    ) {
+      policeChance += 8
+    }
+
+    if (
+      policeAttention >= 9
+    ) {
+      policeChance += 12
+    }
+
+    policeChance =
+      clamp(
+        policeChance,
+        5,
+        50
+      )
+
+    /*
+      Segurança é muito provável em
+      regiões movimentadas.
+    */
+
+    let securityChance =
+      10 +
+      crowdLevel *
+        20 +
+      policePresence *
+        5
+
+    securityChance =
+      clamp(
+        securityChance,
+        10,
+        35
+      )
+
+    /*
+      Celulares são especialmente
+      comuns em áreas cheias.
+    */
+
+    let phoneChance =
+      15 +
+      crowdLevel *
+        25
+
+    phoneChance =
+      clamp(
+        phoneChance,
+        15,
+        40
+      )
+
+    if (
+      roll <
+      policeChance
+    ) {
+      return 'police'
+    }
+
+    if (
+      roll <
+      policeChance +
+        securityChance
+    ) {
       return 'security'
     }
 
-    if (roll < 88) {
-      return 'concern'
-    }
-
-    return 'police'
-  }
-
-  if (
-    location?.type ===
-    'nightclub'
-  ) {
-    if (roll < 40) {
-      return 'security'
-    }
-
-    if (roll < 68) {
+    if (
+      roll <
+      policeChance +
+        securityChance +
+        phoneChance
+    ) {
       return 'phone'
     }
 
-    if (roll < 90) {
-      return 'concern'
-    }
-
-    return 'police'
-  }
-
-  if (
-    location?.wealthLevel >= 4
-  ) {
-    if (roll < 45) {
-      return 'security'
-    }
-
-    if (roll < 70) {
-      return 'phone'
-    }
-
-    return 'police'
-  }
-
-  if (roll < 45) {
-    return 'phone'
-  }
-
-  if (roll < 72) {
     return 'concern'
   }
 
-  if (roll < 88) {
+  /*
+    ========================================
+    COBERTO DE SANGUE
+    ========================================
+  */
+
+  let policeChance =
+    15 +
+    policePresence *
+      30
+
+  if (
+    policeAttention >= 3
+  ) {
+    policeChance += 5
+  }
+
+  if (
+    policeAttention >= 6
+  ) {
+    policeChance += 10
+  }
+
+  if (
+    policeAttention >= 9
+  ) {
+    policeChance += 15
+  }
+
+  /*
+    Em uma região praticamente sem
+    polícia, reduzimos o mínimo.
+  */
+
+  if (
+    policePresence <= 0.2
+  ) {
+    policeChance -= 10
+  }
+
+  policeChance =
+    clamp(
+      policeChance,
+      5,
+      70
+    )
+
+  let securityChance =
+    10 +
+    crowdLevel *
+      25
+
+  /*
+    Em local quase vazio normalmente
+    não há segurança imediatamente.
+  */
+
+  if (
+    crowdLevel <= 0.2
+  ) {
+    securityChance =
+      5
+  }
+
+  securityChance =
+    clamp(
+      securityChance,
+      5,
+      35
+    )
+
+  let phoneChance =
+    15 +
+    crowdLevel *
+      30
+
+  phoneChance =
+    clamp(
+      phoneChance,
+      10,
+      40
+    )
+
+  if (
+    roll <
+    policeChance
+  ) {
+    return 'police'
+  }
+
+  if (
+    roll <
+    policeChance +
+      securityChance
+  ) {
     return 'security'
   }
 
-  return 'police'
+  if (
+    roll <
+    policeChance +
+      securityChance +
+      phoneChance
+  ) {
+    return 'phone'
+  }
+
+  return 'concern'
 }
+
+/*
+  ========================================
+  ROLAR REAÇÃO PÚBLICA
+  ========================================
+*/
 
 export function rollPublicReaction(
   game,
@@ -393,15 +834,22 @@ export function rollPublicReaction(
       location
     )
 
-  if (chance <= 0) {
+  if (
+    chance <= 0
+  ) {
     return null
   }
 
-  if (chance < 100) {
+  if (
+    chance < 100
+  ) {
     const roll =
-      Math.random() * 100
+      Math.random() *
+      100
 
-    if (roll >= chance) {
+    if (
+      roll >= chance
+    ) {
       return null
     }
   }
@@ -420,15 +868,24 @@ export function forcePublicReaction(
   location,
   type = 'phone'
 ) {
+  if (
+    !game ||
+    !location
+  ) {
+    return null
+  }
+
   return createReaction(
     type,
     location
   )
 }
 
-/* ==========================================
-   EVENTOS
-========================================== */
+/*
+  ========================================
+  EVENTOS
+  ========================================
+*/
 
 function createReaction(
   type,
@@ -436,10 +893,13 @@ function createReaction(
 ) {
   const id =
     `masquerade-${Date.now()}-${Math.floor(
-      Math.random() * 10000
+      Math.random() *
+      10000
     )}`
 
-  if (type === 'concern') {
+  if (
+    type === 'concern'
+  ) {
     return {
       id,
 
@@ -455,31 +915,37 @@ function createReaction(
         '— Cara... você está bem? Quer que eu chame uma ambulância?',
 
       locationId:
-        location?.id ?? null,
+        location?.id ??
+        null,
     }
   }
 
-  if (type === 'avoid') {
+  if (
+    type === 'avoid'
+  ) {
     return {
       id,
 
       type,
 
       title:
-        'Olhares',
+        'Olhares e cochichos',
 
       text:
-        'As pessoas começam a abrir espaço. Algumas cochicham. Outras desviam os olhos quando você percebe.',
+        'As pessoas começam a abrir espaço. Algumas cochicham entre si. Outras mudam discretamente de caminho quando percebem o sangue.',
 
       dialogue:
         null,
 
       locationId:
-        location?.id ?? null,
+        location?.id ??
+        null,
     }
   }
 
-  if (type === 'phone') {
+  if (
+    type === 'phone'
+  ) {
     return {
       id,
 
@@ -495,11 +961,14 @@ function createReaction(
         '— Mano... olha isso.',
 
       locationId:
-        location?.id ?? null,
+        location?.id ??
+        null,
     }
   }
 
-  if (type === 'security') {
+  if (
+    type === 'security'
+  ) {
     return {
       id,
 
@@ -509,13 +978,14 @@ function createReaction(
         'O segurança se aproxima',
 
       text:
-        'Um segurança percebe seu estado e atravessa o salão em sua direção. Outro segurança acompanha a cena à distância.',
+        'Um segurança percebe seu estado e caminha em sua direção. Outro observa a situação à distância.',
 
       dialogue:
         '— Senhor, fica onde está. O que aconteceu? Esse sangue é seu?',
 
       locationId:
-        location?.id ?? null,
+        location?.id ??
+        null,
     }
   }
 
@@ -529,25 +999,29 @@ function createReaction(
       'Abordagem policial',
 
     text:
-      'Uma viatura para próxima a você. Um dos policiais sai enquanto observa cuidadosamente o sangue em suas roupas.',
+      'Uma viatura reduz a velocidade e para próxima a você. Um dos policiais sai enquanto observa cuidadosamente o sangue em suas roupas.',
 
     dialogue:
       '— Boa noite. Documento. E me explica o que aconteceu.',
 
     locationId:
-      location?.id ?? null,
+      location?.id ??
+      null,
   }
 }
 
-/* ==========================================
-   OPÇÕES
-========================================== */
+/*
+  ========================================
+  OPÇÕES
+  ========================================
+*/
 
 export function getReactionChoices(
   event
 ) {
   if (
-    event.type === 'avoid'
+    event.type ===
+    'avoid'
   ) {
     return [
       {
@@ -575,7 +1049,8 @@ export function getReactionChoices(
   }
 
   if (
-    event.type === 'phone'
+    event.type ===
+    'phone'
   ) {
     return [
       {
@@ -676,7 +1151,8 @@ export function getReactionChoices(
   }
 
   if (
-    event.type === 'police'
+    event.type ===
+    'police'
   ) {
     return [
       {
@@ -761,9 +1237,11 @@ export function getReactionChoices(
   ]
 }
 
-/* ==========================================
-   TESTE
-========================================== */
+/*
+  ========================================
+  TESTE
+  ========================================
+*/
 
 function buildReactionTest(
   game,
@@ -872,27 +1350,45 @@ function buildReactionTest(
       game
     )
 
-  /*
-    É realmente difícil explicar
-    por que você está coberto de sangue.
-  */
-
-  if (severity === 2) {
-    difficulty += 1
-  }
-
-  if (severity >= 3) {
-    difficulty += 2
-  }
+  const policeAttention =
+    getMasqueradeState(
+      game
+    ).policeAttention
 
   if (
-    event.type === 'police'
+    severity === 2
   ) {
     difficulty += 1
   }
 
   if (
-    event.type === 'security'
+    severity >= 3
+  ) {
+    difficulty += 2
+  }
+
+  if (
+    event.type ===
+    'police'
+  ) {
+    difficulty += 1
+
+    if (
+      policeAttention >= 6
+    ) {
+      difficulty += 1
+    }
+
+    if (
+      policeAttention >= 9
+    ) {
+      difficulty += 1
+    }
+  }
+
+  if (
+    event.type ===
+    'security'
   ) {
     difficulty += 1
   }
@@ -907,7 +1403,9 @@ function buildReactionTest(
     testId ===
     'manipulationIntimidation'
   ) {
-    if (humanity <= 3) {
+    if (
+      humanity <= 3
+    ) {
       difficulty -= 1
     }
   } else if (
@@ -941,9 +1439,11 @@ function buildReactionTest(
   }
 }
 
-/* ==========================================
-   RESOLVER
-========================================== */
+/*
+  ========================================
+  RESOLVER
+  ========================================
+*/
 
 export function resolveReactionChoice(
   game,
@@ -1004,9 +1504,11 @@ export function resolveReactionChoice(
   }
 }
 
-/* ==========================================
-   TESTEMUNHA
-========================================== */
+/*
+  ========================================
+  TESTEMUNHA
+  ========================================
+*/
 
 function createWitness(
   event,
@@ -1015,7 +1517,8 @@ function createWitness(
   return {
     id:
       `witness-${Date.now()}-${Math.floor(
-        Math.random() * 10000
+        Math.random() *
+        10000
       )}`,
 
     type:
@@ -1038,9 +1541,11 @@ function createWitness(
   }
 }
 
-/* ==========================================
-   EVIDÊNCIA
-========================================== */
+/*
+  ========================================
+  EVIDÊNCIA
+  ========================================
+*/
 
 function createVideoEvidence(
   event,
@@ -1049,7 +1554,8 @@ function createVideoEvidence(
   return {
     id:
       `video-${Date.now()}-${Math.floor(
-        Math.random() * 10000
+        Math.random() *
+        10000
       )}`,
 
     type:
@@ -1060,7 +1566,8 @@ function createVideoEvidence(
     locationId:
       event.locationId,
 
-    active: true,
+    active:
+      true,
 
     timestamp:
       new Date()
@@ -1068,9 +1575,11 @@ function createVideoEvidence(
   }
 }
 
-/* ==========================================
-   CONSEQUÊNCIAS
-========================================== */
+/*
+  ========================================
+  CONSEQUÊNCIAS
+  ========================================
+*/
 
 function applyReactionOutcome(
   game,
@@ -1092,8 +1601,11 @@ function applyReactionOutcome(
   let policeGain = 0
   let violationGain = 0
 
-  let witnessAdded = false
-  let evidenceAdded = false
+  let witnessAdded =
+    false
+
+  let evidenceAdded =
+    false
 
   const witnesses = [
     ...current.witnesses,
@@ -1103,24 +1615,26 @@ function applyReactionOutcome(
     ...current.evidence,
   ]
 
-  /* ======================================
-     SUCESSO
-  ====================================== */
+  /*
+    ======================================
+    SUCESSO
+    ======================================
+  */
 
-  if (result === 'success') {
+  if (
+    result ===
+    'success'
+  ) {
     /*
-      COBERTO DE SANGUE
-
-      Mesmo convencendo alguém,
-      você foi visto.
-
-      Isso não desaparece.
+      Mesmo numa interação sem teste,
+      estar extremamente ensanguentado
+      pode deixar uma impressão.
     */
 
     if (
       bloodSeverity >= 3
     ) {
-      suspicionGain = 1
+      suspicionGain += 1
 
       witnesses.push(
         createWitness(
@@ -1134,11 +1648,23 @@ function applyReactionOutcome(
     }
 
     /*
-      INTIMIDAÇÃO
+      Ignorar pessoas enquanto se está
+      coberto de sangue não elimina a
+      suspeita.
+    */
 
-      Resolve o problema imediato,
-      mas deixa uma testemunha
-      assustada.
+    if (
+      event.type ===
+        'avoid' &&
+      choice.id ===
+        'ignore' &&
+      bloodSeverity >= 2
+    ) {
+      suspicionGain += 1
+    }
+
+    /*
+      Intimidação.
     */
 
     if (
@@ -1147,7 +1673,9 @@ function applyReactionOutcome(
     ) {
       suspicionGain += 1
 
-      if (!witnessAdded) {
+      if (
+        !witnessAdded
+      ) {
         witnesses.push(
           createWitness(
             event,
@@ -1161,10 +1689,7 @@ function applyReactionOutcome(
     }
 
     /*
-      POLÍCIA
-
-      Mesmo enganando os policiais,
-      o encontro fica registrado.
+      Polícia.
     */
 
     if (
@@ -1175,7 +1700,9 @@ function applyReactionOutcome(
 
       policeGain += 1
 
-      if (!witnessAdded) {
+      if (
+        !witnessAdded
+      ) {
         witnesses.push(
           createWitness(
             event,
@@ -1189,14 +1716,16 @@ function applyReactionOutcome(
     }
 
     /*
-      SEGURANÇA também lembra.
+      Segurança.
     */
 
     if (
       event.type ===
       'security'
     ) {
-      if (!witnessAdded) {
+      if (
+        !witnessAdded
+      ) {
         witnesses.push(
           createWitness(
             event,
@@ -1208,13 +1737,47 @@ function applyReactionOutcome(
           true
       }
     }
+
+    /*
+      Celular.
+
+      Se está completamente coberto
+      de sangue, o simples fato de um
+      celular ter sido apontado já pode
+      deixar algum registro.
+    */
+
+    if (
+      event.type ===
+        'phone' &&
+      bloodSeverity >= 3 &&
+      choice.id ===
+        'leave'
+    ) {
+      evidence.push(
+        createVideoEvidence(
+          event,
+          'Gravação curta mostrando o personagem coberto de sangue deixando o local.'
+        )
+      )
+
+      evidenceAdded =
+        true
+
+      suspicionGain += 1
+    }
   }
 
-  /* ======================================
-     FALHA
-  ====================================== */
+  /*
+    ======================================
+    FALHA
+    ======================================
+  */
 
-  if (result === 'failure') {
+  if (
+    result ===
+    'failure'
+  ) {
     suspicionGain = 2
 
     witnesses.push(
@@ -1224,7 +1787,8 @@ function applyReactionOutcome(
       )
     )
 
-    witnessAdded = true
+    witnessAdded =
+      true
 
     if (
       event.type ===
@@ -1233,13 +1797,25 @@ function applyReactionOutcome(
       evidence.push(
         createVideoEvidence(
           event,
-          'Vídeo de celular mostrando o personagem coberto de sangue.'
+          'Vídeo de celular mostrando o personagem ensanguentado.'
         )
       )
 
-      evidenceAdded = true
+      evidenceAdded =
+        true
 
       suspicionGain += 2
+
+      /*
+        Evidência pública também pode
+        aumentar atenção policial.
+      */
+
+      if (
+        bloodSeverity >= 2
+      ) {
+        policeGain += 1
+      }
     }
 
     if (
@@ -1254,22 +1830,28 @@ function applyReactionOutcome(
       'police'
     ) {
       policeGain += 3
+
       suspicionGain += 1
     }
 
     if (
       choice.id ===
-        'intimidate'
+      'intimidate'
     ) {
       suspicionGain += 1
     }
   }
 
-  /* ======================================
-     FALHA CRÍTICA
-  ====================================== */
+  /*
+    ======================================
+    FALHA CRÍTICA
+    ======================================
+  */
 
-  if (result === 'botch') {
+  if (
+    result ===
+    'botch'
+  ) {
     suspicionGain = 4
 
     violationGain = 1
@@ -1281,7 +1863,8 @@ function applyReactionOutcome(
       )
     )
 
-    witnessAdded = true
+    witnessAdded =
+      true
 
     if (
       event.type ===
@@ -1296,9 +1879,12 @@ function applyReactionOutcome(
         )
       )
 
-      evidenceAdded = true
+      evidenceAdded =
+        true
 
       suspicionGain += 2
+
+      policeGain += 1
     }
 
     if (
@@ -1310,7 +1896,7 @@ function applyReactionOutcome(
 
     if (
       choice.id ===
-        'intimidate'
+      'intimidate'
     ) {
       policeGain += 1
     }
@@ -1385,6 +1971,12 @@ function applyReactionOutcome(
     eventType:
       event.type,
 
+    locationId:
+      event.locationId ??
+      null,
+
+    bloodSeverity,
+
     choice:
       choice.id,
 
@@ -1428,9 +2020,11 @@ function applyReactionOutcome(
   }
 }
 
-/* ==========================================
-   TEXTO DO RESULTADO
-========================================== */
+/*
+  ========================================
+  TEXTO DO RESULTADO
+  ========================================
+*/
 
 export function getReactionResultText(
   event,
@@ -1438,8 +2032,18 @@ export function getReactionResultText(
   result
 ) {
   if (
-    result === 'success'
+    result ===
+    'success'
   ) {
+    if (
+      choice.id ===
+      'ignore'
+    ) {
+      return (
+        'Você continua andando sem responder. Os cochichos ficam para trás, mas algumas pessoas continuam olhando.'
+      )
+    }
+
     if (
       choice.id ===
       'intimidate'
@@ -1451,9 +2055,9 @@ export function getReactionResultText(
 
     if (
       choice.id ===
-      'escape' ||
+        'escape' ||
       choice.id ===
-      'leave'
+        'leave'
     ) {
       return (
         'Você consegue sair antes que alguém o impeça. Isso não significa que ninguém tenha reparado em você.'
@@ -1465,7 +2069,7 @@ export function getReactionResultText(
       'police'
     ) {
       return (
-        'Sua explicação é boa o suficiente para evitar uma escalada imediata. Ainda assim, aqueles policiais viram você coberto de sangue.'
+        'Sua explicação é boa o suficiente para evitar uma escalada imediata. Ainda assim, os policiais registram mentalmente o encontro.'
       )
     }
 
@@ -1493,7 +2097,8 @@ export function getReactionResultText(
   }
 
   if (
-    result === 'failure'
+    result ===
+    'failure'
   ) {
     if (
       event.type ===
@@ -1509,7 +2114,7 @@ export function getReactionResultText(
       'security'
     ) {
       return (
-        'O segurança não acredita na história. A situação começa a ficar mais séria.'
+        'O segurança não acredita na história. Ele começa a tratar a situação como um possível caso policial.'
       )
     }
 
@@ -1542,6 +2147,15 @@ export function getReactionResultText(
   ) {
     return (
       'A situação sai do controle. Os policiais passam a tratar você como suspeito.'
+    )
+  }
+
+  if (
+    event.type ===
+    'security'
+  ) {
+    return (
+      'Sua reação faz o segurança acionar ajuda. A situação começa a escapar do seu controle.'
     )
   }
 

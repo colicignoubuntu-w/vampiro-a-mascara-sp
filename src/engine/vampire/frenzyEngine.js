@@ -458,7 +458,11 @@ export function createFrenzyAftermath(
           false,
 
         endScene:
-          outcome.endScene,
+  outcome.endScene ??
+  trigger.endScene ??
+  trigger.successScene ??
+  game?.story?.scene ??
+  null,
 
         flags:
           outcome.flags ??
@@ -526,12 +530,36 @@ export function finishFrenzyAftermath(
     return game
   }
 
-  if (
-    !aftermath.endScene
-  ) {
-    throw new Error(
-      'Consequência de Frenesi sem endScene.'
-    )
+  /*
+    ========================================
+    CENA DE RETORNO
+    ========================================
+
+    Saves antigos podem ter um
+    pendingAftermath sem endScene.
+
+    Nesse caso, permanecemos na cena
+    em que o personagem já está.
+  */
+
+  const endScene =
+    aftermath.endScene ??
+    game?.story?.scene ??
+    null
+
+  if (!endScene) {
+    return {
+      ...game,
+
+      beast: {
+        ...(game.beast ?? {}),
+
+        frenzy: false,
+
+        pendingAftermath:
+          null,
+      },
+    }
   }
 
   return {
@@ -544,7 +572,7 @@ export function finishFrenzyAftermath(
         game.story?.scene,
 
       scene:
-        aftermath.endScene,
+        endScene,
     },
 
     beast: {
@@ -555,5 +583,20 @@ export function finishFrenzyAftermath(
       pendingAftermath:
         null,
     },
+
+    history: [
+      ...(game.history ?? []),
+
+      {
+        type:
+          'frenzy-aftermath-finished',
+
+        endScene,
+
+        timestamp:
+          new Date()
+            .toISOString(),
+      },
+    ],
   }
 }

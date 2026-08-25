@@ -2,6 +2,10 @@ import {
   resolveDayHealing,
 } from './healingEngine'
 
+import {
+  spendBlood,
+} from './bloodEngine'
+
 function safeNumber(
   value,
   fallback = 0
@@ -153,10 +157,122 @@ export function createDaySleepState(
     },
   }
 }
+export function getAwakeningHungerState(
+  game
+) {
+  const blood =
+    Math.max(
+      0,
+      Number(
+        game?.blood
+          ?.current ?? 0
+      )
+    )
 
+  /*
+    ========================================
+    TORPOR
+    ========================================
+  */
+
+  if (blood <= 0) {
+    return {
+      state:
+        'torpor',
+
+      blood,
+
+      requiresFrenzyTest:
+        false,
+
+      frenzyDifficulty:
+        null,
+    }
+  }
+
+  /*
+    ========================================
+    FOME CRÍTICA
+    ========================================
+
+    Quanto menos sangue,
+    maior a dificuldade para
+    controlar a Besta.
+  */
+
+  if (blood === 1) {
+    return {
+      state:
+        'critical_hunger',
+
+      blood,
+
+      requiresFrenzyTest:
+        true,
+
+      frenzyDifficulty:
+        8,
+    }
+  }
+
+  if (blood === 2) {
+    return {
+      state:
+        'severe_hunger',
+
+      blood,
+
+      requiresFrenzyTest:
+        true,
+
+      frenzyDifficulty:
+        7,
+    }
+  }
+
+  if (blood === 3) {
+    return {
+      state:
+        'hunger',
+
+      blood,
+
+      requiresFrenzyTest:
+        true,
+
+      frenzyDifficulty:
+        6,
+    }
+  }
+
+  /*
+    ========================================
+    DESPERTAR NORMAL
+    ========================================
+  */
+
+  return {
+    state:
+      'normal',
+
+    blood,
+
+    requiresFrenzyTest:
+      false,
+
+    frenzyDifficulty:
+      null,
+  }
+}
 export function sleepThroughDay(
   game
 ) {
+  /*
+    ========================================
+    CURA DURANTE O DIA
+    ========================================
+  */
+
   let updatedGame =
     resolveDayHealing(
       game
@@ -165,6 +281,59 @@ export function sleepThroughDay(
   const currentNight =
     updatedGame.world
       ?.night ?? 1
+
+  /*
+    ========================================
+    CUSTO PARA DESPERTAR
+    ========================================
+
+    Todo vampiro gasta 1 ponto de sangue
+    para despertar em uma nova noite.
+
+    Esse gasto NÃO conta para o limite
+    de sangue por turno de combate.
+  */
+
+  const awakeningCost =
+    spendBlood(
+      updatedGame,
+      1
+    )
+
+  const paidAwakeningBlood =
+    awakeningCost.success
+
+  if (
+    paidAwakeningBlood
+  ) {
+    updatedGame =
+      awakeningCost.game
+  }
+
+  /*
+    ========================================
+    ESTADO DE FOME AO DESPERTAR
+    ========================================
+  */
+
+  const hungerState =
+    getAwakeningHungerState(
+      updatedGame
+    )
+
+  const enteredTorpor =
+    hungerState.state ===
+      'torpor'
+
+  const requiresFrenzyTest =
+    hungerState
+      .requiresFrenzyTest
+
+  /*
+    ========================================
+    NOVA NOITE
+    ========================================
+  */
 
   updatedGame = {
     ...updatedGame,
@@ -176,6 +345,60 @@ export function sleepThroughDay(
 
       lastSleepNight:
         currentNight,
+
+      awakeningBloodSpent:
+        paidAwakeningBlood
+          ? 1
+          : 0,
+
+      awakeningFailed:
+        enteredTorpor,
+
+      awakeningState:
+        hungerState.state,
+
+      awakeningBlood:
+        hungerState.blood,
+
+      awakeningFrenzyRequired:
+        requiresFrenzyTest,
+
+      awakeningFrenzyDifficulty:
+        hungerState
+          .frenzyDifficulty,
+
+      torpor:
+        enteredTorpor,
+    },
+
+    /*
+      ========================================
+      ESTADO VAMPÍRICO
+      ========================================
+
+      O Torpor fica salvo separadamente
+      para futuramente também poder ocorrer
+      por dano, estaca, efeitos sobrenaturais,
+      etc.
+    */
+
+    vampireState: {
+      ...(updatedGame
+        .vampireState ??
+        {}),
+
+      torpor:
+        enteredTorpor,
+
+      torporReason:
+        enteredTorpor
+          ? 'blood_depletion'
+          : null,
+
+      torporStartedNight:
+        enteredTorpor
+          ? currentNight + 1
+          : null,
     },
 
     world: {
@@ -184,13 +407,6 @@ export function sleepThroughDay(
 
       night:
         currentNight + 1,
-
-      /*
-        Acordamos no início da noite.
-
-        Depois podemos criar horário
-        variável por estação do ano.
-      */
 
       hour: 19,
 
@@ -201,8 +417,35 @@ export function sleepThroughDay(
       ...(updatedGame.flags ??
         {}),
 
+      /*
+        Só despertou de verdade
+        se não entrou em Torpor.
+      */
+
       wokeFromDaySleep:
+        !enteredTorpor,
+
+      awakeningBloodSpent:
+        paidAwakeningBlood,
+
+      awakeningWithoutBlood:
+        !paidAwakeningBlood,
+
+      awakeningHungerCheck:
         true,
+
+      awakeningFrenzyRequired:
+        requiresFrenzyTest,
+
+      awakeningFrenzyDifficulty:
+        hungerState
+          .frenzyDifficulty,
+
+      awakeningTorpor:
+        enteredTorpor,
+
+      inTorpor:
+        enteredTorpor,
     },
 
     history: [
@@ -211,13 +454,35 @@ export function sleepThroughDay(
 
       {
         type:
-          'day-sleep',
+          enteredTorpor
+            ? 'day-sleep-torpor'
+            : 'day-sleep',
 
         night:
           currentNight,
 
         nextNight:
           currentNight + 1,
+
+        bloodAfterSleep:
+          hungerState.blood,
+
+        awakeningBloodSpent:
+          paidAwakeningBlood
+            ? 1
+            : 0,
+
+        awakeningState:
+          hungerState.state,
+
+        frenzyRequired:
+          requiresFrenzyTest,
+
+        frenzyDifficulty:
+          hungerState
+            .frenzyDifficulty,
+
+        enteredTorpor,
 
         timestamp:
           new Date()

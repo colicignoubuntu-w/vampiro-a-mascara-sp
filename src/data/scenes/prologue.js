@@ -1344,7 +1344,7 @@ const prologueScenes = {
           '"Onde está a Lívia?"',
 
         nextScene:
-          'jack_intro',
+          'jack_after_trial',
 
         timeMinutes: 1,
 
@@ -3234,7 +3234,24 @@ const prologueScenes = {
         'Vamos. Sua primeira noite ainda nem começou direito.',
     },
 
-    choices: [],
+     choices: [
+      {
+        id: 'follow_jack_after_trial',
+
+        text: 'Seguir Jack.',
+
+        nextScene: 'jack_after_trial',
+
+        timeMinutes: 2,
+
+        flags: {
+          survivedTrial: true,
+          survivedJudgment: true,
+          liviaDead: true,
+          metJack: true,
+        },
+      },
+    ],
   },
 }
 

@@ -295,6 +295,422 @@ const policeScenes = {
     ],
   },
 
+  police_recognized: {
+    id:
+      'police_recognized',
+
+    chapter:
+      'A MÁSCARA',
+
+    title:
+      'Reconhecido',
+
+    location: {
+      id:
+        'street_police_stop',
+
+      name:
+        'Rua',
+
+      district:
+        'São Paulo',
+    },
+
+    narration: [
+      'O policial observa seu rosto por alguns segundos a mais.',
+      'A expressão dele muda.',
+      'Os olhos descem rapidamente até algum ponto de referência e voltam para você.',
+      'A mão vai até o rádio preso no ombro.',
+      'O segundo policial sai da viatura.',
+      'Agora não existe mais dúvida: eles acreditam que encontraram o suspeito que estavam procurando.',
+    ],
+
+    dialogue: {
+      speaker:
+        'Policial',
+
+      text:
+        'Central, possível positivo. Acho que encontrei o suspeito.',
+    },
+
+    choices: [
+      {
+        id:
+          'recognized_surrender',
+
+        text:
+          'Manter as mãos visíveis e se entregar.',
+
+        nextScene:
+          'police_detained',
+
+        timeMinutes:
+          2,
+
+        flags: {
+          policeStopActive:
+            true,
+
+          policeTrouble:
+            true,
+
+          policeRecognizedPlayer:
+            true,
+
+          policeChase:
+            false,
+        },
+      },
+
+      {
+        id:
+          'recognized_show_document',
+
+        text:
+          'Entregar o documento e deixar o policial conferir seus dados.',
+
+        nextScene:
+          'police_identity_uncertain',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeStopActive:
+            true,
+
+          policeTrouble:
+            true,
+
+          policeDocumentOffered:
+            true,
+        },
+      },
+
+      {
+        id:
+          'recognized_argue',
+
+        text:
+          'Dizer que eles estão confundindo você com outra pessoa.',
+
+        nextScene:
+          'police_questions',
+
+        timeMinutes:
+          1,
+
+        flags: {
+          policeRecognizedPlayer:
+            true,
+
+          policeTrouble:
+            true,
+        },
+      },
+
+      {
+        id:
+          'recognized_run',
+
+        text:
+          'Correr antes que eles consigam cercar você.',
+
+        nextScene:
+          'police_chase',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeRecognizedPlayer:
+            true,
+
+          policeTrouble:
+            true,
+
+          policeStopActive:
+            false,
+
+          policeChase:
+            true,
+
+          escapedPolice:
+            false,
+
+          policeWantedRegistered:
+            false,
+        },
+      },
+
+      {
+        id:
+          'recognized_resist',
+
+        text:
+          'Resistir fisicamente à prisão.',
+
+        nextScene:
+          'police_force',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeRecognizedPlayer:
+            true,
+
+          policeTrouble:
+            true,
+
+          policeViolence:
+            true,
+
+          policeStopActive:
+            false,
+
+          possibleMasqueradeRisk:
+            true,
+        },
+      },
+    ],
+
+    disciplineChoices: [
+      {
+        id:
+          'recognized_dominate',
+
+        powerId:
+          'dominate_1',
+
+        text:
+          '"Você se enganou. Eu não sou quem procura."',
+
+        description:
+          'Tentar apagar a certeza imediata do policial com uma ordem direta.',
+
+        target: {
+          id:
+            'police_officer_1',
+
+          name:
+            'Policial',
+
+          type:
+            'human',
+
+          requiresEyeContact:
+            true,
+
+          eyeContact:
+            true,
+        },
+
+        successScene:
+          'police_released',
+
+        failureScene:
+          'police_escalation',
+
+        botchScene:
+          'police_force',
+
+        timeMinutes:
+          1,
+
+        successFlags: {
+          policeRecognizedPlayer:
+            false,
+
+          policeStopActive:
+            false,
+
+          policeTrouble:
+            false,
+        },
+
+        failureFlags: {
+          policeRecognizedPlayer:
+            true,
+
+          policeEscalation:
+            true,
+        },
+
+        botchFlags: {
+          policeRecognizedPlayer:
+            true,
+
+          policeEscalation:
+            true,
+
+          possibleMasqueradeRisk:
+            true,
+        },
+      },
+
+      {
+        id:
+          'recognized_presence',
+
+        powerId:
+          'presence_1',
+
+        text:
+          'Usar Presença para fazê-los hesitar.',
+
+        description:
+          'Tentar transformar a certeza em dúvida e reduzir a hostilidade antes que eles avancem.',
+
+        target: {
+          id:
+            'police_officer_1',
+
+          name:
+            'Policial',
+
+          type:
+            'human',
+        },
+
+        successScene:
+          'police_released',
+
+        failureScene:
+          'police_escalation',
+
+        botchScene:
+          'police_force',
+
+        timeMinutes:
+          1,
+
+        successFlags: {
+          policeRecognizedPlayer:
+            false,
+
+          policeStopActive:
+            false,
+
+          policeTrouble:
+            false,
+        },
+
+        failureFlags: {
+          policeRecognizedPlayer:
+            true,
+
+          policeEscalation:
+            true,
+        },
+      },
+
+      {
+        id:
+          'recognized_dementia',
+
+        powerId:
+          'dementia_1',
+
+        text:
+          'Amplificar a insegurança do policial sobre o reconhecimento.',
+
+        description:
+          'Intensificar a dúvida até que ele comece a questionar a própria certeza.',
+
+        target: {
+          id:
+            'police_officer_1',
+
+          name:
+            'Policial',
+
+          type:
+            'human',
+        },
+
+        successScene:
+          'police_dementia_success',
+
+        failureScene:
+          'police_escalation',
+
+        botchScene:
+          'police_force',
+
+        timeMinutes:
+          1,
+
+        successFlags: {
+          policeRecognizedPlayer:
+            false,
+
+          policeTrouble:
+            false,
+        },
+
+        failureFlags: {
+          policeRecognizedPlayer:
+            true,
+
+          policeEscalation:
+            true,
+        },
+      },
+
+      {
+        id:
+          'recognized_obfuscate',
+
+        powerId:
+          'obfuscate_2',
+
+        text:
+          'Usar Ofuscação e desaparecer da atenção deles.',
+
+        description:
+          'Quebrar o foco dos policiais e sair do campo de atenção antes que a abordagem se feche.',
+
+        target: {
+          type:
+            'environment',
+        },
+
+        nextScene:
+          'police_obfuscate_escape',
+
+        timeMinutes:
+          1,
+
+        successFlags: {
+          policeRecognizedPlayer:
+            false,
+
+          policeStopActive:
+            false,
+
+          policeTrouble:
+            false,
+
+          policeChase:
+            false,
+
+          escapedPolice:
+            true,
+
+          policeLookingForPlayer:
+            true,
+
+          policeEscapeMethod:
+            'obfuscation',
+
+          policeWantedRegistered:
+            false,
+        },
+      },
+    ],
+  },
+
   police_document_check: {
     id:
       'police_document_check',
@@ -1609,9 +2025,30 @@ const policeScenes = {
           'Continuar pela noite.',
 
         nextScene:
-          'police_released',
+          'free_roam',
 
-        timeMinutes: 2,
+        timeMinutes:
+          2,
+
+        flags: {
+          policeChase:
+            false,
+
+          policeStopActive:
+            false,
+
+          policeTrouble:
+            false,
+
+          escapedPolice:
+            true,
+
+          policeLookingForPlayer:
+            false,
+
+          policeEscapeMethod:
+            'obfuscation',
+        },
       },
     ],
   },
@@ -1659,6 +2096,640 @@ const policeScenes = {
     ],
   },
 
+    police_identity_confirmed: {
+    id:
+      'police_identity_confirmed',
+
+    chapter:
+      'A MÁSCARA',
+
+    title:
+      'Identidade Confirmada',
+
+    location: {
+      id:
+        'street_police_stop',
+
+      name:
+        'Rua',
+
+      district:
+        'São Paulo',
+    },
+
+    narration: [
+      'O policial pega o documento e compara os dados com as informações recebidas.',
+      'O olhar dele passa da fotografia para o seu rosto.',
+      'Desta vez a hesitação desaparece.',
+      'O segundo policial se aproxima e muda de posição para bloquear sua rota de fuga.',
+      'A abordagem deixou de ser uma suspeita: para eles, sua identidade está confirmada.',
+    ],
+
+    dialogue: {
+      speaker:
+        'Policial',
+
+      text:
+        'Confirmado. É ele. Mantenha as mãos onde eu possa ver.',
+    },
+
+    choices: [
+      {
+        id:
+          'identity_confirmed_cooperate',
+
+        text:
+          'Cooperar e se entregar.',
+
+        nextScene:
+          'police_detained',
+
+        timeMinutes:
+          2,
+
+        flags: {
+          policeIdentityConfirmed:
+            true,
+
+          policeRecognizedPlayer:
+            true,
+
+          policeTrouble:
+            true,
+
+          policeStopActive:
+            true,
+
+          policeChase:
+            false,
+        },
+      },
+
+      {
+        id:
+          'identity_confirmed_argue',
+
+        text:
+          'Insistir que existe algum erro nos registros.',
+
+        nextScene:
+          'police_escalation',
+
+        timeMinutes:
+          1,
+
+        flags: {
+          policeIdentityConfirmed:
+            true,
+
+          policeRecognizedPlayer:
+            true,
+
+          policeTrouble:
+            true,
+
+          policeEscalation:
+            true,
+        },
+      },
+
+      {
+        id:
+          'identity_confirmed_run',
+
+        text:
+          'Correr antes que eles coloquem as algemas.',
+
+        nextScene:
+          'police_chase',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeIdentityConfirmed:
+            true,
+
+          policeRecognizedPlayer:
+            true,
+
+          policeTrouble:
+            true,
+
+          policeStopActive:
+            false,
+
+          policeChase:
+            true,
+
+          escapedPolice:
+            false,
+        },
+      },
+
+      {
+        id:
+          'identity_confirmed_resist',
+
+        text:
+          'Resistir fisicamente à prisão.',
+
+        nextScene:
+          'police_force',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeIdentityConfirmed:
+            true,
+
+          policeRecognizedPlayer:
+            true,
+
+          policeTrouble:
+            true,
+
+          policeStopActive:
+            false,
+
+          policeViolence:
+            true,
+
+          possibleMasqueradeRisk:
+            true,
+        },
+      },
+    ],
+
+    disciplineChoices: [
+      {
+        id:
+          'identity_confirmed_dominate',
+
+        powerId:
+          'dominate_1',
+
+        text:
+          '"Você verificou errado. Guarde o documento."',
+
+        description:
+          'Tentar impor uma ordem direta mesmo depois da confirmação.',
+
+        target: {
+          id:
+            'police_officer_1',
+
+          name:
+            'Policial',
+
+          type:
+            'human',
+
+          requiresEyeContact:
+            true,
+
+          eyeContact:
+            true,
+        },
+
+        successScene:
+          'police_released',
+
+        failureScene:
+          'police_force',
+
+        botchScene:
+          'police_force',
+
+        timeMinutes:
+          1,
+
+        successFlags: {
+          policeStopActive:
+            false,
+
+          policeTrouble:
+            false,
+
+          policeRecognizedPlayer:
+            false,
+        },
+
+        failureFlags: {
+          policeIdentityConfirmed:
+            true,
+
+          policeRecognizedPlayer:
+            true,
+
+          policeEscalation:
+            true,
+        },
+      },
+
+      {
+        id:
+          'identity_confirmed_presence',
+
+        powerId:
+          'presence_1',
+
+        text:
+          'Usar Presença para fazê-los hesitar antes da prisão.',
+
+        description:
+          'Tentar reduzir a hostilidade e criar um instante de dúvida.',
+
+        target: {
+          id:
+            'police_officer_1',
+
+          name:
+            'Policial',
+
+          type:
+            'human',
+        },
+
+        successScene:
+          'police_questions',
+
+        failureScene:
+          'police_force',
+
+        botchScene:
+          'police_force',
+
+        timeMinutes:
+          1,
+      },
+
+      {
+        id:
+          'identity_confirmed_dementia',
+
+        powerId:
+          'dementia_1',
+
+        text:
+          'Amplificar a insegurança do policial sobre a conferência.',
+
+        description:
+          'Mexer com a emoção do policial para enfraquecer a certeza do momento.',
+
+        target: {
+          id:
+            'police_officer_1',
+
+          name:
+            'Policial',
+
+          type:
+            'human',
+        },
+
+        successScene:
+          'police_questions',
+
+        failureScene:
+          'police_force',
+
+        botchScene:
+          'police_force',
+
+        timeMinutes:
+          1,
+      },
+
+      {
+        id:
+          'identity_confirmed_obfuscate',
+
+        powerId:
+          'obfuscate_2',
+
+        text:
+          'Tentar desaparecer da atenção deles antes das algemas.',
+
+        description:
+          'Usar Ofuscação para quebrar a atenção dos policiais e sair da abordagem.',
+
+        target: {
+          type:
+            'environment',
+        },
+
+        nextScene:
+          'police_obfuscate_escape',
+
+        timeMinutes:
+          1,
+
+        successFlags: {
+          policeStopActive:
+            false,
+
+          policeObfuscateEscape:
+            true,
+        },
+      },
+    ],
+  },
+
+  police_identity_uncertain: {
+    id:
+      'police_identity_uncertain',
+
+    chapter:
+      'A MÁSCARA',
+
+    title:
+      'Ainda Há Dúvida',
+
+    location: {
+      id:
+        'street_police_stop',
+
+      name:
+        'Rua',
+
+      district:
+        'São Paulo',
+    },
+
+    narration: [
+      'O policial confere o documento com atenção.',
+      'Ele olha novamente para você e depois para as informações disponíveis.',
+      'Alguma coisa não fecha perfeitamente.',
+      'A semelhança existe, mas a confirmação não é forte o bastante para encerrar a dúvida.',
+      'Você ganhou alguns segundos, não necessariamente sua liberdade.',
+    ],
+
+    dialogue: {
+      speaker:
+        'Policial',
+
+      text:
+        'Espera aí. Fica parado enquanto eu confirmo uma coisa.',
+    },
+
+    choices: [
+      {
+        id:
+          'identity_uncertain_cooperate',
+
+        text:
+          'Continuar cooperando e responder às perguntas.',
+
+        nextScene:
+          'police_questions',
+
+        timeMinutes:
+          2,
+
+        flags: {
+          policeIdentityConfirmed:
+            false,
+
+          policeRecognitionUncertain:
+            true,
+
+          policeStopActive:
+            true,
+
+          policeTrouble:
+            true,
+        },
+      },
+
+      {
+        id:
+          'identity_uncertain_argue',
+
+        text:
+          'Aproveitar a dúvida e insistir que houve um engano.',
+
+        nextScene:
+          'police_released',
+
+        timeMinutes:
+          1,
+
+        flags: {
+          policeIdentityConfirmed:
+            false,
+
+          policeRecognizedPlayer:
+            false,
+
+          policeRecognitionDisputed:
+            true,
+
+          policeStopActive:
+            false,
+
+          policeTrouble:
+            false,
+        },
+      },
+
+      {
+        id:
+          'identity_uncertain_run',
+
+        text:
+          'Aproveitar a hesitação e fugir.',
+
+        nextScene:
+          'police_chase',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeIdentityConfirmed:
+            false,
+
+          policeTrouble:
+            true,
+
+          policeStopActive:
+            false,
+
+          policeChase:
+            true,
+
+          escapedPolice:
+            false,
+        },
+      },
+    ],
+
+    disciplineChoices: [
+      {
+        id:
+          'identity_uncertain_dominate',
+
+        powerId:
+          'dominate_1',
+
+        text:
+          '"Você já conferiu. Está tudo certo."',
+
+        description:
+          'Usar a dúvida existente para impor uma conclusão simples.',
+
+        target: {
+          id:
+            'police_officer_1',
+
+          name:
+            'Policial',
+
+          type:
+            'human',
+
+          requiresEyeContact:
+            true,
+
+          eyeContact:
+            true,
+        },
+
+        successScene:
+          'police_released',
+
+        failureScene:
+          'police_escalation',
+
+        botchScene:
+          'police_force',
+
+        timeMinutes:
+          1,
+
+        successFlags: {
+          policeStopActive:
+            false,
+
+          policeTrouble:
+            false,
+
+          policeRecognizedPlayer:
+            false,
+        },
+      },
+
+      {
+        id:
+          'identity_uncertain_presence',
+
+        powerId:
+          'presence_1',
+
+        text:
+          'Usar Presença para tornar sua versão mais aceitável.',
+
+        description:
+          'Aproveitar a incerteza do policial para reduzir a suspeita.',
+
+        target: {
+          id:
+            'police_officer_1',
+
+          name:
+            'Policial',
+
+          type:
+            'human',
+        },
+
+        successScene:
+          'police_released',
+
+        failureScene:
+          'police_questions',
+
+        botchScene:
+          'police_escalation',
+
+        timeMinutes:
+          1,
+      },
+
+      {
+        id:
+          'identity_uncertain_dementia',
+
+        powerId:
+          'dementia_1',
+
+        text:
+          'Amplificar a dúvida que ele já está sentindo.',
+
+        description:
+          'Transformar uma pequena incerteza em uma convicção de que a identificação pode estar errada.',
+
+        target: {
+          id:
+            'police_officer_1',
+
+          name:
+            'Policial',
+
+          type:
+            'human',
+        },
+
+        successScene:
+          'police_released',
+
+        failureScene:
+          'police_questions',
+
+        botchScene:
+          'police_escalation',
+
+        timeMinutes:
+          1,
+      },
+
+      {
+        id:
+          'identity_uncertain_obfuscate',
+
+        powerId:
+          'obfuscate_2',
+
+        text:
+          'Sair da atenção deles enquanto ainda estão em dúvida.',
+
+        description:
+          'Usar Ofuscação para abandonar a abordagem antes de uma nova confirmação.',
+
+        target: {
+          type:
+            'environment',
+        },
+
+        nextScene:
+          'police_obfuscate_escape',
+
+        timeMinutes:
+          1,
+
+        successFlags: {
+          policeStopActive:
+            false,
+
+          policeObfuscateEscape:
+            true,
+        },
+      },
+    ],
+  },
+
   police_chase: {
     id:
       'police_chase',
@@ -1685,9 +2756,747 @@ const policeScenes = {
       'Atrás de você, o policial grita.',
       'A porta da viatura bate.',
       'A perseguição começou.',
+      'Você precisa abrir distância antes que eles consigam cercar você.',
     ],
 
-    choices: [],
+    choices: [
+      {
+        id:
+          'try_escape',
+
+        text:
+          'Continuar correndo e tentar abrir distância.',
+
+        nextScene:
+          'police_chase',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeChase:
+            true,
+
+          policeStopActive:
+            false,
+        },
+      },
+
+      {
+        id:
+          'jump_obstacle',
+
+        text:
+          'Pular um muro ou obstáculo para despistar os policiais.',
+
+        nextScene:
+          'police_chase',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeChase:
+            true,
+
+          policeStopActive:
+            false,
+        },
+      },
+
+      {
+        id:
+          'enter_alley',
+
+        text:
+          'Entrar em uma viela e procurar uma rota alternativa.',
+
+        nextScene:
+          'police_chase',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeChase:
+            true,
+
+          policeStopActive:
+            false,
+        },
+      },
+
+      {
+        id:
+          'hide',
+
+        text:
+          'Quebrar a linha de visão e procurar um lugar para se esconder.',
+
+        nextScene:
+          'police_chase',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeChase:
+            true,
+
+          policeStopActive:
+            false,
+        },
+      },
+    ],
+
+    disciplineChoices: [
+      {
+        id:
+          'police_chase_obfuscate',
+
+        powerId:
+          'obfuscate_2',
+
+        text:
+          'Usar Ofuscação para desaparecer da atenção dos policiais.',
+
+        description:
+          'Quebrar a perseguição ao deixar de ocupar o foco da atenção deles.',
+
+        target: {
+          type:
+            'environment',
+        },
+
+        nextScene:
+          'police_obfuscate_escape',
+
+        timeMinutes:
+          1,
+
+        successFlags: {
+          policeChase:
+            false,
+
+          policeStopActive:
+            false,
+
+          escapedPolice:
+            true,
+
+          policeLookingForPlayer:
+            true,
+
+          policeEscapeMethod:
+            'obfuscation',
+        },
+      },
+
+      {
+        id:
+          'police_chase_celerity',
+
+        powerId:
+          'celerity_1',
+
+        text:
+          'Usar Celeridade para abrir distância imediatamente.',
+
+        description:
+          'Gastar sangue e correr em velocidade sobrenatural. Se os policiais perceberem claramente o que aconteceu, isso pode ameaçar a Máscara.',
+
+        target: {
+          type:
+            'self',
+        },
+
+        nextScene:
+          'police_celerity_escape',
+
+        timeMinutes:
+          0,
+
+        context: {
+          visible:
+            true,
+
+          witnesses: [
+            {
+              id:
+                'police_chase_officer_1',
+
+              name:
+                'Policial',
+
+              type:
+                'human',
+
+              sawDiscipline:
+                true,
+
+              knowsSupernatural:
+                false,
+
+              credibility:
+                3,
+            },
+
+            {
+              id:
+                'police_chase_officer_2',
+
+              name:
+                'Policial',
+
+              type:
+                'human',
+
+              sawDiscipline:
+                true,
+
+              knowsSupernatural:
+                false,
+
+              credibility:
+                3,
+            },
+          ],
+        },
+
+        successFlags: {
+          policeChase:
+            false,
+
+          policeStopActive:
+            false,
+
+          escapedPolice:
+            true,
+
+          policeLookingForPlayer:
+            true,
+
+          policeWitnessedSupernatural:
+            true,
+
+          possibleMasqueradeRisk:
+            true,
+
+          policeEscapeMethod:
+            'celerity',
+        },
+      },
+    ],
+  },
+
+  police_chase_continues: {
+    id:
+      'police_chase_continues',
+
+    chapter:
+      'A MÁSCARA',
+
+    title:
+      'Eles Ainda Estão Atrás',
+
+    location: {
+      id:
+        'street_police_chase',
+
+      name:
+        'Ruas de São Paulo',
+
+      district:
+        'São Paulo',
+    },
+
+    narration: [
+      'Você dobra uma esquina e força o ritmo.',
+      'Por alguns segundos parece que conseguiu abrir distância.',
+      'Então você escuta passos novamente.',
+      'Os policiais ainda estão atrás de você.',
+      'A perseguição está ficando mais difícil.',
+    ],
+
+    dialogue: {
+      speaker:
+        'Policial',
+
+      text:
+        'Para! Polícia!',
+    },
+
+    choices: [
+      {
+        id:
+          'try_escape_again',
+
+        text:
+          'Forçar o ritmo e continuar correndo.',
+
+        nextScene:
+          'police_chase_continues',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeChase:
+            true,
+
+          policeStopActive:
+            false,
+        },
+      },
+
+      {
+        id:
+          'jump_obstacle_again',
+
+        text:
+          'Tentar superar outro obstáculo.',
+
+        nextScene:
+          'police_chase_continues',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeChase:
+            true,
+
+          policeStopActive:
+            false,
+        },
+      },
+
+      {
+        id:
+          'enter_alley_again',
+
+        text:
+          'Entrar em uma viela e apostar em outra rota.',
+
+        nextScene:
+          'police_chase_continues',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeChase:
+            true,
+
+          policeStopActive:
+            false,
+        },
+      },
+
+      {
+        id:
+          'hide_again',
+
+        text:
+          'Tentar desaparecer da linha de visão e se esconder.',
+
+        nextScene:
+          'police_chase_continues',
+
+        timeMinutes:
+          0,
+
+        flags: {
+          policeChase:
+            true,
+
+          policeStopActive:
+            false,
+        },
+      },
+    ],
+
+    disciplineChoices: [
+      {
+        id:
+          'police_chase_continues_obfuscate',
+
+        powerId:
+          'obfuscate_2',
+
+        text:
+          'Usar Ofuscação para desaparecer da perseguição.',
+
+        description:
+          'Sumir da atenção dos policiais antes que eles fechem a distância.',
+
+        target: {
+          type:
+            'environment',
+        },
+
+        nextScene:
+          'police_obfuscate_escape',
+
+        timeMinutes:
+          1,
+
+        successFlags: {
+          policeChase:
+            false,
+
+          policeStopActive:
+            false,
+
+          escapedPolice:
+            true,
+
+          policeLookingForPlayer:
+            true,
+
+          policeEscapeMethod:
+            'obfuscation',
+        },
+      },
+
+      {
+        id:
+          'police_chase_continues_celerity',
+
+        powerId:
+          'celerity_1',
+
+        text:
+          'Usar Celeridade para romper a perseguição.',
+
+        description:
+          'Gastar sangue para atingir velocidade sobrenatural diante dos policiais.',
+
+        target: {
+          type:
+            'self',
+        },
+
+        nextScene:
+          'police_celerity_escape',
+
+        timeMinutes:
+          0,
+
+        context: {
+          visible:
+            true,
+
+          witnesses: [
+            {
+              id:
+                'police_chase_officer_1',
+
+              name:
+                'Policial',
+
+              type:
+                'human',
+
+              sawDiscipline:
+                true,
+
+              knowsSupernatural:
+                false,
+
+              credibility:
+                3,
+            },
+
+            {
+              id:
+                'police_chase_officer_2',
+
+              name:
+                'Policial',
+
+              type:
+                'human',
+
+              sawDiscipline:
+                true,
+
+              knowsSupernatural:
+                false,
+
+              credibility:
+                3,
+            },
+          ],
+        },
+
+        successFlags: {
+          policeChase:
+            false,
+
+          policeStopActive:
+            false,
+
+          escapedPolice:
+            true,
+
+          policeLookingForPlayer:
+            true,
+
+          policeWitnessedSupernatural:
+            true,
+
+          possibleMasqueradeRisk:
+            true,
+
+          policeEscapeMethod:
+            'celerity',
+        },
+      },
+    ],
+  },
+
+  police_chase_escape: {
+    id:
+      'police_chase_escape',
+
+    chapter:
+      'A MÁSCARA',
+
+    title:
+      'Você os Despistou',
+
+    location: {
+      id:
+        'street_after_police',
+
+      name:
+        'Ruas de São Paulo',
+
+      district:
+        'São Paulo',
+    },
+
+    narration: [
+      'Você muda de direção entre duas ruas.',
+      'Passa por um corredor estreito entre os prédios e continua correndo.',
+      'Os gritos ficam mais distantes.',
+      'Depois de alguns minutos, você não escuta mais passos atrás de você.',
+      'Você conseguiu escapar.',
+      'Isso não significa que a polícia esqueceu seu rosto.',
+    ],
+
+    choices: [
+      {
+        id:
+          'chase_escape_continue',
+
+        text:
+          'Voltar para a noite.',
+
+        nextScene:
+          'free_roam',
+
+        timeMinutes:
+          2,
+
+        flags: {
+          policeChase:
+            false,
+
+          policeStopActive:
+            false,
+
+          policeTrouble:
+            false,
+
+          escapedPolice:
+            true,
+
+          policeLookingForPlayer:
+            true,
+        },
+      },
+    ],
+  },
+
+  police_celerity_escape: {
+    id:
+      'police_celerity_escape',
+
+    chapter:
+      'A MÁSCARA',
+
+    title:
+      'Rápido Demais',
+
+    location: {
+      id:
+        'street_after_police',
+
+      name:
+        'Ruas de São Paulo',
+
+      district:
+        'São Paulo',
+    },
+
+    narration: [
+      'Você libera o sangue e seu corpo responde imediatamente.',
+      'O mundo parece desacelerar ao redor.',
+      'Seus passos cobrem a distância rápido demais para qualquer perseguição humana.',
+      'Em segundos, os policiais ficam para trás.',
+      'Quando eles alcançam a próxima esquina, você já está longe.',
+      'Mas pelo menos um deles viu o suficiente para saber que aquilo não foi normal.',
+    ],
+
+    dialogue: {
+      speaker:
+        'A Voz',
+
+      text:
+        'Parabéns. Você fugiu. Agora só precisa torcer para ninguém acreditar no que eles viram.',
+    },
+
+    choices: [
+      {
+        id:
+          'celerity_escape_continue',
+
+        text:
+          'Diminuir o ritmo e voltar para a noite.',
+
+        nextScene:
+          'free_roam',
+
+        timeMinutes:
+          2,
+
+        flags: {
+          policeChase:
+            false,
+
+          policeStopActive:
+            false,
+
+          policeTrouble:
+            false,
+
+          escapedPolice:
+            true,
+
+          policeLookingForPlayer:
+            true,
+
+          policeWitnessedSupernatural:
+            true,
+
+          possibleMasqueradeRisk:
+            true,
+
+          policeEscapeMethod:
+            'celerity',
+        },
+      },
+    ],
+  },
+
+  police_chase_caught: {
+    id:
+      'police_chase_caught',
+
+    chapter:
+      'A MÁSCARA',
+
+    title:
+      'Alcançado',
+
+    location: {
+      id:
+        'street_police_chase',
+
+      name:
+        'Ruas de São Paulo',
+
+      district:
+        'São Paulo',
+    },
+
+    narration: [
+      'Você não consegue abrir distância.',
+      'Um dos policiais corta seu caminho enquanto o outro se aproxima por trás.',
+      'A fuga terminou.',
+      'Agora eles não estão mais tratando isso como uma abordagem de rotina.',
+    ],
+
+    dialogue: {
+      speaker:
+        'Policial',
+
+      text:
+        'No chão! Agora!',
+    },
+
+    choices: [
+      {
+        id:
+          'chase_caught_surrender',
+
+        text:
+          'Parar e se render.',
+
+        nextScene:
+          'police_detained',
+
+        timeMinutes:
+          2,
+
+        flags: {
+          policeChase:
+            false,
+
+          policeStopActive:
+            false,
+
+          policeTrouble:
+            true,
+
+          policeChaseCaught:
+            true,
+        },
+      },
+
+      {
+        id:
+          'chase_caught_resist',
+
+        text:
+          'Resistir fisicamente.',
+
+        nextScene:
+          'police_force',
+
+        timeMinutes:
+          1,
+
+        flags: {
+          policeChase:
+            false,
+
+          policeStopActive:
+            false,
+
+          policeTrouble:
+            true,
+
+          policeViolence:
+            true,
+
+          possibleMasqueradeRisk:
+            true,
+        },
+      },
+    ],
   },
 
   /*
@@ -1758,7 +3567,32 @@ const policeScenes = {
         'Pode ir.',
     },
 
-    choices: [],
+    choices: [
+      {
+        id:
+          'police_released_continue',
+
+        text:
+          'Continuar pela noite.',
+
+        nextScene:
+          'free_roam',
+
+        timeMinutes:
+          1,
+
+        flags: {
+          policeChase:
+            false,
+
+          policeStopActive:
+            false,
+
+          policeTrouble:
+            false,
+        },
+      },
+    ],
   },
 }
 

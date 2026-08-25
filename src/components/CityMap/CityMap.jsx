@@ -32,8 +32,10 @@ export default function CityMap({
     'walking'
   )
 
-  const locations =
-    getAllLocations()
+ const locations =
+  getAllLocations(
+    game
+  )
 
   const currentLocationId =
     game.world

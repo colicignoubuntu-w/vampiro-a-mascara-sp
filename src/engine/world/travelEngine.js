@@ -1,4 +1,8 @@
 import {
+  getLocation as getWorldLocation,
+  getAllLocations as getWorldLocations,
+} from '../../data/world/locations'
+import {
   addMinutes,
   saveGame,
 } from '../../utils/gameState'
@@ -16,7 +20,17 @@ const RISK_ORDER = {
 const TRANSPORT_LABELS = {
   walking: 'A pé',
   bus: 'Ônibus',
+
+  /*
+    metro é o ID atual.
+
+    subway fica por compatibilidade
+    com saves/rotas antigas.
+  */
+
+  metro: 'Metrô',
   subway: 'Metrô',
+
   car: 'Carro',
 }
 
@@ -82,93 +96,57 @@ export function getRiskLabel(
 export function getLocation(
   locationId
 ) {
-  const locations = {
-    prologue: {
-      id: 'prologue',
-      name: 'Prólogo',
-      district: 'São Paulo',
-    },
-
-    centro: {
-      id: 'centro',
-      name: 'Centro de São Paulo',
-      district: 'Centro',
-    },
-
-    paulista: {
-      id: 'paulista',
-      name: 'Avenida Paulista',
-      district: 'Bela Vista',
-    },
-
-    liberdade: {
-      id: 'liberdade',
-      name: 'Liberdade',
-      district: 'Liberdade',
-    },
-
-    santaCecilia: {
-      id: 'santaCecilia',
-      name: 'Santa Cecília',
-      district: 'Santa Cecília',
-    },
-
-    pinheiros: {
-      id: 'pinheiros',
-      name: 'Pinheiros',
-      district: 'Pinheiros',
-    },
-
-    vilaMadAlena: {
-      id: 'vilaMadAlena',
-      name: 'Vila Madalena',
-      district: 'Vila Madalena',
-    },
-
-    tatuape: {
-      id: 'tatuape',
-      name: 'Tatuapé',
-      district: 'Zona Leste',
-    },
-
-    santana: {
-      id: 'santana',
-      name: 'Santana',
-      district: 'Zona Norte',
-    },
-  }
-
-  return (
-    locations[
-      locationId
-    ] ??
-    null
+  return getWorldLocation(
+    locationId
   )
 }
 
-export function getAllLocations() {
-  const ids = [
-    'prologue',
-    'centro',
-    'paulista',
-    'liberdade',
-    'santaCecilia',
-    'pinheiros',
-    'vilaMadAlena',
-    'tatuape',
-    'santana',
-  ]
-
-  return ids
-    .map(
-      getLocation
-    )
-    .filter(
-      Boolean
-    )
+export function getAllLocations(
+  game = null
+) {
+  return getWorldLocations(
+    game
+  )
 }
 
 const TRAVEL_ROUTES = {
+  /*
+    REFÚGIO DO JOGADOR
+
+    A rota inversa também funciona porque
+    getTravelOptions procura directKey e reverseKey.
+  */
+
+  'centro:livia_apartment': [
+    {
+      transport: 'walking',
+      minutes: 15,
+      cost: 0,
+      risk: 'medium',
+    },
+
+    {
+      transport: 'bus',
+      minutes: 10,
+      cost: 4.5,
+      risk: 'low',
+    },
+
+    {
+      transport: 'subway',
+      minutes: 8,
+      cost: 5.2,
+      risk: 'low',
+    },
+
+    {
+      transport: 'car',
+      minutes: 6,
+      cost: 14,
+      risk: 'low',
+    },
+  ],
+
   'prologue:centro': [
     {
       transport: 'walking',
@@ -769,17 +747,317 @@ const TRAVEL_ROUTES = {
     },
   ],
 }
+function calculateMapDistance(
+  origin,
+  destination
+) {
+  if (
+    !origin?.coordinates ||
+    !destination?.coordinates
+  ) {
+    return null
+  }
 
+  const dx =
+    destination.coordinates.x -
+    origin.coordinates.x
+
+  const dy =
+    destination.coordinates.y -
+    origin.coordinates.y
+
+  const mapDistance =
+    Math.sqrt(
+      dx * dx +
+      dy * dy
+    )
+
+  /*
+    Aproximação usada pelo mapa.
+
+    Cada unidade visual corresponde
+    aproximadamente a 0,65 km.
+  */
+
+  const distanceKm =
+    mapDistance * 0.65
+
+  return Math.max(
+    0.8,
+    distanceKm
+  )
+}
+
+function calculateAutomaticRisk(
+  origin,
+  destination,
+  transport
+) {
+  const averageDanger =
+    (
+      Number(
+        origin?.danger ?? 0.3
+      ) +
+      Number(
+        destination?.danger ?? 0.3
+      )
+    ) / 2
+
+  if (
+    transport === 'walking'
+  ) {
+    if (
+      averageDanger >= 0.6
+    ) {
+      return 'high'
+    }
+
+    if (
+      averageDanger >= 0.35
+    ) {
+      return 'medium'
+    }
+
+    return 'low'
+  }
+
+  if (
+    transport === 'bus'
+  ) {
+    return averageDanger >= 0.6
+      ? 'medium'
+      : 'low'
+  }
+
+  return 'low'
+}
+
+function createAutomaticTravelOptions(
+  origin,
+  destination
+) {
+  const distance =
+    calculateMapDistance(
+      origin,
+      destination
+    )
+
+  if (distance === null) {
+    return []
+  }
+
+  /*
+    ========================================
+    A PÉ
+    ========================================
+  */
+
+  const walkingMinutes =
+    Math.max(
+      5,
+      Math.ceil(
+        distance /
+          4.5 *
+          60
+      )
+    )
+
+  /*
+    ========================================
+    ÔNIBUS
+    ========================================
+
+    Velocidade média menor por causa
+    das paradas e espera.
+  */
+
+  const busMinutes =
+    Math.max(
+      10,
+      Math.ceil(
+        distance /
+          18 *
+          60 +
+        8
+      )
+    )
+
+  /*
+    ========================================
+    METRÔ
+    ========================================
+
+    Incluímos alguns minutos para
+    acesso, espera e caminhada.
+  */
+
+  const subwayMinutes =
+    Math.max(
+      10,
+      Math.ceil(
+        distance /
+          28 *
+          60 +
+        10
+      )
+    )
+
+  /*
+    ========================================
+    CARRO
+    ========================================
+
+    Tempo urbano aproximado.
+    O valor aumenta conforme a distância.
+  */
+
+  const carMinutes =
+    Math.max(
+      5,
+      Math.ceil(
+        distance /
+          24 *
+          60 +
+        4
+      )
+    )
+
+  const carCost =
+    Math.max(
+      8,
+      Math.round(
+        (
+          6 +
+          distance * 2.2
+        ) *
+        100
+      ) / 100
+    )
+
+  return [
+    {
+      transport:
+        'walking',
+
+      minutes:
+        walkingMinutes,
+
+      cost:
+        0,
+
+      risk:
+        calculateAutomaticRisk(
+          origin,
+          destination,
+          'walking'
+        ),
+
+      distanceKm:
+        distance,
+    },
+
+    {
+      transport:
+        'bus',
+
+      minutes:
+        busMinutes,
+
+      cost:
+        4.5,
+
+      risk:
+        calculateAutomaticRisk(
+          origin,
+          destination,
+          'bus'
+        ),
+
+      distanceKm:
+        distance,
+    },
+
+    {
+      transport:
+        'subway',
+
+      minutes:
+        subwayMinutes,
+
+      cost:
+        5.2,
+
+      risk:
+        calculateAutomaticRisk(
+          origin,
+          destination,
+          'subway'
+        ),
+
+      distanceKm:
+        distance,
+    },
+
+    {
+      transport:
+        'car',
+
+      minutes:
+        carMinutes,
+
+      cost:
+        carCost,
+
+      risk:
+        calculateAutomaticRisk(
+          origin,
+          destination,
+          'car'
+        ),
+
+      distanceKm:
+        distance,
+    },
+  ]
+}
 export function getTravelOptions(
   currentLocationId,
   destinationId
 ) {
   if (
     !currentLocationId ||
-    !destinationId
+    !destinationId ||
+    currentLocationId ===
+      destinationId
   ) {
     return []
   }
+
+  const origin =
+    getLocation(
+      currentLocationId
+    )
+
+  const destination =
+    getLocation(
+      destinationId
+    )
+
+  if (
+    !origin ||
+    !destination
+  ) {
+    return []
+  }
+
+  /*
+    Primeiro procuramos uma rota
+    especial cadastrada manualmente.
+
+    Isso continua útil futuramente
+    para túneis, atalhos, bloqueios,
+    viagens especiais etc.
+  */
 
   const directKey =
     `${currentLocationId}:${destinationId}`
@@ -787,24 +1065,89 @@ export function getTravelOptions(
   const reverseKey =
     `${destinationId}:${currentLocationId}`
 
-  return (
+  const specialRoute =
     TRAVEL_ROUTES[
       directKey
     ] ??
     TRAVEL_ROUTES[
       reverseKey
-    ] ??
-    []
+    ]
+
+  if (
+    specialRoute &&
+    specialRoute.length > 0
+  ) {
+    return specialRoute
+  }
+
+  /*
+    Caso não exista uma rota especial,
+    calculamos automaticamente.
+  */
+
+  return createAutomaticTravelOptions(
+    origin,
+    destination
   )
 }
 
 export function getAvailableDestinations(
-  currentLocationId
+  currentLocationId,
+  game = null
 ) {
+  const havenUnlocked =
+    Boolean(
+      game?.flags
+        ?.liviaApartmentUnlocked ||
+      game?.flags
+        ?.inheritedLiviaApartment ||
+      game?.flags
+        ?.hasHaven
+    )
+
   return getAllLocations().filter(
-    (location) =>
-      location.id !==
-      currentLocationId
+    (location) => {
+      /*
+        Não mostra o local atual.
+      */
+
+      if (
+        location.id ===
+        currentLocationId
+      ) {
+        return false
+      }
+
+      /*
+        O apartamento só aparece
+        depois de ser herdado.
+      */
+
+      if (
+        location.id ===
+          'livia_apartment' &&
+        !havenUnlocked
+      ) {
+        return false
+      }
+
+      /*
+        Só mostramos destinos para
+        os quais realmente existe
+        uma rota cadastrada.
+      */
+
+      const options =
+        getTravelOptions(
+          currentLocationId,
+          location.id
+        )
+
+      return (
+        options.length >
+        0
+      )
+    }
   )
 }
 
@@ -1141,17 +1484,24 @@ export function performTravel(
     },
   }
 
+  const resolvedDestination =
+    travel.destination ??
+    getLocation(
+      travel.destinationId
+    )
+
   if (
-    travel.destination
+    resolvedDestination
   ) {
     updatedGame.world = {
       ...updatedGame.world,
 
       location: {
-        ...travel.destination,
+        ...resolvedDestination,
       },
     }
   }
+
 
   saveGame(
     updatedGame

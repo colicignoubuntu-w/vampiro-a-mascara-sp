@@ -18,227 +18,42 @@ import {
 import './DevCombatArena.css'
 
 const DISCIPLINES = [
-  {
-    id:
-      'animalism',
-
-    label:
-      'Animalismo',
-  },
-
-  {
-    id:
-      'auspex',
-
-    label:
-      'Auspícios',
-  },
-
-  {
-    id:
-      'celerity',
-
-    label:
-      'Celeridade',
-  },
-
-  {
-    id:
-      'dementia',
-
-    label:
-      'Demência',
-  },
-
-  {
-    id:
-      'dominate',
-
-    label:
-      'Dominação',
-  },
-
-  {
-    id:
-      'fortitude',
-
-    label:
-      'Fortitude',
-  },
-
-  {
-    id:
-      'obfuscate',
-
-    label:
-      'Ofuscação',
-  },
-
-  {
-    id:
-      'potency',
-
-    label:
-      'Potência',
-  },
-
-  {
-    id:
-      'presence',
-
-    label:
-      'Presença',
-  },
-
-  {
-    id:
-      'protean',
-
-    label:
-      'Proteanismo',
-  },
-
-  {
-    id:
-      'thaumaturgy',
-
-    label:
-      'Taumaturgia',
-  },
+  { id: 'animalism', label: 'Animalismo' },
+  { id: 'auspex', label: 'Auspícios' },
+  { id: 'celerity', label: 'Celeridade' },
+  { id: 'dementia', label: 'Demência' },
+  { id: 'dominate', label: 'Dominação' },
+  { id: 'fortitude', label: 'Fortitude' },
+  { id: 'obfuscate', label: 'Ofuscação' },
+  { id: 'potency', label: 'Potência' },
+  { id: 'presence', label: 'Presença' },
+  { id: 'protean', label: 'Proteanismo' },
+  { id: 'thaumaturgy', label: 'Taumaturgia' },
 ]
 
 const ATTRIBUTES = [
-  {
-    id:
-      'strength',
-
-    label:
-      'Força',
-  },
-
-  {
-    id:
-      'dexterity',
-
-    label:
-      'Destreza',
-  },
-
-  {
-    id:
-      'stamina',
-
-    label:
-      'Vigor',
-  },
-
-  {
-    id:
-      'charisma',
-
-    label:
-      'Carisma',
-  },
-
-  {
-    id:
-      'manipulation',
-
-    label:
-      'Manipulação',
-  },
-
-  {
-    id:
-      'wits',
-
-    label:
-      'Raciocínio',
-  },
-
-  {
-    id:
-      'intelligence',
-
-    label:
-      'Inteligência',
-  },
+  { id: 'strength', label: 'Força' },
+  { id: 'dexterity', label: 'Destreza' },
+  { id: 'stamina', label: 'Vigor' },
+  { id: 'charisma', label: 'Carisma' },
+  { id: 'manipulation', label: 'Manipulação' },
+  { id: 'wits', label: 'Raciocínio' },
+  { id: 'intelligence', label: 'Inteligência' },
 ]
 
 const ABILITIES = [
-  {
-    id:
-      'brawl',
-
-    label:
-      'Briga',
-  },
-
-  {
-    id:
-      'melee',
-
-    label:
-      'Armas Brancas',
-  },
-
-  {
-    id:
-      'firearms',
-
-    label:
-      'Armas de Fogo',
-  },
-
-  {
-    id:
-      'dodge',
-
-    label:
-      'Esquiva',
-  },
-
-  {
-    id:
-      'athletics',
-
-    label:
-      'Esportes',
-  },
-
-  {
-    id:
-      'intimidation',
-
-    label:
-      'Intimidação',
-  },
+  { id: 'brawl', label: 'Briga' },
+  { id: 'melee', label: 'Armas Brancas' },
+  { id: 'firearms', label: 'Armas de Fogo' },
+  { id: 'dodge', label: 'Esquiva' },
+  { id: 'athletics', label: 'Esportes' },
+  { id: 'intimidation', label: 'Intimidação' },
 ]
 
 const VIRTUES = [
-  {
-    id:
-      'conscience',
-
-    label:
-      'Consciência',
-  },
-
-  {
-    id:
-      'selfControl',
-
-    label:
-      'Autocontrole',
-  },
-
-  {
-    id:
-      'courage',
-
-    label:
-      'Coragem',
-  },
+  { id: 'conscience', label: 'Consciência' },
+  { id: 'selfControl', label: 'Autocontrole' },
+  { id: 'courage', label: 'Coragem' },
 ]
 
 const PERSONALITIES = [
@@ -603,7 +418,9 @@ export default function DevCombatArena({
     }
 
     onStart(
-      customEncounter
+      cloneEncounter(
+        customEncounter
+      )
     )
   }
 

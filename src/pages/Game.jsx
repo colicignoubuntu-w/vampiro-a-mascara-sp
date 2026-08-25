@@ -1,13 +1,40 @@
 import {
+  createPoliceResponse,
+  updatePoliceResponse,
+} from '../engine/police/policeResponseEngine'
+import {
+  clearPoliceWanted,
+  createPoliceWantedState,
+  getPoliceRecognitionChance,
+  getPoliceWantedState,
+  increasePoliceWantedLevel,
+  registerPoliceRecognition,
+  rollPoliceRecognition,
+  rollPoliceWantedEncounter,
+  updatePoliceWantedDecay,
+} from '../engine/police/policeWantedEngine'
+import Haven from '../components/Haven/Haven'
+import FreeRoam from '../components/FreeRoam/FreeRoam'
+import {
+  useQuestStoryProgress,
+} from '../engine/quests/useQuestStoryProgress'
+
+import QuestPanel from '../components/QuestPanel/QuestPanel'
+
+import {
+  completeQuest,
+  completeQuestObjective,
+  initializeQuestSystem,
+  startQuest,
+} from '../engine/quests/questEngine'
+
+import {
   useEffect,
   useState,
 } from 'react'
 
 import scenes from '../data/scenes'
 
-import {
-  getCombatEncounter,
-} from '../data/npcs/combatEncounters'
 
 import {
   getChoiceTest,
@@ -51,7 +78,8 @@ import {
 
 import {
   getMasqueradeState,
-} from '../engine/vampire/masqueradeEngine'
+
+} from '../engine/masquerade/masqueradeEngine'
 
 import {
   payDisciplineCost,
@@ -83,6 +111,19 @@ import {
 import {
   getBloodState,
 } from '../engine/vampire/bloodEngine'
+import {
+  createSunriseHazard,
+  isSunriseReached,
+  sleepThroughDay,
+} from '../engine/vampire/daySleepEngine'
+import {
+  healWithBlood,
+} from '../engine/vampire/bloodHealingEngine'
+
+import {
+  grantDevAmmo,
+  grantDevCombatArsenal,
+} from '../engine/combat/devCombatKitEngine'
 
 import {
   createFrenzyAftermath,
@@ -96,6 +137,11 @@ import {
   drinkBlood,
   sealBiteWound,
 } from '../engine/vampire/feedingEngine'
+
+import {
+  mustRollToStopFeeding,
+  rollStopFeeding,
+} from '../engine/instinct/instinctEngine'
 
 import {
   applyDegenerationResult,
@@ -129,7 +175,6 @@ import {
 import {
   equipArmor,
   equipWeapon,
-  giveCombatTestItems,
   normalizeInventory,
 } from '../engine/inventoryEngine'
 
@@ -187,6 +232,10 @@ export default function Game({
     TESTES NORMAIS
     ========================================
   */
+const [
+  questOpen,
+  setQuestOpen,
+] = useState(false)
 
   const [
     pendingChoice,
@@ -228,7 +277,10 @@ export default function Game({
     frenzyCheckedScene,
     setFrenzyCheckedScene,
   ] = useState(null)
-
+const [
+  awakeningFrenzyTrigger,
+  setAwakeningFrenzyTrigger,
+] = useState(null)
   /*
     ========================================
     ALIMENTAÇÃO
@@ -254,6 +306,12 @@ export default function Game({
     feedingTotal,
     setFeedingTotal,
   ] = useState(0)
+
+  const [
+    stopFeedingRoll,
+    setStopFeedingRoll,
+  ] = useState(null)
+
 
   /*
     ========================================
@@ -358,8 +416,150 @@ export default function Game({
 
   /*
     ========================================
-    DEV
+    MISSÕES
     ========================================
+  */
+
+  function devStartLiviaQuest() {
+    const preparedGame =
+      initializeQuestSystem(
+        game
+      )
+
+    const result =
+      startQuest(
+        preparedGame,
+        'livia_legacy'
+      )
+
+    if (
+      !result.success
+    ) {
+      window.alert(
+        `Não foi possível iniciar a missão: ${result.reason}`
+      )
+
+      return
+    }
+
+    saveGame(
+      result.game
+    )
+
+    setGame(
+      result.game
+    )
+
+    window.alert(
+      'Missão iniciada: O Legado de Lívia'
+    )
+  }
+
+  function devCompleteLiviaObjective() {
+    const quest =
+      game?.quests
+        ?.livia_legacy
+
+    if (
+      !quest ||
+      quest.status !==
+        'active'
+    ) {
+      window.alert(
+        'A missão O Legado de Lívia não está ativa.'
+      )
+
+      return
+    }
+
+    const objectiveOrder = [
+      'reach_livia_apartment',
+      'search_livia_apartment',
+      'find_livia_diary',
+      'inspect_livia_computer',
+      'discover_hospital_connection',
+    ]
+
+    const nextObjective =
+      objectiveOrder.find(
+        (objectiveId) =>
+          !quest.objectives
+            ?.[objectiveId]
+            ?.completed
+      )
+
+    if (!nextObjective) {
+      window.alert(
+        'Todos os objetivos já foram concluídos.'
+      )
+
+      return
+    }
+
+    const result =
+      completeQuestObjective(
+        game,
+        'livia_legacy',
+        nextObjective
+      )
+
+    if (
+      !result.success
+    ) {
+      window.alert(
+        `Erro ao concluir objetivo: ${result.reason}`
+      )
+
+      return
+    }
+
+    saveGame(
+      result.game
+    )
+
+    setGame(
+      result.game
+    )
+
+    window.alert(
+      `Objetivo concluído: ${nextObjective}`
+    )
+  }
+
+  function devCompleteLiviaQuest() {
+    const result =
+      completeQuest(
+        game,
+        'livia_legacy'
+      )
+
+    if (
+      !result.success
+    ) {
+      window.alert(
+        `Não foi possível concluir a missão: ${result.reason}`
+      )
+
+      return
+    }
+
+    saveGame(
+      result.game
+    )
+
+    setGame(
+      result.game
+    )
+
+    window.alert(
+      `Missão concluída! +${result.experience} XP`
+    )
+  }
+
+  /*
+    ========================================
+    DEV
+    ===========================  =============
   */
 
   const [
@@ -395,6 +595,186 @@ export default function Game({
 
   const scene =
     scenes[sceneId]
+     /*
+    ========================================
+    EXPOSIÇÃO GLOBAL À LUZ DO DIA
+    ========================================
+  */
+
+  function isOutdoorWorldLocation(
+    currentGame
+  ) {
+    const locationId =
+      currentGame?.world
+        ?.location
+        ?.id
+
+    if (!locationId) {
+      return false
+    }
+
+    const location =
+      getLocation(
+        locationId
+      )
+
+    if (!location) {
+      return false
+    }
+
+    /*
+      Distritos representam áreas
+      abertas da cidade.
+    */
+
+    return (
+      location.type ===
+      'district'
+    )
+  }
+
+useEffect(() => {
+  if (!game) {
+    return
+  }
+
+
+  const required =
+    Boolean(
+      game?.flags
+        ?.awakeningFrenzyRequired
+    )
+
+  const difficulty =
+    Number(
+      game?.flags
+        ?.awakeningFrenzyDifficulty ??
+      0
+    )
+
+  if (
+    !required ||
+    difficulty <= 0
+  ) {
+    return
+  }
+
+  /*
+    Evita abrir o mesmo teste
+    repetidamente a cada render.
+  */
+
+  if (
+    awakeningFrenzyTrigger
+  ) {
+    return
+  }
+const awakeningReturnScene =
+  scene?.id ??
+  'free_roam'
+  const trigger = {
+    id:
+      'awakening_hunger_frenzy',
+
+    type:
+      'hunger',
+
+    title:
+      'A Besta Desperta',
+
+    description:
+      'Você desperta com tão pouco sangue que a fome ameaça assumir o controle.',
+
+    difficulty,
+
+    successScene:
+      'livia_apartment_wakeup',
+
+    failureOutcomes: [
+      {
+        id:
+          'awakening_hunger_hunt',
+
+        title:
+          'Fome Incontrolável',
+
+        durationMinutes:
+          10,
+
+        remembered:
+          true,
+
+  endScene:
+    awakeningReturnScene,
+        flags: {
+          awakeningHungerFrenzy:
+            true,
+        },
+
+        memories: [
+          'A fome domina seus pensamentos.',
+
+          'Por alguns instantes, tudo o que importa é sangue.',
+        ],
+      },
+    ],
+
+    criticalOutcomes: [
+      {
+        id:
+          'awakening_hunger_critical',
+
+        title:
+          'A Besta Assume',
+
+        durationMinutes:
+          20,
+
+        remembered:
+          false,
+ endScene:
+    awakeningReturnScene,
+
+        flags: {
+          awakeningHungerFrenzy:
+            true,
+
+          violentFrenzyOccurred:
+            true,
+        },
+
+        memories: [
+          'Você desperta com a sensação de que alguma coisa dentro de você assumiu o controle.',
+        ],
+      },
+    ],
+  }
+
+  setAwakeningFrenzyTrigger(
+    trigger
+  )
+
+  setFrenzyResult(
+    null
+  )
+
+  setFrenzyOpen(
+    true
+  )
+}, [
+  game?.flags
+    ?.awakeningFrenzyRequired,
+
+  game?.flags
+    ?.awakeningFrenzyDifficulty,
+
+  awakeningFrenzyTrigger,
+])
+
+  useQuestStoryProgress(
+    game,
+    setGame
+  )
 
   const bloodState =
     game
@@ -410,7 +790,7 @@ export default function Game({
     game?.combat ??
     null
 
-  const hazard =
+const hazard =
     game?.hazard ??
     null
 
@@ -426,20 +806,141 @@ export default function Game({
     getLocation(
       currentLocationId
     )
+  /*
+    ========================================
+    SOL GLOBAL NO FREE ROAM
+    ========================================
+  */
 
+  useEffect(() => {
+    if (
+      !game ||
+      !scene
+    ) {
+      return
+    }
+
+    /*
+      Só existe risco solar durante o dia.
+    */
+
+    if (
+      !isSunriseReached(
+        game.world
+      )
+    ) {
+      return
+    }
+
+    /*
+      Se já existe um risco ativo,
+      não criamos outro.
+    */
+
+    if (hazard) {
+      return
+    }
+
+    /*
+      Se encontrou abrigo neste mesmo
+      local, continua protegido.
+    */
+
+  const sunlightSheltered =
+  Boolean(
+    game?.flags
+      ?.sunlightSheltered
+  )
+
+if (sunlightSheltered) {
+  return
+}
+
+    /*
+      Não abre o Sol por cima de outros
+      sistemas importantes.
+    */
+
+    if (
+      combat ||
+      frenzyOpen ||
+      feedingOpen ||
+      humanityOpen ||
+      pendingAftermath ||
+      pendingTest
+    ) {
+      return
+    }
+
+    /*
+      O risco global do Sol só acontece
+      no Free Roam e em locais externos.
+    */
+
+    const exposed =
+      scene.id ===
+        'free_roam' &&
+      isOutdoorWorldLocation(
+        game
+      )
+
+    if (!exposed) {
+      return
+    }
+
+    /*
+      Cria o risco solar.
+    */
+
+    const sunlightHazard =
+      createSunriseHazard({
+        id:
+          scene.id,
+
+        location:
+          game.world
+            ?.location,
+
+        daySafe:
+          false,
+      })
+
+    const newHazard =
+      createHazardState(
+        sunlightHazard
+      )
+
+    const updatedGame = {
+      ...game,
+
+      hazard:
+        newHazard,
+    }
+
+    saveGame(
+      updatedGame
+    )
+
+    setGame(
+      updatedGame
+    )
+  }, [
+    game,
+    scene,
+    hazard,
+    combat,
+    frenzyOpen,
+    feedingOpen,
+    humanityOpen,
+    pendingAftermath,
+    pendingTest,
+    currentLocationId,
+  ])
   /*
     ========================================
     ATUALIZA SELECT DEV
     ========================================
   */
-
-  useEffect(() => {
-    setDevScene(
-      sceneId
-    )
-  }, [
-    sceneId,
-  ])
 
   /*
     ========================================
@@ -1097,7 +1598,6 @@ export default function Game({
 
   const masquerade =
     getMasqueradeState(game)
-
   const availableDisciplineChoices =
     getAvailableSceneDisciplineChoices(
       game,
@@ -1167,7 +1667,15 @@ export default function Game({
     setDisciplineRoll(null)
   }
 
-  function transitionToScene(currentGame, nextScene, { flags = {}, timeMinutes = 0, historyItem = null } = {}) {
+  function transitionToScene(
+    currentGame,
+    nextScene,
+    {
+      flags = {},
+      timeMinutes = 0,
+      historyItem = null,
+    } = {}
+  ) {
     if (!nextScene || !scenes[nextScene]) {
       window.alert(`Cena não encontrada: ${nextScene}`)
       return currentGame
@@ -1177,20 +1685,687 @@ export default function Game({
     const currentHour = Number(currentGame.world?.hour ?? 0)
     const currentMinute = Number(currentGame.world?.minute ?? 0)
     const day = 24 * 60
-    const total = currentHour * 60 + currentMinute + Number(timeMinutes ?? 0)
-    const normalizedMinutes = ((total % day) + day) % day
+    const total =
+      currentHour * 60 +
+      currentMinute +
+      Number(timeMinutes ?? 0)
+    const normalizedMinutes =
+      ((total % day) + day) % day
 
     return {
       ...currentGame,
-      flags: { ...(currentGame.flags ?? {}), ...flags },
-      story: { ...(currentGame.story ?? {}), previousScene: scene.id, scene: nextScene },
+      flags: {
+        ...(currentGame.flags ?? {}),
+        ...flags,
+      },
+      story: {
+        ...(currentGame.story ?? {}),
+        previousScene: scene.id,
+        scene: nextScene,
+      },
       world: {
         ...(currentGame.world ?? {}),
         hour: Math.floor(normalizedMinutes / 60),
         minute: normalizedMinutes % 60,
-        location: target.location ?? currentGame.world?.location,
+        location:
+          target.location ??
+          currentGame.world?.location,
       },
-      history: [ ...(currentGame.history ?? []), ...(historyItem ? [historyItem] : []) ],
+      history: [
+        ...(currentGame.history ?? []),
+        ...(historyItem ? [historyItem] : []),
+      ],
+    }
+  }
+
+  function processPoliceResponse(
+    currentGame
+  ) {
+    const responseResult =
+      updatePoliceResponse(
+        currentGame
+      )
+
+    let updatedGame =
+      responseResult.game
+
+    const event =
+      responseResult.event
+
+    if (!event) {
+      return {
+        game:
+          updatedGame,
+
+        event:
+          null,
+
+        interrupted:
+          false,
+      }
+    }
+
+    if (
+      event.type ===
+        'police-arrival' &&
+      event.playerPresent
+    ) {
+      updatedGame =
+        transitionToScene(
+          updatedGame,
+          'police_stop',
+          {
+            flags: {
+              policeArrived:
+                true,
+
+              policeArrivalReason:
+                event.reason ??
+                'unknown',
+
+              policeArrivalSeverity:
+                event.severity ??
+                'medium',
+
+              policeArrivalLocationId:
+                event.locationId ??
+                null,
+
+              policeTrouble:
+                true,
+
+              policeStopActive:
+                true,
+
+              policeChase:
+                false,
+
+              escapedPolice:
+                false,
+
+              policeEscapeMethod:
+                null,
+
+              policeWantedRegistered:
+                false,
+
+              possibleMasqueradeRisk:
+                true,
+            },
+
+            historyItem: {
+              type:
+                'police-encounter-started',
+
+              locationId:
+                event.locationId ??
+                null,
+
+              reason:
+                event.reason ??
+                null,
+
+              timestamp:
+                new Date()
+                  .toISOString(),
+            },
+          }
+        )
+
+      return {
+        game:
+          updatedGame,
+
+        event,
+
+        interrupted:
+          true,
+      }
+    }
+
+    return {
+      game:
+        updatedGame,
+
+      event,
+
+      interrupted:
+        false,
+    }
+  }
+
+  /*
+    ========================================
+    PROCURA POLICIAL
+    ========================================
+
+    Integra policeWantedEngine com o fluxo
+    principal do jogo.
+
+    Responsabilidades:
+    - registrar uma fuga policial;
+    - aumentar o nível se o personagem
+      fugir novamente;
+    - reduzir procura com o tempo;
+    - sortear nova abordagem quando houver
+      procura ativa;
+    - impedir que a mesma fuga seja
+      registrada repetidamente.
+  */
+
+  function getGameMinuteStamp(
+    currentGame
+  ) {
+    const day =
+      Math.max(
+        1,
+        Number(
+          currentGame?.world
+            ?.day ??
+          1
+        ) || 1
+      )
+
+    const hour =
+      Math.max(
+        0,
+        Number(
+          currentGame?.world
+            ?.hour ??
+          0
+        ) || 0
+      )
+
+    const minute =
+      Math.max(
+        0,
+        Number(
+          currentGame?.world
+            ?.minute ??
+          0
+        ) || 0
+      )
+
+    return (
+      ((day - 1) * 24 * 60) +
+      (hour * 60) +
+      minute
+    )
+  }
+
+  function processPoliceWanted(
+    currentGame,
+    {
+      allowEncounter = false,
+      policePresence = null,
+    } = {}
+  ) {
+    if (!currentGame) {
+      return {
+        game:
+          currentGame,
+
+        interrupted:
+          false,
+
+        encounter:
+          null,
+      }
+    }
+
+    let updatedGame =
+      updatePoliceWantedDecay(
+        currentGame
+      )
+
+    const escapedPolice =
+      Boolean(
+        updatedGame?.flags
+          ?.escapedPolice
+      )
+
+    const alreadyRegistered =
+      Boolean(
+        updatedGame?.flags
+          ?.policeWantedRegistered
+      )
+
+    let registeredNow =
+      false
+
+    /*
+      ======================================
+      REGISTRAR NOVA FUGA
+      ======================================
+    */
+
+    if (
+      escapedPolice &&
+      !alreadyRegistered
+    ) {
+      const currentWanted =
+        getPoliceWantedState(
+          updatedGame
+        )
+
+      const supernaturalSeen =
+        Boolean(
+          updatedGame?.flags
+            ?.policeWitnessedSupernatural
+        )
+
+      const violenceAgainstPolice =
+        Boolean(
+          updatedGame?.flags
+            ?.policeViolence
+        )
+
+      const escapeMethod =
+        updatedGame?.flags
+          ?.policeEscapeMethod ??
+        null
+
+      /*
+        Se já estava sendo procurado,
+        uma nova fuga aumenta a prioridade.
+
+        Caso contrário criamos o primeiro
+        registro de procura.
+      */
+
+      if (
+        currentWanted.active &&
+        currentWanted.level > 0
+      ) {
+        updatedGame =
+          increasePoliceWantedLevel(
+            updatedGame,
+            {
+              amount:
+                supernaturalSeen ||
+                violenceAgainstPolice
+                  ? 2
+                  : 1,
+
+              reason:
+                supernaturalSeen
+                  ? 'escaped-again-supernatural'
+                  : violenceAgainstPolice
+                    ? 'escaped-again-after-violence'
+                    : 'escaped-police-again',
+            }
+          )
+      } else {
+        updatedGame =
+          createPoliceWantedState(
+            updatedGame,
+            {
+              escapedPolice:
+                true,
+
+              violenceAgainstPolice,
+
+              supernaturalSeen,
+
+              /*
+                Ofuscação deixa testemunhos
+                muito pouco confiáveis.
+
+                Nas demais fugas assumimos
+                que os policiais ao menos
+                conseguem dar uma descrição.
+              */
+
+              witnessEvidence:
+                escapeMethod !==
+                'obfuscation',
+
+              cameraEvidence:
+                Boolean(
+                  updatedGame?.flags
+                    ?.policeCameraEvidence
+                ),
+
+              escapeMethod,
+
+              reason:
+                supernaturalSeen
+                  ? 'escaped-with-supernatural-power'
+                  : violenceAgainstPolice
+                    ? 'escaped-after-police-violence'
+                    : 'escaped-police',
+            }
+          )
+      }
+
+      registeredNow =
+        true
+
+      updatedGame = {
+        ...updatedGame,
+
+        flags: {
+          ...(updatedGame.flags ??
+            {}),
+
+          policeWantedRegistered:
+            true,
+
+          policeLookingForPlayer:
+            Boolean(
+              updatedGame
+                ?.policeWanted
+                ?.active
+            ),
+        },
+      }
+    }
+
+    /*
+      Mantém a flag antiga sincronizada com
+      o novo estado autoritativo.
+    */
+
+    const wanted =
+      getPoliceWantedState(
+        updatedGame
+      )
+
+    updatedGame = {
+      ...updatedGame,
+
+      flags: {
+        ...(updatedGame.flags ??
+          {}),
+
+        policeLookingForPlayer:
+          wanted.active,
+      },
+    }
+
+    /*
+      Não sorteamos uma nova abordagem no
+      mesmo instante em que a fuga acabou.
+    */
+
+    if (
+      !allowEncounter ||
+      registeredNow ||
+      !wanted.active ||
+      wanted.level <= 0 ||
+      updatedGame?.flags
+        ?.policeStopActive ||
+      updatedGame?.flags
+        ?.policeChase
+    ) {
+      return {
+        game:
+          updatedGame,
+
+        interrupted:
+          false,
+
+        encounter:
+          null,
+      }
+    }
+
+    const locationId =
+      updatedGame?.world
+        ?.location
+        ?.id ??
+      null
+
+    const locationDefinition =
+      locationId
+        ? getLocation(
+            locationId
+          )
+        : null
+
+    const resolvedPolicePresence =
+      policePresence !==
+        null &&
+      policePresence !==
+        undefined
+        ? Number(
+            policePresence
+          )
+        : Number(
+            locationDefinition
+              ?.policePresence ??
+            updatedGame?.world
+              ?.location
+              ?.policePresence ??
+            0
+          )
+
+    /*
+      Lugares sem presença policial
+      configurada nunca geram abordagem.
+
+      Exemplo:
+      - esconderijo Sabbat;
+      - subterrâneo secreto;
+      - túnel isolado.
+    */
+
+    if (
+      !Number.isFinite(
+        resolvedPolicePresence
+      ) ||
+      resolvedPolicePresence <= 0
+    ) {
+      return {
+        game:
+          updatedGame,
+
+        interrupted:
+          false,
+
+        encounter:
+          null,
+      }
+    }
+
+    const encounter =
+      rollPoliceWantedEncounter(
+        updatedGame,
+        {
+          policePresence:
+            resolvedPolicePresence,
+        }
+      )
+
+    if (
+      !encounter.triggered
+    ) {
+      return {
+        game:
+          updatedGame,
+
+        interrupted:
+          false,
+
+        encounter,
+      }
+    }
+
+    /*
+      ======================================
+      NOVA ABORDAGEM
+      ======================================
+
+      Primeiro a viatura encontra o
+      personagem.
+
+      Depois fazemos uma segunda rolagem
+      para descobrir se os policiais
+      reconhecem o personagem como sendo
+      o suspeito procurado.
+
+      Esta rolagem é separada da chance
+      de encontro policial.
+    */
+
+    const recognition =
+      rollPoliceRecognition(
+        updatedGame,
+        {
+          /*
+            Neste primeiro contato os
+            policiais ainda estão apenas
+            observando o personagem.
+
+            Quando ele entregar documento
+            posteriormente podemos usar
+            closeInspection: true em uma
+            nova verificação, se desejarmos.
+          */
+
+          closeInspection:
+            false,
+
+          knownIdentity:
+            Boolean(
+              updatedGame?.flags
+                ?.policeKnownIdentity
+            ),
+
+          changedClothes:
+            Boolean(
+              updatedGame?.flags
+                ?.changedClothesAfterPolice
+            ),
+
+          disguise:
+            Boolean(
+              updatedGame?.flags
+                ?.policeDisguise
+            ),
+
+          poorLighting:
+            Boolean(
+              updatedGame?.flags
+                ?.policePoorLighting
+            ),
+        }
+      )
+
+    updatedGame =
+      registerPoliceRecognition(
+        updatedGame,
+        recognition
+      )
+
+    /*
+      Se futuramente existir uma cena
+      específica de reconhecimento,
+      podemos usá-la.
+
+      Enquanto ela ainda não existir,
+      continuamos usando police_stop.
+
+      Dessa forma esta alteração NÃO
+      quebra o jogo durante esta etapa.
+    */
+
+    const recognitionScene =
+      recognition.recognized &&
+      scenes.police_recognized
+        ? 'police_recognized'
+        : 'police_stop'
+
+    updatedGame =
+      transitionToScene(
+        updatedGame,
+        recognitionScene,
+        {
+          flags: {
+            policeTrouble:
+              true,
+
+            policeStopActive:
+              true,
+
+            policeChase:
+              false,
+
+            escapedPolice:
+              false,
+
+            policeEscapeMethod:
+              null,
+
+            policeWantedRegistered:
+              false,
+
+            policeWantedEncounter:
+              true,
+
+            policeWantedLevel:
+              wanted.level,
+
+            policeRecognitionChecked:
+              true,
+
+            policeRecognizedPlayer:
+              Boolean(
+                recognition.recognized
+              ),
+
+            policeRecognitionChance:
+              recognition.chance,
+
+            policeRecognitionRoll:
+              recognition.roll ??
+              null,
+          },
+
+          historyItem: {
+            type:
+              recognition.recognized
+                ? 'police-wanted-recognized'
+                : 'police-wanted-not-recognized',
+
+            wantedLevel:
+              wanted.level,
+
+            wantedLabel:
+              wanted.label,
+
+            encounterChance:
+              encounter.chance,
+
+            recognitionChance:
+              recognition.chance,
+
+            recognized:
+              Boolean(
+                recognition.recognized
+              ),
+
+            locationId,
+
+            timestamp:
+              new Date()
+                .toISOString(),
+          },
+        }
+      )
+
+    return {
+      game:
+        updatedGame,
+
+      interrupted:
+        true,
+
+      encounter: {
+        ...encounter,
+
+        recognition,
+      },
     }
   }
 
@@ -1205,6 +2380,7 @@ export default function Game({
     setFeedingOpen(false)
     setFeedingVictim(null)
     setFeedingTotal(0)
+    setStopFeedingRoll(null)
   }
 
   function clearFrenzy() {
@@ -1227,21 +2403,278 @@ export default function Game({
 
     clearFeeding()
   }
+function handleFreeRoamGameChange(
+  updatedGame
+) {
+  const timeAdvanced =
+    getGameMinuteStamp(
+      updatedGame
+    ) >
+    getGameMinuteStamp(
+      game
+    )
 
+  const policeResult =
+    processPoliceResponse(
+      updatedGame
+    )
+
+  let processedGame =
+    policeResult.game
+
+  if (
+    policeResult.interrupted
+  ) {
+    saveGame(
+      processedGame
+    )
+
+    setGame(
+      processedGame
+    )
+
+    resetSceneSystems()
+    clearTest()
+    goToTop()
+
+    return
+  }
+
+  const wantedResult =
+    processPoliceWanted(
+      processedGame,
+      {
+        allowEncounter:
+          timeAdvanced,
+      }
+    )
+
+  processedGame =
+    wantedResult.game
+
+  saveGame(
+    processedGame
+  )
+
+  setGame(
+    processedGame
+  )
+
+  if (
+    wantedResult.interrupted
+  ) {
+    resetSceneSystems()
+    clearTest()
+    goToTop()
+  }
+}
+
+function handleHavenComputer() {
+  const updatedGame =
+    transitionToScene(
+      game,
+      'livia_computer',
+      {
+        timeMinutes: 1,
+
+        historyItem: {
+          type:
+            'haven-computer',
+
+          locationId:
+            'livia_apartment',
+
+          timestamp:
+            new Date()
+              .toISOString(),
+        },
+      }
+    )
+
+  saveGame(
+    updatedGame
+  )
+
+  setGame(
+    updatedGame
+  )
+
+  resetSceneSystems()
+
+  clearTest()
+
+  goToTop()
+}
+
+/*
+  ========================================
+  INVESTIGAÇÃO DOS DESAPARECIMENTOS
+  ========================================
+*/
+
+function handleHavenInvestigation() {
+  const updatedGame =
+    transitionToScene(
+      game,
+      'strange_hospitals_records',
+      {
+        timeMinutes: 1,
+
+        historyItem: {
+          type:
+            'haven-hospital-investigation',
+
+          locationId:
+            'livia_apartment',
+
+          timestamp:
+            new Date()
+              .toISOString(),
+        },
+      }
+    )
+
+  saveGame(
+    updatedGame
+  )
+
+  setGame(
+    updatedGame
+  )
+
+  resetSceneSystems()
+
+  clearTest()
+
+  goToTop()
+}
   /*
     ========================================
     ESCOLHAS NORMAIS
     ========================================
   */
 
-  function performNormalChoice(
-    choice
+ function performNormalChoice(
+  choice
+) {
+  let updatedGame =
+    applyChoice(
+      game,
+      scene,
+      choice
+    )
+
+  const policeResult =
+    processPoliceResponse(
+      updatedGame
+    )
+
+  updatedGame =
+    policeResult.game
+
+  if (
+    policeResult.interrupted
   ) {
-    const updatedGame =
-      applyChoice(
-        game,
-        scene,
-        choice
+    persist(
+      updatedGame
+    )
+
+    resetSceneSystems()
+    clearTest()
+    goToTop()
+
+    return
+  }
+
+  const wantedResult =
+    processPoliceWanted(
+      updatedGame,
+      {
+        allowEncounter:
+          false,
+      }
+    )
+
+  updatedGame =
+    wantedResult.game
+
+  saveGame(
+    updatedGame
+  )
+
+  setGame(
+    updatedGame
+  )
+
+  resetSceneSystems()
+
+  clearTest()
+
+  goToTop()
+}
+
+function handleHavenDaySleep() {
+  let updatedGame =
+    sleepThroughDay(
+      game
+    )
+
+  const enteredTorpor =
+    Boolean(
+      updatedGame
+        ?.vampireState
+        ?.torpor
+    )
+
+  /*
+    ========================================
+    TORPOR
+    ========================================
+  */
+
+  if (
+    enteredTorpor
+  ) {
+    updatedGame =
+      transitionToScene(
+        updatedGame,
+        'livia_apartment_torpor',
+        {
+          flags: {
+            wokeInLiviaHaven:
+              false,
+
+            hasHaven:
+              true,
+
+            inheritedLiviaApartment:
+              true,
+
+            liviaApartmentUnlocked:
+              true,
+
+            inTorpor:
+              true,
+
+            awakeningTorpor:
+              true,
+          },
+
+          historyItem: {
+            type:
+              'entered-torpor',
+
+            reason:
+              'blood_depletion',
+
+            locationId:
+              'livia_apartment',
+
+            timestamp:
+              new Date()
+                .toISOString(),
+          },
+        }
       )
 
     saveGame(
@@ -1255,11 +2688,185 @@ export default function Game({
     resetSceneSystems()
     clearTest()
     goToTop()
+
+    return
+  }
+
+  /*
+    ========================================
+    DESPERTAR NORMAL / FOME
+    ========================================
+  */
+
+  updatedGame =
+    transitionToScene(
+      updatedGame,
+      'livia_apartment_wakeup',
+      {
+        flags: {
+          wokeInLiviaHaven:
+            true,
+
+          hasHaven:
+            true,
+
+          inheritedLiviaApartment:
+            true,
+
+          liviaApartmentUnlocked:
+            true,
+        },
+
+        historyItem: {
+          type:
+            'haven-day-sleep',
+
+          locationId:
+            'livia_apartment',
+
+          timestamp:
+            new Date()
+              .toISOString(),
+        },
+      }
+    )
+
+  saveGame(
+    updatedGame
+  )
+
+  setGame(
+    updatedGame
+  )
+
+  resetSceneSystems()
+  clearTest()
+  goToTop()
+}
+  function handleRecognizedDocument() {
+    if (!game) {
+      return
+    }
+
+    /*
+      O personagem entrega o documento.
+      A inspeção próxima torna o reconhecimento
+      mais confiável do que uma observação casual.
+    */
+
+    const recognition =
+      rollPoliceRecognition(
+        game,
+        {
+          closeInspection:
+            true,
+
+          knownIdentity:
+            Boolean(
+              game?.flags
+                ?.policeKnownIdentity
+            ),
+        }
+      )
+
+    let updatedGame =
+      registerPoliceRecognition(
+        game,
+        recognition
+      )
+
+    const identityConfirmed =
+      Boolean(
+        game?.flags
+          ?.policeKnownIdentity
+      ) ||
+      Boolean(
+        recognition.recognized
+      )
+
+    updatedGame =
+      transitionToScene(
+        updatedGame,
+        identityConfirmed
+          ? 'police_identity_confirmed'
+          : 'police_identity_uncertain',
+        {
+          timeMinutes:
+            2,
+
+          flags: {
+            policeStopActive:
+              true,
+
+            policeTrouble:
+              true,
+
+            policeDocumentChecked:
+              true,
+
+            policeCloseInspection:
+              true,
+
+            policeIdentityConfirmed:
+              identityConfirmed,
+
+            policeRecognizedPlayer:
+              identityConfirmed,
+
+            policeRecognitionChecked:
+              true,
+
+            policeRecognitionChance:
+              recognition.chance,
+
+            policeRecognitionRoll:
+              recognition.roll ??
+              null,
+          },
+
+          historyItem: {
+            type:
+              'police-document-check',
+
+            recognized:
+              Boolean(
+                recognition.recognized
+              ),
+
+            identityConfirmed,
+
+            chance:
+              recognition.chance,
+
+            roll:
+              recognition.roll ??
+              null,
+
+            timestamp:
+              new Date()
+                .toISOString(),
+          },
+        }
+      )
+
+    persist(
+      updatedGame
+    )
+
+    resetSceneSystems()
+    clearTest()
+    goToTop()
   }
 
   function handleChoice(
     choice
   ) {
+    if (
+  game?.vampireState
+    ?.torpor
+) {
+  return
+}
     if (
       frenzyOpen ||
       feedingOpen ||
@@ -1278,11 +2885,32 @@ export default function Game({
     ) {
       return
     }
+if (
+  scene.id ===
+    'livia_apartment_rest' &&
+  choice.id ===
+    'haven_sleep_until_night'
+) {
+  handleHavenDaySleep()
+
+  return
+}
+    if (
+      scene.id ===
+        'police_recognized' &&
+      choice.id ===
+        'recognized_show_document'
+    ) {
+      handleRecognizedDocument()
+
+      return
+    }
 
     const test =
       getChoiceTest(
         scene.id,
-        choice.id
+        choice.id,
+        game
       )
 
     if (!test) {
@@ -1418,7 +3046,7 @@ export default function Game({
       return
     }
 
-    const updatedGame =
+    let updatedGame =
       applyTestOutcome(
         game,
         scene,
@@ -1426,6 +3054,18 @@ export default function Game({
         pendingTest,
         currentRoll
       )
+
+    const wantedResult =
+      processPoliceWanted(
+        updatedGame,
+        {
+          allowEncounter:
+            false,
+        }
+      )
+
+    updatedGame =
+      wantedResult.game
 
     saveGame(
       updatedGame
@@ -1440,7 +3080,7 @@ export default function Game({
     goToTop()
   }
 
-  /*
+    /*
     ========================================
     DISCIPLINAS NARRATIVAS
     ========================================
@@ -1526,6 +3166,19 @@ export default function Game({
     if (nextScene) {
       updatedGame = transitionToScene(updatedGame, nextScene, { flags, timeMinutes: disciplineEvaluation.choice.timeMinutes ?? 0 })
     }
+
+    const wantedResult =
+      processPoliceWanted(
+        updatedGame,
+        {
+          allowEncounter:
+            false,
+        }
+      )
+
+    updatedGame =
+      wantedResult.game
+
     persist(updatedGame)
     clearDiscipline()
     resetSceneSystems()
@@ -1545,33 +3198,475 @@ export default function Game({
     ========================================
   */
 
-  function handleOpenTravel() {
-    if (pendingTest || interactionBlocked) return
-    setTravelOpen(true)
+ function handleOpenTravel() {
+  if (
+    game?.flags
+      ?.policeChase
+  ) {
+    return
   }
 
-  function handleTravel(travel) {
-    const destination = getLocation(travel?.destinationId)
-    if (!destination) return
-    const result = performTravel(game, { ...travel, destinationId: destination.id, destination, timeMinutes: Number(travel.minutes ?? 0) })
-    if (result.error) { window.alert(result.error); return }
-    const updatedGame = { ...result.game, flags: { ...(result.game.flags ?? {}), [`visited_${destination.id}`]: true } }
-    persist(updatedGame)
-    setTravelOpen(false)
-    setTravelEventInfo({ fromId: currentLocationId, fromName: game.world?.location?.name ?? 'Local atual', toId: destination.id, toName: destination.name, transport: travel.transport, transportLabel: getTransportLabel(travel.transport) })
-    if (result.event) setTravelEvent(result.event)
+  if (
+    game?.vampireState
+      ?.torpor
+  ) {
+    return
   }
 
-  function handleTravelEventContinue() {
-    if (!travelEvent) return
-    if (travelEvent.test) {
-      const test = buildTravelEventTest(game, travelEvent)
-      setTravelEventTest(test)
-      setTravelEventTesting(true)
-      return
-    }
+  if (
+    pendingTest ||
+    interactionBlocked
+  ) {
+    return
+  }
+
+  setTravelOpen(
+    true
+  )
+}
+function getLiviaApartmentScene(
+  currentGame
+) {
+  const questStatus =
+    currentGame?.quests
+      ?.livia_legacy
+      ?.status
+
+  const hospitalDiscovered =
+    Boolean(
+      currentGame?.flags
+        ?.discoveredHospitalConnection ||
+      currentGame?.flags
+        ?.liviaHospitalConnection
+    )
+
+  const alreadyVisited =
+    Boolean(
+      currentGame?.flags
+        ?.visitedLiviaApartment
+    )
+
+  /*
+    ========================================
+    REFÚGIO JÁ ESTABELECIDO
+    ========================================
+
+    Depois que a investigação principal
+    avançou, não usamos mais a cena
+    narrativa livia_apartment_haven.
+
+    Vamos direto para free_roam mantendo
+    a localização no apartamento.
+
+    O Game.jsx então renderiza o componente
+    Haven automaticamente.
+  */
+
+  if (
+    questStatus ===
+      'completed' ||
+    hospitalDiscovered
+  ) {
+    return 'free_roam'
+  }
+
+  /*
+    O jogador já entrou anteriormente,
+    mas ainda não terminou a investigação.
+  */
+
+  if (
+    alreadyVisited
+  ) {
+    return 'livia_apartment_inside'
+  }
+
+  /*
+    Primeira visita.
+  */
+
+  return 'livia_apartment_arrival'
+}
+function handleTravel(
+  travel
+) {
+  const destination =
+    getLocation(
+      travel?.destinationId
+    )
+
+  if (!destination) {
+    return
+  }
+
+  /*
+    ========================================
+    REALIZAR VIAGEM
+    ========================================
+  */
+
+  const result =
+    performTravel(
+      game,
+      {
+        ...travel,
+
+        destinationId:
+          destination.id,
+
+        destination,
+
+        timeMinutes:
+          Number(
+            travel.minutes ??
+            0
+          ),
+      }
+    )
+
+  if (
+    result.error
+  ) {
+    window.alert(
+      result.error
+    )
+
+    return
+  }
+
+  let updatedGame =
+    result.game
+
+  /*
+    ========================================
+    MARCAR LOCAL COMO VISITADO
+    ========================================
+  */
+
+  updatedGame = {
+    ...updatedGame,
+
+    flags: {
+      ...(updatedGame.flags ??
+        {}),
+
+      [`visited_${destination.id}`]:
+        true,
+
+      pendingPublicReactionCheck:
+        true,
+
+      publicReactionLocationId:
+        destination.id,
+
+      publicReactionReason:
+        'travel-arrival',
+    },
+  }
+
+  /*
+    ========================================
+    RESPOSTA POLICIAL DURANTE A VIAGEM
+    ========================================
+
+    performTravel() já:
+
+    1. avança o relógio;
+    2. muda world.location para o destino.
+
+    Portanto agora o policeResponseEngine
+    consegue determinar corretamente se:
+
+    - a polícia ainda está a caminho;
+    - ela chegou enquanto o jogador viajava;
+    - o jogador já deixou o local da ocorrência.
+
+    IMPORTANTE:
+
+    A polícia não segue magicamente
+    o personagem até o destino.
+
+    A ocorrência continua vinculada ao
+    local onde foi chamada.
+  */
+
+  const policeResult =
+    processPoliceResponse(
+      updatedGame
+    )
+
+  updatedGame =
+    policeResult.game
+
+  /*
+    ========================================
+    POLÍCIA INTERROMPEU A VIAGEM
+    ========================================
+
+    É um caso raro, mas mantemos o sistema
+    preparado caso o personagem esteja no
+    próprio local associado à ocorrência
+    quando a chegada for processada.
+  */
+
+  if (
+    policeResult.interrupted
+  ) {
+    persist(
+      updatedGame
+    )
+
+    setTravelOpen(
+      false
+    )
+
     clearTravelEvent()
+
+    resetSceneSystems()
+
+    clearTest()
+
+    goToTop()
+
+    return
   }
+
+  /*
+    ========================================
+    PROCURA POLICIAL DURANTE A VIAGEM
+    ========================================
+
+    Se o personagem estiver sendo procurado,
+    cada viagem que realmente avança o tempo
+    pode gerar uma nova abordagem.
+
+    O cálculo considera a presença policial
+    do destino. Locais secretos com presença
+    zero continuam seguros desse sistema.
+  */
+
+  const wantedResult =
+    processPoliceWanted(
+      updatedGame,
+      {
+        allowEncounter:
+          true,
+
+        policePresence:
+          destination
+            ?.policePresence ??
+          null,
+      }
+    )
+
+  updatedGame =
+    wantedResult.game
+
+  if (
+    wantedResult.interrupted
+  ) {
+    persist(
+      updatedGame
+    )
+
+    setTravelOpen(
+      false
+    )
+
+    clearTravelEvent()
+
+    resetSceneSystems()
+
+    clearTest()
+
+    goToTop()
+
+    return
+  }
+
+  /*
+    ========================================
+    CHEGADA AO REFÚGIO
+    ========================================
+  */
+
+  if (
+    destination.id ===
+      'livia_apartment' &&
+    !result.event
+  ) {
+    updatedGame =
+      transitionToScene(
+        updatedGame,
+        getLiviaApartmentScene(
+          updatedGame
+        ),
+        {
+          flags: {
+            visitedLiviaApartment:
+              true,
+
+            hasHaven:
+              true,
+
+            inheritedLiviaApartment:
+              true,
+
+            liviaApartmentUnlocked:
+              true,
+          },
+
+          historyItem: {
+            type:
+              'haven-arrival',
+
+            locationId:
+              'livia_apartment',
+
+            timestamp:
+              new Date()
+                .toISOString(),
+          },
+        }
+      )
+  }
+
+  /*
+    ========================================
+    SALVAR VIAGEM
+    ========================================
+  */
+
+  persist(
+    updatedGame
+  )
+
+  setTravelOpen(
+    false
+  )
+
+  /*
+    ========================================
+    INFORMAÇÕES DA VIAGEM
+    ========================================
+  */
+
+  setTravelEventInfo({
+    fromId:
+      currentLocationId,
+
+    fromName:
+      game.world
+        ?.location
+        ?.name ??
+      'Local atual',
+
+    toId:
+      destination.id,
+
+    toName:
+      destination.name,
+
+    transport:
+      travel.transport,
+
+    transportLabel:
+      getTransportLabel(
+        travel.transport
+      ),
+  })
+
+  /*
+    ========================================
+    EVENTO DE VIAGEM
+    ========================================
+  */
+
+  if (
+    result.event
+  ) {
+    setTravelEvent(
+      result.event
+    )
+
+    return
+  }
+
+  resetSceneTriggers()
+
+  goToTop()
+}
+
+function handleTravelEventContinue() {
+  if (!travelEvent) {
+    return
+  }
+
+  if (
+    travelEvent.test
+  ) {
+    const test =
+      buildTravelEventTest(
+        game,
+        travelEvent
+      )
+
+    setTravelEventTest(
+      test
+    )
+
+    setTravelEventTesting(
+      true
+    )
+
+    return
+  }
+
+  let updatedGame =
+    game
+
+  /*
+    Depois de um evento simples de viagem,
+    finalmente entramos no refúgio.
+  */
+
+  if (
+    travelEventInfo
+      ?.toId ===
+      'livia_apartment'
+  ) {
+    updatedGame =
+      transitionToScene(
+        updatedGame,
+        getLiviaApartmentScene(
+  updatedGame
+),
+        {
+          flags: {
+            visitedLiviaApartment:
+              true,
+
+            hasHaven:
+              true,
+
+            inheritedLiviaApartment:
+              true,
+
+            liviaApartmentUnlocked:
+              true,
+          },
+        }
+      )
+
+    persist(
+      updatedGame
+    )
+  }
+
+  clearTravelEvent()
+  resetSceneTriggers()
+  goToTop()
+}
 
   function handleTravelEventRoll() {
     const roll = executeTravelEventTest(game, travelEvent)
@@ -1580,17 +3675,95 @@ export default function Game({
     setTravelEventOutcome(getTravelEventOutcome(travelEvent, roll))
   }
 
-  function handleTravelEventTestContinue() {
-    if (!travelEvent || !travelEventRoll || !travelEventOutcome) return
-    let updatedGame = applyTravelEventOutcome(game, travelEvent, travelEventRoll, travelEventOutcome)
-    const policeBotch = travelEvent.id === 'police_patrol' && travelEventRoll.result === 'botch'
-    if (policeBotch) {
-      updatedGame = transitionToScene(updatedGame, 'police_stop', { flags: { policeTrouble: true, policeStopActive: true, possibleMasqueradeRisk: true } })
-    }
-    persist(updatedGame)
-    clearTravelEvent()
-    resetSceneSystems()
+function handleTravelEventTestContinue() {
+  if (
+    !travelEvent ||
+    !travelEventRoll ||
+    !travelEventOutcome
+  ) {
+    return
   }
+
+  let updatedGame =
+    applyTravelEventOutcome(
+      game,
+      travelEvent,
+      travelEventRoll,
+      travelEventOutcome
+    )
+
+  const policeBotch =
+    travelEvent.id ===
+      'police_patrol' &&
+    travelEventRoll.result ===
+      'botch'
+
+  if (
+    policeBotch
+  ) {
+    updatedGame =
+      transitionToScene(
+        updatedGame,
+        'police_stop',
+        {
+          flags: {
+            policeTrouble:
+              true,
+
+            policeStopActive:
+              true,
+
+            possibleMasqueradeRisk:
+              true,
+          },
+        }
+      )
+  } else if (
+    travelEventInfo
+      ?.toId ===
+      'livia_apartment'
+  ) {
+    updatedGame =
+      transitionToScene(
+        updatedGame,
+        getLiviaApartmentScene(
+  updatedGame
+),
+        {
+          flags: {
+            visitedLiviaApartment:
+              true,
+
+            hasHaven:
+              true,
+
+            inheritedLiviaApartment:
+              true,
+
+            liviaApartmentUnlocked:
+              true,
+          },
+
+          historyItem: {
+            type:
+              'haven-arrival-after-event',
+
+            timestamp:
+              new Date()
+                .toISOString(),
+          },
+        }
+      )
+  }
+
+  persist(
+    updatedGame
+  )
+
+  clearTravelEvent()
+  resetSceneTriggers()
+  goToTop()
+}
 
   /*
     ========================================
@@ -1627,7 +3800,6 @@ export default function Game({
     resetSceneSystems()
     goToTop()
   }
-
   /*
     ========================================
     RISCO AMBIENTAL
@@ -1668,97 +3840,73 @@ export default function Game({
     )
   }
 
-  function handleHazardFinish() {
-    if (
-      !hazard ||
-      !scene.hazardEncounter
-    ) {
-      return
-    }
+ function handleHazardFinish() {
+  if (!hazard) {
+    return
+  }
 
-    const config =
-      scene.hazardEncounter
+  const globalSunlight =
+    hazard?.type ===
+    'sunlight'
 
-    let nextScene =
-      null
+  /*
+    ========================================
+    SOL GLOBAL — ENCONTROU ABRIGO
+    ========================================
 
-    if (
-      hazard.destroyed
-    ) {
-      nextScene =
-        config.destructionScene
-    } else if (
-      hazard.escaped
-    ) {
-      nextScene =
-        config.successScene
-    }
+    Não mudamos de cena.
 
-    if (
-      !nextScene ||
-      !scenes[nextScene]
-    ) {
-      window.alert(
-        `Cena após risco não encontrada: ${nextScene}`
-      )
+    O personagem continua no mesmo
+    distrito, mas agora está protegido
+    dentro de algum prédio, cobertura,
+    estação, garagem etc.
+  */
 
-      return
-    }
-
-    const target =
-      scenes[nextScene]
-
-    let updatedGame =
-      clearCombatBoosts(
-        game
-      )
-
-    updatedGame = {
-      ...updatedGame,
+  if (
+    globalSunlight &&
+    hazard.escaped
+  ) {
+    const updatedGame = {
+      ...game,
 
       hazard:
         null,
 
-      story: {
-        ...(updatedGame.story ??
-          {}),
+      flags: {
+        ...(game.flags ?? {}),
 
-        previousScene:
-          scene.id,
+        sunlightSheltered:
+          true,
 
-        scene:
-          nextScene,
-      },
-
-      world: {
-        ...(updatedGame.world ??
-          {}),
-
-        location:
-          target.location ??
-          updatedGame.world
-            ?.location,
+        sunlightShelterLocationId:
+          game?.world
+            ?.location
+            ?.id ??
+          null,
       },
 
       history: [
-        ...(updatedGame.history ??
-          []),
+        ...(game.history ?? []),
 
         {
           type:
-            'hazard-end',
+            'sunlight-shelter',
 
-          hazardId:
-            hazard.id,
+          locationId:
+            game?.world
+              ?.location
+              ?.id ??
+            null,
 
-          hazardType:
-            hazard.type,
+          hour:
+            game?.world
+              ?.hour ??
+            null,
 
-          escaped:
-            hazard.escaped,
-
-          destroyed:
-            hazard.destroyed,
+          minute:
+            game?.world
+              ?.minute ??
+            null,
 
           timestamp:
             new Date()
@@ -1780,7 +3928,138 @@ export default function Game({
     )
 
     goToTop()
+
+    return
   }
+
+  /*
+    ========================================
+    CONFIGURAÇÃO NORMAL DO RISCO
+    ========================================
+  */
+
+  const config =
+    globalSunlight
+      ? {
+          successScene:
+            scene.id,
+
+          destructionScene:
+            'vampire_destroyed_sunlight',
+        }
+      : (
+          hazard.config ??
+          hazard.hazard ??
+          scene?.hazardEncounter ??
+          hazard
+        )
+
+  if (!config) {
+    return
+  }
+
+  let nextScene =
+    null
+
+  if (
+    hazard.destroyed
+  ) {
+    nextScene =
+      config.destructionScene
+  } else if (
+    hazard.escaped
+  ) {
+    nextScene =
+      config.successScene
+  }
+
+  if (
+    !nextScene ||
+    !scenes[nextScene]
+  ) {
+    window.alert(
+      `Cena após risco não encontrada: ${nextScene}`
+    )
+
+    return
+  }
+
+  const target =
+    scenes[nextScene]
+
+  let updatedGame =
+    clearCombatBoosts(
+      game
+    )
+
+  updatedGame = {
+    ...updatedGame,
+
+    hazard:
+      null,
+
+    story: {
+      ...(updatedGame.story ??
+        {}),
+
+      previousScene:
+        scene.id,
+
+      scene:
+        nextScene,
+    },
+
+    world: {
+      ...(updatedGame.world ??
+        {}),
+
+      location:
+        target.location ??
+        updatedGame.world
+          ?.location,
+    },
+
+    history: [
+      ...(updatedGame.history ??
+        []),
+
+      {
+        type:
+          'hazard-end',
+
+        hazardId:
+          hazard.id,
+
+        hazardType:
+          hazard.type,
+
+        escaped:
+          hazard.escaped,
+
+        destroyed:
+          hazard.destroyed,
+
+        timestamp:
+          new Date()
+            .toISOString(),
+      },
+    ],
+  }
+
+  saveGame(
+    updatedGame
+  )
+
+  setGame(
+    updatedGame
+  )
+
+  setHazardCheckedScene(
+    null
+  )
+
+  goToTop()
+}
 
   /*
     ========================================
@@ -2178,6 +4457,64 @@ export default function Game({
     clearCombatDisciplineTest()
   }
 
+  function handleCombatHeal() {
+    if (
+      !game ||
+      !combat ||
+      combat.status !==
+        'active'
+    ) {
+      return
+    }
+
+    const result =
+      healWithBlood(
+        game
+      )
+
+    if (
+      !result.success
+    ) {
+      const reason =
+        result.reason ??
+        result.log?.[0]?.text ??
+        'Não foi possível curar o ferimento.'
+
+      window.alert(
+        reason
+      )
+
+      return
+    }
+
+    const updatedCombat = {
+      ...combat,
+
+      log: [
+        ...(combat.log ??
+          []),
+
+        ...(result.log ??
+          []),
+      ],
+    }
+
+    const updatedGame = {
+      ...result.game,
+
+      combat:
+        updatedCombat,
+    }
+
+    saveGame(
+      updatedGame
+    )
+
+    setGame(
+      updatedGame
+    )
+  }
+
   function handleCombatBoost(
     attribute
   ) {
@@ -2350,61 +4687,148 @@ export default function Game({
     )
   }
 
-  function handleCombatFinish() {
-    if (
-      !combat ||
-      !scene.combatEncounter
-    ) {
-      return
-    }
+ function handleCombatFinish() {
+  if (!combat) {
+    return
+  }
 
-    const encounter =
-      scene.combatEncounter
+  /*
+    ========================================
+    IDENTIFICA COMBATE DEV
+    ========================================
 
-    let nextScene =
-      null
+    A Arena DEV cria combates que não
+    pertencem necessariamente ao
+    combatEncounter da cena atual.
 
-    if (
-      combat.endingReason ===
-        'staked' &&
-      scenes
-        .combat_vampire_staked
-    ) {
-      nextScene =
-        'combat_vampire_staked'
-    } else if (
-      combat.winner ===
-      'player'
-    ) {
-      nextScene =
-        encounter.victoryScene
-    } else if (
-      combat.winner ===
-      'enemy'
-    ) {
-      nextScene =
-        encounter.defeatScene
-    } else if (
-      combat.winner ===
-      'escaped'
-    ) {
-      nextScene =
-        encounter.escapeScene
-    }
+    Por isso eles não devem tentar usar
+    victoryScene / defeatScene da cena.
+  */
 
-    if (
-      !nextScene ||
-      !scenes[nextScene]
-    ) {
-      window.alert(
-        `Cena após combate não encontrada: ${nextScene}`
+  const isDevCombat =
+    String(
+      combat.encounterId ??
+      ''
+    ).startsWith(
+      'dev_'
+    ) ||
+    Boolean(
+      game?.history?.some(
+        (entry) =>
+          entry.type ===
+            'dev-combat-start' &&
+          entry.encounterId ===
+            combat.encounterId
+      )
+    )
+
+  /*
+    ========================================
+    FINALIZA COMBATE DEV
+    ========================================
+  */
+
+  if (isDevCombat) {
+    let updatedGame =
+      clearCombatBoosts(
+        game
       )
 
-      return
+    updatedGame = {
+      ...updatedGame,
+
+      combat:
+        null,
+
+      history: [
+        ...(updatedGame.history ??
+          []),
+
+        {
+          type:
+            'dev-combat-finish',
+
+          scene:
+            scene?.id ??
+            null,
+
+          encounterId:
+            combat.encounterId ??
+            null,
+
+          enemy:
+            combat.enemy
+              ?.name ??
+            null,
+
+          winner:
+            combat.winner ??
+            null,
+
+          endingReason:
+            combat.endingReason ??
+            null,
+
+          timestamp:
+            new Date()
+              .toISOString(),
+        },
+      ],
     }
 
-    const target =
-      scenes[nextScene]
+    saveGame(
+      updatedGame
+    )
+
+    setGame(
+      updatedGame
+    )
+
+    /*
+      Muito importante:
+
+      marcamos a cena atual como já
+      verificada para impedir que o
+      useEffect de DETECTA COMBATE crie
+      imediatamente o combatEncounter
+      da cena e abra outra luta.
+    */
+
+    if (
+      scene?.id
+    ) {
+      setCombatCheckedScene(
+        scene.id
+      )
+    }
+
+    setCombatDebugOpen(
+      false
+    )
+
+    clearCombatDisciplineTest()
+
+    goToTop()
+
+    return
+  }
+
+  /*
+    ========================================
+    COMBATE NORMAL DA HISTÓRIA
+    ========================================
+  */
+
+  if (
+    !scene?.combatEncounter
+  ) {
+    /*
+      Segurança.
+
+      Se por algum motivo existir um
+      combate fora de uma cena de combate,
+      ainda conseguimos fechá-lo.
+    */
 
     let updatedGame =
       clearCombatBoosts(
@@ -2417,26 +4841,40 @@ export default function Game({
       combat:
         null,
 
-      story: {
-        ...(updatedGame.story ??
-          {}),
+      history: [
+        ...(updatedGame.history ??
+          []),
 
-        previousScene:
-          scene.id,
+        {
+          type:
+            'combat-finish',
 
-        scene:
-          nextScene,
-      },
+          scene:
+            scene?.id ??
+            null,
 
-      world: {
-        ...(updatedGame.world ??
-          {}),
+          encounterId:
+            combat.encounterId ??
+            null,
 
-        location:
-          target.location ??
-          updatedGame.world
-            ?.location,
-      },
+          enemy:
+            combat.enemy
+              ?.name ??
+            null,
+
+          winner:
+            combat.winner ??
+            null,
+
+          endingReason:
+            combat.endingReason ??
+            null,
+
+          timestamp:
+            new Date()
+              .toISOString(),
+        },
+      ],
     }
 
     saveGame(
@@ -2447,12 +4885,258 @@ export default function Game({
       updatedGame
     )
 
-    setCombatCheckedScene(
-      null
+    if (
+      scene?.id
+    ) {
+      setCombatCheckedScene(
+        scene.id
+      )
+    }
+
+    setCombatDebugOpen(
+      false
     )
 
+    clearCombatDisciplineTest()
+
     goToTop()
+
+    return
   }
+
+  const encounter =
+    scene.combatEncounter
+
+  let nextScene =
+    null
+
+  /*
+    Vampiro estacado possui uma
+    resolução especial.
+  */
+
+  if (
+    combat.endingReason ===
+      'staked' &&
+    scenes
+      .combat_vampire_staked
+  ) {
+    nextScene =
+      'combat_vampire_staked'
+  } else if (
+    combat.winner ===
+    'player'
+  ) {
+    nextScene =
+      encounter.victoryScene
+  } else if (
+    combat.winner ===
+    'enemy'
+  ) {
+    nextScene =
+      encounter.defeatScene
+  } else if (
+    combat.winner ===
+    'escaped'
+  ) {
+    nextScene =
+      encounter.escapeScene
+  }
+
+  /*
+    ========================================
+    SEM CENA DE DESTINO
+
+    Antes isso travava o jogador.
+
+    Agora, se o encontro não possuir uma
+    cena válida após o combate, fechamos
+    o combate normalmente e permanecemos
+    na cena atual.
+    ========================================
+  */
+
+  if (
+    !nextScene ||
+    !scenes[
+      nextScene
+    ]
+  ) {
+    let updatedGame =
+      clearCombatBoosts(
+        game
+      )
+
+    updatedGame = {
+      ...updatedGame,
+
+      combat:
+        null,
+
+      history: [
+        ...(updatedGame.history ??
+          []),
+
+        {
+          type:
+            'combat-finish-no-target',
+
+          scene:
+            scene?.id ??
+            null,
+
+          encounterId:
+            combat.encounterId ??
+            null,
+
+          enemy:
+            combat.enemy
+              ?.name ??
+            null,
+
+          winner:
+            combat.winner ??
+            null,
+
+          endingReason:
+            combat.endingReason ??
+            null,
+
+          timestamp:
+            new Date()
+              .toISOString(),
+        },
+      ],
+    }
+
+    saveGame(
+      updatedGame
+    )
+
+    setGame(
+      updatedGame
+    )
+
+    if (
+      scene?.id
+    ) {
+      setCombatCheckedScene(
+        scene.id
+      )
+    }
+
+    setCombatDebugOpen(
+      false
+    )
+
+    clearCombatDisciplineTest()
+
+    goToTop()
+
+    return
+  }
+
+  /*
+    ========================================
+    TRANSIÇÃO NORMAL
+    ========================================
+  */
+
+  const target =
+    scenes[
+      nextScene
+    ]
+
+  let updatedGame =
+    clearCombatBoosts(
+      game
+    )
+
+  updatedGame = {
+    ...updatedGame,
+
+    combat:
+      null,
+
+    story: {
+      ...(updatedGame.story ??
+        {}),
+
+      previousScene:
+        scene.id,
+
+      scene:
+        nextScene,
+    },
+
+    world: {
+      ...(updatedGame.world ??
+        {}),
+
+      location:
+        target.location ??
+        updatedGame.world
+          ?.location,
+    },
+
+    history: [
+      ...(updatedGame.history ??
+        []),
+
+      {
+        type:
+          'combat-finish',
+
+        scene:
+          scene.id,
+
+        nextScene,
+
+        encounterId:
+          combat.encounterId ??
+          encounter.id ??
+          null,
+
+        enemy:
+          combat.enemy
+            ?.name ??
+          null,
+
+        winner:
+          combat.winner ??
+          null,
+
+        endingReason:
+          combat.endingReason ??
+          null,
+
+        timestamp:
+          new Date()
+            .toISOString(),
+      },
+    ],
+  }
+
+  saveGame(
+    updatedGame
+  )
+
+  setGame(
+    updatedGame
+  )
+
+  setCombatCheckedScene(
+    null
+  )
+
+  setCombatDebugOpen(
+    false
+  )
+
+  clearCombatDisciplineTest()
+
+  goToTop()
+}
 
   /*
     ========================================
@@ -2463,7 +5147,10 @@ export default function Game({
   function handleDrink(
     amount
   ) {
-    if (!feedingVictim) {
+    if (
+      !feedingVictim ||
+      stopFeedingRoll
+    ) {
       return
     }
 
@@ -2513,9 +5200,13 @@ export default function Game({
     )
   }
 
-  function handleStopFeeding() {
+  function finalizeFeeding(
+    sourceGame = game,
+    sourceVictim = feedingVictim,
+    sourceTotal = feedingTotal
+  ) {
     if (
-      !feedingVictim ||
+      !sourceVictim ||
       !scene.feedingEncounter
     ) {
       return
@@ -2526,7 +5217,7 @@ export default function Game({
 
     const victim =
       sealBiteWound(
-        feedingVictim
+        sourceVictim
       )
 
     const victimDead =
@@ -2554,25 +5245,26 @@ export default function Game({
         victim,
 
         amount:
-          feedingTotal,
+          sourceTotal,
 
         gameTime:
           formatGameTime(
-            game.world
+            sourceGame.world
           ),
       })
 
     const updatedGame = {
-      ...game,
+      ...sourceGame,
 
       activeFeeding:
         null,
 
       flags: {
-        ...(game.flags ?? {}),
+        ...(sourceGame.flags ??
+          {}),
 
         fedFromHuman:
-          feedingTotal > 0,
+          sourceTotal > 0,
 
         ...(victimDead
           ? {
@@ -2581,19 +5273,60 @@ export default function Game({
 
               humanityCheckRequired:
                 true,
+
+              feedingFrenzyKilledVictim:
+                Boolean(
+                  stopFeedingRoll &&
+                  stopFeedingRoll
+                    .result !==
+                    'success'
+                ),
             }
           : {}),
       },
 
       history: [
-        ...(game.history ??
+        ...(sourceGame.history ??
           []),
 
         historyEntry,
+
+        ...(stopFeedingRoll
+          ? [
+              {
+                type:
+                  'stop-feeding-test',
+
+                result:
+                  stopFeedingRoll
+                    .result,
+
+                successes:
+                  stopFeedingRoll
+                    .successes ??
+                  0,
+
+                difficulty:
+                  stopFeedingRoll
+                    .difficulty ??
+                  null,
+
+                dice:
+                  stopFeedingRoll
+                    .dice ??
+                  [],
+
+                timestamp:
+                  new Date()
+                    .toISOString(),
+              },
+            ]
+          : []),
       ],
 
       story: {
-        ...(game.story ?? {}),
+        ...(sourceGame.story ??
+          {}),
 
         previousScene:
           scene.id,
@@ -2603,12 +5336,13 @@ export default function Game({
       },
 
       world: {
-        ...(game.world ?? {}),
+        ...(sourceGame.world ??
+          {}),
 
         location:
           scenes[nextScene]
             ?.location ??
-          game.world
+          sourceGame.world
             ?.location,
       },
     }
@@ -2630,30 +5364,404 @@ export default function Game({
     goToTop()
   }
 
+  function handleStopFeeding() {
+    if (
+      !feedingVictim ||
+      !scene.feedingEncounter ||
+      stopFeedingRoll
+    ) {
+      return
+    }
+
+    const victimDead =
+      !feedingVictim.alive ||
+      feedingVictim.blood
+        .current <= 0
+
+    /*
+      Vítima morta ou nenhum sangue
+      ingerido: não existe disputa
+      para interromper o Beijo.
+    */
+
+    if (
+      victimDead ||
+      feedingTotal <= 0
+    ) {
+      finalizeFeeding()
+
+      return
+    }
+
+    /*
+      Com reserva de sangue suficiente,
+      o personagem consegue se afastar
+      sem teste.
+    */
+
+    if (
+      !mustRollToStopFeeding(
+        game
+      )
+    ) {
+      finalizeFeeding()
+
+      return
+    }
+
+    /*
+      Fome intensa: Autocontrole para
+      conseguir abandonar sangue fresco.
+    */
+
+    const roll =
+      rollStopFeeding(
+        game,
+        {
+          ...feedingVictim,
+
+          animal:
+            Boolean(
+              scene.feedingEncounter
+                ?.victim?.animal
+            ),
+        }
+      )
+
+    const updatedGame = {
+      ...game,
+
+      lastStopFeedingRoll: {
+        ...roll,
+
+        victimId:
+          feedingVictim.id,
+
+        victimName:
+          feedingVictim.name,
+
+        timestamp:
+          new Date()
+            .toISOString(),
+      },
+    }
+
+    saveGame(
+      updatedGame
+    )
+
+    setGame(
+      updatedGame
+    )
+
+    setStopFeedingRoll(
+      roll
+    )
+  }
+
+  function handleResolveStopFeeding() {
+    if (
+      !stopFeedingRoll ||
+      !feedingVictim
+    ) {
+      return
+    }
+
+    /*
+      SUCESSO:
+      o personagem recupera o controle
+      e encerra a alimentação.
+    */
+
+    if (
+      stopFeedingRoll.result ===
+      'success'
+    ) {
+      finalizeFeeding()
+
+      return
+    }
+
+    /*
+      FALHA:
+      a Besta força mais 1 ponto.
+
+      FALHA CRÍTICA:
+      a perda de controle é mais severa
+      e tenta beber 2 pontos.
+    */
+
+    const forcedAmount =
+      stopFeedingRoll.result ===
+        'botch'
+        ? 2
+        : 1
+
+    const result =
+      drinkBlood({
+        game,
+
+        victim:
+          feedingVictim,
+
+        amount:
+          forcedAmount,
+      })
+
+    const newTotal =
+      feedingTotal +
+      result.amountDrunk
+
+    const forcedHistory = {
+      type:
+        'feeding-control-failure',
+
+      result:
+        stopFeedingRoll.result,
+
+      forcedAmount:
+        result.amountDrunk,
+
+      victimId:
+        result.victim?.id ??
+        feedingVictim.id,
+
+      victimBloodRemaining:
+        result.victim?.blood
+          ?.current ??
+        null,
+
+      timestamp:
+        new Date()
+          .toISOString(),
+    }
+
+    const updatedGame = {
+      ...result.game,
+
+      activeFeeding: {
+        sceneId:
+          scene.id,
+
+        victim:
+          result.victim,
+
+        totalDrunk:
+          newTotal,
+      },
+
+      flags: {
+        ...(result.game.flags ??
+          {}),
+
+        lostControlWhileFeeding:
+          true,
+
+        ...(stopFeedingRoll
+          .result ===
+          'botch'
+          ? {
+              botchedStopFeeding:
+                true,
+            }
+          : {}),
+      },
+
+      history: [
+        ...(result.game.history ??
+          []),
+
+        forcedHistory,
+      ],
+    }
+
+    const victimDead =
+      !result.victim.alive ||
+      result.victim.blood.current <=
+        0
+
+    saveGame(
+      updatedGame
+    )
+
+    setGame(
+      updatedGame
+    )
+
+    setFeedingVictim(
+      result.victim
+    )
+
+    setFeedingTotal(
+      newTotal
+    )
+
+    /*
+      Se a Besta matou a vítima, encerra
+      imediatamente e deixa Humanidade
+      assumir em seguida.
+    */
+
+    if (
+      victimDead
+    ) {
+      finalizeFeeding(
+        updatedGame,
+        result.victim,
+        newTotal
+      )
+
+      return
+    }
+
+    /*
+      A vítima sobreviveu.
+
+      O jogador volta ao painel e pode
+      tentar parar novamente. Como agora
+      possui mais sangue, a dificuldade
+      pode diminuir naturalmente.
+    */
+
+    setStopFeedingRoll(
+      null
+    )
+  }
+
   /*
     ========================================
     FRENESI / RÖTSCHRECK
     ========================================
   */
 
-  function handleFrenzyRoll() {
+function handleFrenzyRoll() {
+  const trigger =
+    awakeningFrenzyTrigger ??
+    scene.frenzyTrigger
+
+  if (!trigger) {
+    return
+  }
+
+  const roll =
+    executeFrenzyTest(
+      game,
+      trigger
+    )
+
+  const updatedGame = {
+    ...game,
+
+    lastFrenzyRoll:
+      roll,
+  }
+
+  saveGame(
+    updatedGame
+  )
+
+  setGame(
+    updatedGame
+  )
+
+  setFrenzyResult(
+    roll
+  )
+}
+
+function handleFrenzyResultContinue() {
+  const trigger =
+    awakeningFrenzyTrigger ??
+    scene.frenzyTrigger
+
+  if (
+    !frenzyResult ||
+    !trigger
+  ) {
+    return
+  }
+
+  /*
+    ========================================
+    SUCESSO
+    ========================================
+  */
+
+  if (
+    frenzyResult.result ===
+    'success'
+  ) {
+    const nextScene =
+      trigger.successScene
+
     if (
-      !scene.frenzyTrigger
+      !nextScene ||
+      !scenes[nextScene]
     ) {
+      window.alert(
+        `Cena de sucesso não encontrada: ${nextScene}`
+      )
+
       return
     }
 
-    const roll =
-      executeFrenzyTest(
-        game,
-        scene.frenzyTrigger
-      )
+    const target =
+      scenes[nextScene]
+
+    const awakeningFrenzy =
+      trigger.id ===
+      'awakening_hunger_frenzy'
 
     const updatedGame = {
       ...game,
 
-      lastFrenzyRoll:
-        roll,
+      flags: {
+        ...(game.flags ?? {}),
+
+        resistedFrenzy:
+          true,
+
+        /*
+          Se esse teste veio do despertar,
+          removemos as flags que fariam
+          o teste abrir novamente.
+        */
+
+        ...(awakeningFrenzy
+          ? {
+              awakeningFrenzyRequired:
+                false,
+
+              awakeningFrenzyDifficulty:
+                null,
+
+              awakeningHungerCheck:
+                false,
+
+              awakeningHungerFrenzy:
+                false,
+            }
+          : {}),
+      },
+
+      story: {
+        ...(game.story ?? {}),
+
+        previousScene:
+          scene.id,
+
+        scene:
+          nextScene,
+      },
+
+      world: {
+        ...(game.world ?? {}),
+
+        location:
+          target.location ??
+          game.world
+            ?.location,
+      },
     }
 
     saveGame(
@@ -2664,124 +5772,153 @@ export default function Game({
       updatedGame
     )
 
-    setFrenzyResult(
-      roll
-    )
-  }
-
-  function handleFrenzyResultContinue() {
-    if (
-      !frenzyResult ||
-      !scene.frenzyTrigger
-    ) {
-      return
-    }
-
-    const trigger =
-      scene.frenzyTrigger
+    /*
+      Remove também o trigger temporário
+      do despertar.
+    */
 
     if (
-      frenzyResult.result ===
-      'success'
+      awakeningFrenzy
     ) {
-      const nextScene =
-        trigger.successScene
-
-      if (
-        !nextScene ||
-        !scenes[nextScene]
-      ) {
-        window.alert(
-          `Cena de sucesso não encontrada: ${nextScene}`
-        )
-
-        return
-      }
-
-      const target =
-        scenes[nextScene]
-
-      const updatedGame = {
-        ...game,
-
-        flags: {
-          ...(game.flags ?? {}),
-
-          resistedFrenzy:
-            true,
-        },
-
-        story: {
-          ...(game.story ?? {}),
-
-          previousScene:
-            scene.id,
-
-          scene:
-            nextScene,
-        },
-
-        world: {
-          ...(game.world ?? {}),
-
-          location:
-            target.location ??
-            game.world
-              ?.location,
-        },
-      }
-
-      saveGame(
-        updatedGame
+      setAwakeningFrenzyTrigger(
+        null
       )
-
-      setGame(
-        updatedGame
-      )
-
-      clearFrenzy()
-      resetSceneSystems()
-      goToTop()
-
-      return
     }
-
-    const updatedGame =
-      createFrenzyAftermath(
-        game,
-        trigger,
-        frenzyResult
-      )
-
-    saveGame(
-      updatedGame
-    )
-
-    setGame(
-      updatedGame
-    )
 
     clearFrenzy()
-  }
-
-  function handleAftermathContinue() {
-    const updatedGame =
-      finishFrenzyAftermath(
-        game
-      )
-
-    saveGame(
-      updatedGame
-    )
-
-    setGame(
-      updatedGame
-    )
-
     resetSceneSystems()
-
     goToTop()
+
+    return
   }
+
+  /*
+    ========================================
+    FALHA / FALHA CRÍTICA
+    ========================================
+  */
+
+  const updatedGame =
+    createFrenzyAftermath(
+      game,
+      trigger,
+      frenzyResult
+    )
+
+  saveGame(
+    updatedGame
+  )
+
+  setGame(
+    updatedGame
+  )
+
+  /*
+    Não apagamos ainda todas as
+    consequências do frenesi.
+
+    O FrenzyAftermath vai cuidar
+    da continuação.
+  */
+
+  if (
+    trigger.id ===
+    'awakening_hunger_frenzy'
+  ) {
+    setAwakeningFrenzyTrigger(
+      null
+    )
+  }
+
+  clearFrenzy()
+}
+
+ function handleAftermathContinue() {console.log(
+  '===== RECUPERAR CONTROLE ====='
+)
+
+console.log(
+  'SCENE ATUAL:',
+  game?.story?.scene
+)
+
+console.log(
+  'BEAST:',
+  game?.beast
+)
+
+console.log(
+  'PENDING AFTERMATH:',
+  game?.beast?.pendingAftermath
+)
+
+console.log(
+  'END SCENE:',
+  game?.beast
+    ?.pendingAftermath
+    ?.endScene
+)
+
+window.alert(
+  `Recuperar controle\nCena atual: ${
+    game?.story?.scene
+  }\nEndScene: ${
+    game?.beast
+      ?.pendingAftermath
+      ?.endScene
+  }`
+)
+  let updatedGame =
+    finishFrenzyAftermath(
+      game
+    )
+
+  const awakeningFrenzy =
+    game?.beast
+      ?.cause ===
+    'awakening_hunger_frenzy'
+
+  if (
+    awakeningFrenzy
+  ) {
+    updatedGame = {
+      ...updatedGame,
+
+      flags: {
+        ...(updatedGame.flags ??
+          {}),
+
+        awakeningFrenzyRequired:
+          false,
+
+        awakeningFrenzyDifficulty:
+          null,
+
+        awakeningHungerCheck:
+          false,
+
+        awakeningHungerFrenzy:
+          false,
+      },
+    }
+
+    setAwakeningFrenzyTrigger(
+      null
+    )
+  }
+
+  saveGame(
+    updatedGame
+  )
+
+  setGame(
+    updatedGame
+  )
+
+  resetSceneSystems()
+
+  goToTop()
+}
 
   /*
     ========================================
@@ -2855,16 +5992,14 @@ export default function Game({
   }
 
   function handleStartDevCombat(
-    encounterId
+    encounter
   ) {
-    const encounter =
-      getCombatEncounter(
-        encounterId
-      )
-
-    if (!encounter) {
+    if (
+      !encounter ||
+      !encounter.enemy
+    ) {
       window.alert(
-        `Encontro DEV não encontrado: ${encounterId}`
+        'Encontro DEV inválido.'
       )
 
       return
@@ -2894,7 +6029,8 @@ export default function Game({
             null,
 
           encounterId:
-            encounter.id,
+            encounter.id ??
+            'custom-dev-combat',
 
           enemy:
             encounter.enemy
@@ -2905,6 +6041,17 @@ export default function Game({
             encounter.enemy
               ?.clan ??
             null,
+
+          generation:
+            encounter.enemy
+              ?.generation ??
+            null,
+
+          distance:
+            encounter.distance ??
+            encounter.environment
+              ?.distance ??
+            'close',
 
           timestamp:
             new Date()
@@ -2925,11 +6072,11 @@ export default function Game({
       false
     )
 
-    clearCombatDisciplineTest()
-
     setCombatDebugOpen(
       false
     )
+
+    clearCombatDisciplineTest()
 
     window.scrollTo({
       top: 0,
@@ -2938,10 +6085,226 @@ export default function Game({
   }
 
   function devGoToPolice() {
-    const updatedGame = transitionToScene(game, 'police_stop', { flags: { policeTrouble: true } })
+    const updatedGame =
+      transitionToScene(
+        game,
+        'police_stop',
+        {
+          flags: {
+            policeTrouble:
+              true,
+
+            policeStopActive:
+              true,
+
+            policeChase:
+              false,
+
+            escapedPolice:
+              false,
+
+            policeEscapeMethod:
+              null,
+
+            policeWantedRegistered:
+              false,
+          },
+        }
+      )
+
     persist(updatedGame)
     setDevOpen(false)
     resetSceneSystems()
+  }
+
+  const DEV_DISCIPLINES = [
+    { id: 'auspex', label: 'Auspex' },
+    { id: 'celerity', label: 'Celeridade' },
+    { id: 'dementia', label: 'Demência' },
+    { id: 'dominate', label: 'Dominação' },
+    { id: 'fortitude', label: 'Fortitude' },
+    { id: 'obfuscate', label: 'Ofuscação' },
+    { id: 'potence', label: 'Potência' },
+    { id: 'presence', label: 'Presença' },
+    { id: 'protean', label: 'Metamorfose' },
+    { id: 'thaumaturgy', label: 'Taumaturgia' },
+  ]
+
+  function getDevDisciplineLevel(id) {
+    return Number(game?.disciplines?.[id] ?? 0)
+  }
+
+  function devSetDiscipline(id, level) {
+    const normalizedLevel = Math.max(0, Math.min(5, Number(level) || 0))
+
+    const originalDisciplines =
+      game?.devOriginalDisciplines ??
+      { ...(game?.disciplines ?? {}) }
+
+    const updatedGame = {
+      ...game,
+      devOriginalDisciplines: originalDisciplines,
+      disciplines: {
+        ...(game?.disciplines ?? {}),
+        [id]: normalizedLevel,
+      },
+    }
+
+    persist(updatedGame)
+  }
+
+  function devSetAllDisciplines(level) {
+    const normalizedLevel = Math.max(0, Math.min(5, Number(level) || 0))
+    const originalDisciplines =
+      game?.devOriginalDisciplines ??
+      { ...(game?.disciplines ?? {}) }
+
+    const disciplines = { ...(game?.disciplines ?? {}) }
+
+    DEV_DISCIPLINES.forEach(({ id }) => {
+      disciplines[id] = normalizedLevel
+    })
+
+    persist({
+      ...game,
+      devOriginalDisciplines: originalDisciplines,
+      disciplines,
+    })
+  }
+
+  function devRestoreDisciplines() {
+    if (!game?.devOriginalDisciplines) {
+      window.alert('Ainda não existe uma cópia das disciplinas originais.')
+      return
+    }
+
+    const updatedGame = {
+      ...game,
+      disciplines: { ...game.devOriginalDisciplines },
+    }
+
+    delete updatedGame.devOriginalDisciplines
+    persist(updatedGame)
+    window.alert('Disciplinas originais restauradas.')
+  }
+
+  function devCreatePoliceWanted() {
+    let updatedGame =
+      createPoliceWantedState(
+        game,
+        {
+          level: 2,
+
+          escapedPolice:
+            true,
+
+          witnessEvidence:
+            true,
+
+          cameraEvidence:
+            false,
+
+          supernaturalSeen:
+            false,
+
+          violenceAgainstPolice:
+            false,
+
+          reason:
+            'dev-test',
+        }
+      )
+
+    updatedGame = {
+      ...updatedGame,
+
+      flags: {
+        ...(updatedGame.flags ??
+          {}),
+
+        escapedPolice:
+          true,
+
+        policeWantedRegistered:
+          true,
+
+        policeLookingForPlayer:
+          true,
+
+        policeEscapeMethod:
+          'dev',
+      },
+    }
+
+    persist(
+      updatedGame
+    )
+
+    window.alert(
+      'Procura policial DEV criada no nível 2.'
+    )
+  }
+
+  function devClearPoliceWanted() {
+    let updatedGame =
+      clearPoliceWanted(
+        game,
+        {
+          reason:
+            'dev-clear',
+        }
+      )
+
+    updatedGame = {
+      ...updatedGame,
+
+      flags: {
+        ...(updatedGame.flags ??
+          {}),
+
+        escapedPolice:
+          false,
+
+        policeWantedRegistered:
+          false,
+
+        policeLookingForPlayer:
+          false,
+
+        policeWantedEncounter:
+          false,
+
+        policeWantedLevel:
+          0,
+
+        policeEscapeMethod:
+          null,
+      },
+    }
+
+    persist(
+      updatedGame
+    )
+
+    window.alert(
+      'Procura policial removida.'
+    )
+  }
+
+  function devShowPoliceWanted() {
+    const wanted =
+      getPoliceWantedState(
+        game
+      )
+
+    console.log(
+      'PROCURA POLICIAL',
+      wanted
+    )
+
+    window.alert(
+      `Procura policial: ${wanted.label} (nível ${wanted.level}).`
+    )
   }
 
   function devShowDisciplines() {
@@ -3055,8 +6418,9 @@ export default function Game({
 
   function devGiveArsenal() {
     const updatedGame =
-      giveCombatTestItems(
-        game
+      grantDevCombatArsenal(
+        game,
+        60
       )
 
     saveGame(
@@ -3068,7 +6432,27 @@ export default function Game({
     )
 
     window.alert(
-      'Arsenal e munição adicionados.'
+      'Arsenal de teste e munição adicionados.'
+    )
+  }
+
+  function devGiveAmmo() {
+    const updatedGame =
+      grantDevAmmo(
+        game,
+        60
+      )
+
+    saveGame(
+      updatedGame
+    )
+
+    setGame(
+      updatedGame
+    )
+
+    window.alert(
+      'Munição de teste adicionada.'
     )
   }
 
@@ -3168,6 +6552,71 @@ export default function Game({
     )
   }
 
+  function devCreatePoliceResponse() {
+    if (!game) {
+      return
+    }
+
+    const updatedGame =
+      createPoliceResponse(
+        game,
+        {
+          reason: 'dev-combat-exposure',
+          severity: 'high',
+          policePresence: Math.max(
+            0.75,
+            Number(
+              game?.world
+                ?.location
+                ?.policePresence ??
+              0
+            )
+          ),
+        }
+      )
+
+    if (updatedGame === game) {
+      window.alert(
+        'Não foi possível criar a resposta policial. Pode já existir uma ocorrência ativa.'
+      )
+      return
+    }
+
+    saveGame(updatedGame)
+    setGame(updatedGame)
+
+    window.alert(
+      `Polícia acionada. Previsão: ${updatedGame.policeResponse?.responseMinutes ?? '?'} minuto(s).`
+    )
+  }
+
+  function devProcessPoliceResponse() {
+    if (!game) {
+      return
+    }
+
+    const result =
+      processPoliceResponse(
+        game
+      )
+
+    saveGame(result.game)
+    setGame(result.game)
+
+    if (result.interrupted) {
+      resetSceneSystems()
+      clearTest()
+      goToTop()
+      return
+    }
+
+    window.alert(
+      result.event
+        ? `Evento policial: ${result.event.type}`
+        : 'A polícia ainda não chegou.'
+    )
+  }
+
   function devShowSave() {
     console.log(
       '============================'
@@ -3207,6 +6656,244 @@ export default function Game({
 
     window.alert(
       'Save enviado para o Console.'
+    )
+  }
+
+
+  function devForcePoliceRecognition() {
+    if (!game) {
+      return
+    }
+
+    let updatedGame =
+      createPoliceWantedState(
+        game,
+        {
+          level: 4,
+
+          escapedPolice:
+            true,
+
+          witnessEvidence:
+            true,
+
+          cameraEvidence:
+            true,
+
+          violenceAgainstPolice:
+            false,
+
+          supernaturalSeen:
+            false,
+
+          escapeMethod:
+            'running',
+
+          reason:
+            'dev-force-recognition',
+        }
+      )
+
+    const recognition =
+      rollPoliceRecognition(
+        updatedGame,
+        {
+          closeInspection:
+            true,
+
+          knownIdentity:
+            true,
+        }
+      )
+
+    updatedGame =
+      registerPoliceRecognition(
+        updatedGame,
+        recognition
+      )
+
+    const nextScene =
+      recognition.recognized
+        ? 'police_recognized'
+        : 'police_stop'
+
+    updatedGame =
+      transitionToScene(
+        updatedGame,
+        nextScene,
+        {
+          flags: {
+            policeTrouble:
+              true,
+
+            policeStopActive:
+              true,
+
+            policeWantedEncounter:
+              true,
+
+            policeWantedLevel:
+              4,
+
+            policeRecognitionChecked:
+              true,
+
+            policeRecognizedPlayer:
+              Boolean(
+                recognition.recognized
+              ),
+
+            policeRecognitionChance:
+              recognition.chance,
+
+            policeRecognitionRoll:
+              recognition.roll ??
+              null,
+          },
+
+          historyItem: {
+            type:
+              'dev-police-recognition',
+
+            recognized:
+              Boolean(
+                recognition.recognized
+              ),
+
+            chance:
+              recognition.chance,
+
+            roll:
+              recognition.roll ??
+              null,
+
+            timestamp:
+              new Date()
+                .toISOString(),
+          },
+        }
+      )
+
+    persist(
+      updatedGame
+    )
+
+    resetSceneSystems()
+    clearTest()
+    goToTop()
+
+    window.alert(
+      [
+        'Reconhecimento policial DEV',
+        '',
+        `Chance: ${Math.round(
+          recognition.chance *
+          100
+        )}%`,
+        `Rolagem: ${
+          typeof recognition.roll ===
+          'number'
+            ? recognition.roll.toFixed(
+                3
+              )
+            : '—'
+        }`,
+        `Resultado: ${
+          recognition.recognized
+            ? 'RECONHECIDO'
+            : 'NÃO RECONHECIDO'
+        }`,
+      ].join('\n')
+    )
+  }
+
+  function devShowPoliceRecognition() {
+    if (!game) {
+      return
+    }
+
+    const wanted =
+      getPoliceWantedState(
+        game
+      )
+
+    const chance =
+      getPoliceRecognitionChance(
+        game,
+        {
+          closeInspection:
+            true,
+
+          knownIdentity:
+            Boolean(
+              game?.flags
+                ?.policeKnownIdentity
+            ),
+        }
+      )
+
+    const lastChance =
+      Number(
+        game?.flags
+          ?.policeRecognitionChance
+      )
+
+    const lastRoll =
+      game?.flags
+        ?.policeRecognitionRoll
+
+    const recognized =
+      game?.flags
+        ?.policeRecognizedPlayer
+
+    window.alert(
+      [
+        `Procura: Nível ${wanted.level} — ${wanted.label}`,
+        `Descrição: ${Math.round(
+          wanted.descriptionQuality *
+          100
+        )}%`,
+        `Câmera: ${
+          wanted.cameraEvidence
+            ? 'SIM'
+            : 'NÃO'
+        }`,
+        `Testemunhas: ${
+          wanted.witnessEvidence
+            ? 'SIM'
+            : 'NÃO'
+        }`,
+        '',
+        `Chance atual de reconhecimento: ${Math.round(
+          chance *
+          100
+        )}%`,
+        `Última chance registrada: ${
+          Number.isFinite(
+            lastChance
+          )
+            ? `${Math.round(
+                lastChance *
+                100
+              )}%`
+            : '—'
+        }`,
+        `Última rolagem: ${
+          typeof lastRoll ===
+          'number'
+            ? lastRoll.toFixed(
+                3
+              )
+            : '—'
+        }`,
+        `Último resultado: ${
+          recognized === true
+            ? 'RECONHECIDO'
+            : recognized === false
+              ? 'NÃO RECONHECIDO'
+              : '—'
+        }`,
+      ].join('\n')
     )
   }
 
@@ -3263,9 +6950,18 @@ export default function Game({
             </button>
           )}
 
-          <button type="button" onClick={handleOpenTravel} disabled={Boolean(pendingTest || interactionBlocked)}>
-            Viajar
-          </button>
+          <button
+              type="button"
+              onClick={handleOpenTravel}
+              disabled={Boolean(
+                pendingTest ||
+                interactionBlocked ||
+                game?.flags
+                  ?.policeChase
+              )}
+            >
+              Viajar
+            </button>
 
           {availableDisciplineChoices.length > 0 && (
             <button type="button" onClick={handleOpenDisciplines} disabled={interactionBlocked}>
@@ -3276,7 +6972,17 @@ export default function Game({
           <button type="button" onClick={() => setMasqueradeOpen(true)} disabled={interactionBlocked}>
             Máscara
           </button>
-
+<button
+  type="button"
+  onClick={() =>
+    setQuestOpen(true)
+  }
+  disabled={
+    interactionBlocked
+  }
+>
+  Missões
+</button>
           <button
             type="button"
             onClick={onOpenSheet}
@@ -3403,6 +7109,60 @@ export default function Game({
               <span className="game-dev-label">Polícia / Disciplinas</span>
               <div className="game-dev-grid">
                 <button type="button" onClick={devGoToPolice}>Forçar Abordagem</button>
+
+                <button
+                  type="button"
+                  onClick={
+                    devForcePoliceRecognition
+                  }
+                >
+                  Forçar Reconhecimento
+                </button>
+
+                <button
+                  type="button"
+                  onClick={
+                    devShowPoliceRecognition
+                  }
+                >
+                  Ver Reconhecimento
+                </button>
+
+                <button
+                  type="button"
+                  onClick={devCreatePoliceResponse}
+                >
+                  Criar Resposta Policial
+                </button>
+
+                <button
+                  type="button"
+                  onClick={devProcessPoliceResponse}
+                >
+                  Processar Resposta Policial
+                </button>
+
+                <button
+                  type="button"
+                  onClick={devCreatePoliceWanted}
+                >
+                  Criar Procura Nível 2
+                </button>
+
+                <button
+                  type="button"
+                  onClick={devShowPoliceWanted}
+                >
+                  Ver Procura Policial
+                </button>
+
+                <button
+                  type="button"
+                  onClick={devClearPoliceWanted}
+                >
+                  Limpar Procura Policial
+                </button>
+
                 <button type="button" onClick={devShowDisciplines}>Ver Disciplinas</button>
                 <button type="button" onClick={handleOpenDevCombatArena}>Arena de Combate</button>
                 <button
@@ -3419,6 +7179,55 @@ export default function Game({
                   Debug do Combate
                 </button>
               </div>
+
+              <div style={{ marginTop: '14px', display: 'grid', gap: '8px' }}>
+                {DEV_DISCIPLINES.map(({ id, label }) => {
+                  const level = getDevDisciplineLevel(id)
+
+                  return (
+                    <div
+                      key={id}
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr auto auto auto',
+                        alignItems: 'center',
+                        gap: '8px',
+                      }}
+                    >
+                      <span>{label}</span>
+                      <button
+                        type="button"
+                        onClick={() => devSetDiscipline(id, level - 1)}
+                        disabled={level <= 0}
+                      >
+                        −
+                      </button>
+                      <strong style={{ minWidth: '24px', textAlign: 'center' }}>
+                        {level}
+                      </strong>
+                      <button
+                        type="button"
+                        onClick={() => devSetDiscipline(id, level + 1)}
+                        disabled={level >= 5}
+                      >
+                        +
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="game-dev-grid" style={{ marginTop: '14px' }}>
+                <button type="button" onClick={() => devSetAllDisciplines(5)}>
+                  Todas nível 5
+                </button>
+                <button type="button" onClick={() => devSetAllDisciplines(0)}>
+                  Zerar disciplinas
+                </button>
+                <button type="button" onClick={devRestoreDisciplines}>
+                  Restaurar disciplinas da ficha
+                </button>
+              </div>
             </div>
 
             {/* COMBATE */}
@@ -3432,10 +7241,46 @@ export default function Game({
                 <button
                   type="button"
                   onClick={
+                    devStartLiviaQuest
+                  }
+                >
+                  DEV · Iniciar missão Lívia
+                </button>
+
+                <button
+                  type="button"
+                  onClick={
+                    devCompleteLiviaObjective
+                  }
+                >
+                  DEV · Completar objetivo
+                </button>
+
+                <button
+                  type="button"
+                  onClick={
+                    devCompleteLiviaQuest
+                  }
+                >
+                  DEV · Concluir missão
+                </button>
+
+                <button
+                  type="button"
+                  onClick={
                     devGiveArsenal
                   }
                 >
                   Dar Arsenal
+                </button>
+
+                <button
+                  type="button"
+                  onClick={
+                    devGiveAmmo
+                  }
+                >
+                  Dar Munição
                 </button>
 
                 <button
@@ -3588,7 +7433,49 @@ export default function Game({
       {/* ================================
           HISTÓRIA
       ================================ */}
+{scene.id === 'free_roam' &&
+game.world?.location?.id ===
+  'livia_apartment' ? (
+  <Haven
+  game={game}
 
+  onGameChange={
+    handleFreeRoamGameChange
+  }
+
+  onTravel={
+    handleTravel
+  }
+
+  onComputer={
+    handleHavenComputer
+  }
+
+  onInvestigateDisappearances={
+    handleHavenInvestigation
+  }
+/>
+) : scene.id === 'free_roam' ? (
+  <FreeRoam
+    game={game}
+
+    onGameChange={
+      handleFreeRoamGameChange
+    }
+
+    onTravel={
+      handleTravel
+    }
+
+    onOpenSheet={
+      onOpenSheet
+    }
+
+    onMenu={
+      onMenu
+    }
+  />
+) : (
       <section
         className="game-story"
         key={scene.id}
@@ -3743,7 +7630,7 @@ export default function Game({
           )
         )}
       </section>
-
+)}
       {/* ================================
           HUD
       ================================ */}
@@ -3879,28 +7766,31 @@ export default function Game({
       ================================ */}
 
       {hazard &&
-        scene.hazardEncounter &&
-        !combat &&
-        !frenzyOpen &&
-        !feedingOpen &&
-        !humanityOpen &&
-        !pendingAftermath && (
-          <HazardPanel
-            game={game}
+  (
+    scene.hazardEncounter ||
+    hazard?.type === 'sunlight'
+  ) &&
+  !combat &&
+  !frenzyOpen &&
+  !feedingOpen &&
+  !humanityOpen &&
+  !pendingAftermath && (
+    <HazardPanel
+      game={game}
 
-            hazard={
-              hazard
-            }
+      hazard={
+        hazard
+      }
 
-            onAction={
-              handleHazardAction
-            }
+      onAction={
+        handleHazardAction
+      }
 
-            onFinish={
-              handleHazardFinish
-            }
-          />
-        )}
+      onFinish={
+        handleHazardFinish
+      }
+    />
+  )}
 
       {devCombatArenaOpen && (
         <DevCombatArena
@@ -3913,6 +7803,16 @@ export default function Game({
           }
         />
       )}
+
+      {questOpen && (
+  <QuestPanel
+    game={game}
+
+    onClose={() =>
+      setQuestOpen(false)
+    }
+  />
+)}
 
       {combatDebugOpen &&
         combat && (
@@ -3938,12 +7838,11 @@ export default function Game({
       ================================ */}
 
       {combat &&
-        scene.combatEncounter &&
-        !hazard &&
-        !frenzyOpen &&
-        !feedingOpen &&
-        !humanityOpen &&
-        !pendingAftermath && (
+  !hazard &&
+  !frenzyOpen &&
+  !feedingOpen &&
+  !humanityOpen &&
+  !pendingAftermath && (
           <CombatPanel
             game={game}
 
@@ -3961,6 +7860,10 @@ export default function Game({
 
             onBoost={
               handleCombatBoost
+            }
+
+            onHeal={
+              handleCombatHeal
             }
 
             onEquipWeapon={
@@ -4015,7 +7918,10 @@ export default function Game({
       ================================ */}
 
       {frenzyOpen &&
-        scene.frenzyTrigger &&
+  (
+    awakeningFrenzyTrigger ||
+    scene.frenzyTrigger
+  ) &&
         !combat &&
         !hazard &&
         !pendingAftermath &&
@@ -4023,9 +7929,10 @@ export default function Game({
           <FrenzyTest
             game={game}
 
-            trigger={
-              scene.frenzyTrigger
-            }
+           trigger={
+  awakeningFrenzyTrigger ??
+  scene.frenzyTrigger
+}
 
             result={
               frenzyResult
@@ -4078,12 +7985,20 @@ export default function Game({
               feedingVictim
             }
 
+            stopFeedingRoll={
+              stopFeedingRoll
+            }
+
             onDrink={
               handleDrink
             }
 
             onStop={
               handleStopFeeding
+            }
+
+            onResolveStopFeeding={
+              handleResolveStopFeeding
             }
           />
         )}

@@ -4,11 +4,28 @@ import {
 
 import './FeedingPanel.css'
 
+function formatDice(
+  dice
+) {
+  if (
+    !Array.isArray(dice) ||
+    dice.length === 0
+  ) {
+    return '—'
+  }
+
+  return dice.join(
+    ', '
+  )
+}
+
 export default function FeedingPanel({
   game,
   victim,
+  stopFeedingRoll = null,
   onDrink,
   onStop,
+  onResolveStopFeeding,
 }) {
   const playerBlood =
     game?.blood?.current ?? 0
@@ -28,6 +45,22 @@ export default function FeedingPanel({
   const victimDead =
     !victim.alive ||
     victim.blood.current <= 0
+
+  const stopTestSuccess =
+    stopFeedingRoll
+      ?.result ===
+    'success'
+
+  const stopTestBotch =
+    stopFeedingRoll
+      ?.result ===
+    'botch'
+
+  const stopTestFailure =
+    Boolean(
+      stopFeedingRoll
+    ) &&
+    !stopTestSuccess
 
   return (
     <div className="feeding-overlay">
@@ -65,9 +98,7 @@ export default function FeedingPanel({
 
           <div className="feeding-character">
             <span>
-              {
-                victim.name
-              }
+              {victim.name}
             </span>
 
             <strong>
@@ -102,13 +133,98 @@ export default function FeedingPanel({
           </strong>
 
           <p>
-            {
-              state.description
-            }
+            {state.description}
           </p>
         </div>
 
-        {!victimDead &&
+        {stopFeedingRoll && (
+          <div className="feeding-message">
+            <span>
+              AUTOCONTROLE
+            </span>
+
+            <strong>
+              {
+                stopTestSuccess
+                  ? 'Você domina a Besta.'
+                  : stopTestBotch
+                    ? 'A Besta toma o controle.'
+                    : 'A Besta não quer parar.'
+              }
+            </strong>
+
+            <p>
+              Autocontrole:{' '}
+              {
+                stopFeedingRoll
+                  .virtueValue ??
+                '—'
+              }
+              {' · '}
+              Dificuldade:{' '}
+              {
+                stopFeedingRoll
+                  .difficulty ??
+                '—'
+              }
+            </p>
+
+            <p>
+              Dados:{' '}
+              {
+                formatDice(
+                  stopFeedingRoll
+                    .dice
+                )
+              }
+            </p>
+
+            <p>
+              Sucessos:{' '}
+              {
+                stopFeedingRoll
+                  .successes ??
+                0
+              }
+            </p>
+
+            {stopTestSuccess && (
+              <p>
+                Você consegue afastar
+                os dentes e interromper
+                a alimentação.
+              </p>
+            )}
+
+            {stopTestFailure && (
+              <p>
+                {
+                  stopTestBotch
+                    ? 'Você perde o controle de forma violenta. A Besta tenta arrancar mais sangue antes que você consiga reagir.'
+                    : 'O cheiro e o gosto do sangue vencem sua decisão. A Besta força você a beber mais.'
+                }
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={
+                onResolveStopFeeding
+              }
+            >
+              {
+                stopTestSuccess
+                  ? 'Afastar-se'
+                  : stopTestBotch
+                    ? 'A Besta assume'
+                    : 'A Besta bebe mais'
+              }
+            </button>
+          </div>
+        )}
+
+        {!stopFeedingRoll &&
+          !victimDead &&
           !playerFull && (
           <>
             <p className="feeding-description">
@@ -117,9 +233,9 @@ export default function FeedingPanel({
 
               A fome diminui.
 
-              Você ainda está no
-              controle e pode decidir
-              quando parar.
+              Você pode tentar parar,
+              mas uma fome intensa pode
+              exigir que domine a Besta.
             </p>
 
             <div className="feeding-actions">
@@ -148,13 +264,14 @@ export default function FeedingPanel({
                   onStop
                 }
               >
-                Parar
+                Tentar parar
               </button>
             </div>
           </>
         )}
 
-        {playerFull &&
+        {!stopFeedingRoll &&
+          playerFull &&
           !victimDead && (
           <div className="feeding-message">
             <strong>
@@ -163,7 +280,8 @@ export default function FeedingPanel({
 
             <p>
               Sua reserva de sangue
-              está cheia.
+              está cheia. A fome já
+              não força você a continuar.
             </p>
 
             <button
@@ -177,7 +295,8 @@ export default function FeedingPanel({
           </div>
         )}
 
-        {victimDead && (
+        {!stopFeedingRoll &&
+          victimDead && (
           <div className="feeding-death">
             <span>
               SILÊNCIO

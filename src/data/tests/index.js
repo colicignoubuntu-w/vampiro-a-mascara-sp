@@ -10,9 +10,14 @@ import {
   getHuntingChoiceTest,
 } from './huntingTests'
 
+import {
+  getPoliceChoiceTest,
+} from './policeTests'
+
 export function getChoiceTest(
   sceneId,
-  choiceId
+  choiceId,
+  game = null
 ) {
   return (
     getPrologueChoiceTest(
@@ -26,6 +31,11 @@ export function getChoiceTest(
     getHuntingChoiceTest(
       sceneId,
       choiceId
+    ) ??
+    getPoliceChoiceTest(
+      sceneId,
+      choiceId,
+      game
     ) ??
     null
   )

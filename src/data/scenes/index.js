@@ -10,6 +10,7 @@ import hazardScenes from './hazardScenes'
 import daySleepScenes from './daySleepScenes'
 import policeScenes from './policeScenes'
 import policeForceScenes from './policeForceScenes'
+import liviaApartmentScenes from './liviaApartmentScenes'
 
 const scenes = {
   ...prologueScenes,
@@ -25,6 +26,25 @@ const scenes = {
   ...policeScenes,
 
   /*
+    ========================================
+    APARTAMENTO DE LÍVIA
+    ========================================
+
+    Sequência narrativa da investigação
+    das coisas deixadas por Lívia.
+
+    Esta sequência também serve como
+    primeira missão investigativa real
+    da campanha.
+  */
+
+  ...liviaApartmentScenes,
+
+  /*
+    ========================================
+    POLÍCIA
+    ========================================
+
     Fica depois de policeScenes de propósito.
 
     Assim a versão nova de police_force

@@ -2965,3 +2965,89 @@ background 0.15s ease,
     gap: 14px;
   }
 }
+.combat-health-owner {
+  display: block;
+
+  color: #8e7b80;
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+
+  text-transform: uppercase;
+}
+
+.combat-health-title {
+  display: block;
+
+  margin-top: 7px;
+
+  color: #bd4252 !important;
+
+  font-size: 9px !important;
+
+  font-weight: 800;
+
+  letter-spacing: 0.14em;
+
+  text-transform: uppercase;
+}
+
+.combat-health-summary {
+  margin-top: 8px;
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 6px 14px;
+}
+
+.combat-health-summary small {
+  color: #857779;
+
+  font-size: 9px;
+}
+.combat-blood-turn-status {
+  margin-top: 10px;
+  margin-bottom: 12px;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  gap: 8px;
+}
+
+.combat-blood-turn-status > div {
+  padding: 10px 12px;
+
+  background:
+    rgba(90, 15, 25, 0.18);
+
+  border:
+    1px solid rgba(150, 45, 60, 0.28);
+}
+
+.combat-blood-turn-status span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #8f7b7f;
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.1em;
+
+  text-transform: uppercase;
+}
+
+.combat-blood-turn-status strong {
+  color: #d85b6e;
+
+  font-size: 16px;
+}

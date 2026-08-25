@@ -1,4 +1,8 @@
 import {
+  getBloodTurnState,
+} from '../../engine/vampire/bloodTurnEngine'
+
+import {
   getCombatActions,
   getCombatHealthSlots,
   getCombatRangeInfo,
@@ -169,6 +173,7 @@ export default function CombatPanel({
   onFinish,
 
   onBoost,
+  onHeal,
 
   onEquipWeapon,
   onEquipArmor,
@@ -216,7 +221,8 @@ export default function CombatPanel({
 
   const enemyHealth =
     getHealthInfo(
-      enemyDamage
+      combat.enemy
+        ?.health
     )
 
   const blood =
@@ -224,6 +230,10 @@ export default function CombatPanel({
       ?.current ??
     0
 
+  const bloodTurn =
+    getBloodTurnState(
+      game
+    )
   const strength =
     game?.attributes
       ?.physical
@@ -499,160 +509,239 @@ export default function CombatPanel({
         )}
 
         <div className="combat-health-grid">
-          <section className="combat-health-card">
-            <span>
-              VOCÊ
-            </span>
+  <section className="combat-health-card">
+    <span className="combat-health-owner">
+      VOCÊ
+    </span>
 
-            <strong>
-              {
-                playerHealth.label
-              }
-            </strong>
+    <span className="combat-health-title">
+      VITALIDADE
+    </span>
 
-            <div className="combat-health-boxes">
-              {healthSlots.map(
-                (
-                  slot,
-                  index
-                ) => (
-                  <span
-                    key={
-                      `player-health-${index}`
-                    }
-                    className={
-                      `combat-health-slot ${slot.type}`
-                    }
-                  >
-                    {
-                      slot.symbol
-                    }
-                  </span>
-                )
-              )}
-            </div>
+    <strong>
+      {
+        playerHealth.label
+      }
+    </strong>
 
-            <div className="combat-damage-legend">
-              <span>
-                / Contusão
-              </span>
+    <div className="combat-health-boxes">
+      {healthSlots.map(
+        (
+          slot,
+          index
+        ) => (
+          <span
+            key={
+              `player-health-${index}`
+            }
+            className={
+              `combat-health-slot ${slot.type}`
+            }
+          >
+            {
+              slot.symbol
+            }
+          </span>
+        )
+      )}
+    </div>
 
-              <span>
-                X Letal
-              </span>
+    <div className="combat-damage-legend">
+      <span>
+        / Contusão
+      </span>
 
-              <span>
-                * Agravado
-              </span>
-            </div>
+      <span>
+        X Letal
+      </span>
 
-            <small>
-              Dano:
-              {' '}
-              {
-                playerDamage
-              }
-              /7
-            </small>
+      <span>
+        * Agravado
+      </span>
+    </div>
 
-            {playerHealth
-              .penalty !== 0 &&
-              playerHealth
-                .penalty !==
-                null && (
-              <p>
-                Penalidade:
-                {' '}
-                {
-                  playerHealth
-                    .penalty
-                }
-              </p>
-            )}
-          </section>
+    <div className="combat-health-summary">
+      <small>
+        Dano:
+        {' '}
+        {
+          playerDamage
+        }
+        /
+        {
+          game?.health
+            ?.maximum ??
+          7
+        }
+      </small>
 
-          <section className="combat-health-card enemy">
-            <span>
-              {
-                combat.enemy
-                  .name
-              }
-            </span>
+      <small>
+        Sangue:
+        {' '}
+        {
+          game?.blood
+            ?.current ??
+          0
+        }
+        /
+        {
+          game?.blood
+            ?.maximum ??
+          0
+        }
+      </small>
+    </div>
 
-            <strong>
-              {
-                enemyHealth.label
-              }
-            </strong>
+    {playerHealth.penalty !==
+      0 &&
+      playerHealth.penalty !==
+        null && (
+      <p>
+        Penalidade:
+        {' '}
+        {
+          playerHealth
+            .penalty
+        }
+      </p>
+    )}
+  </section>
 
-            <div className="combat-health-boxes">
-              {getCombatHealthSlots(
-                combat.enemy
-                  .health
-              ).map(
-                (
-                  slot,
-                  index
-                ) => (
-                  <span
-                    key={
-                      `enemy-health-${index}`
-                    }
-                    className={
-                      `combat-health-slot ${slot.type}`
-                    }
-                  >
-                    {
-                      slot.symbol
-                    }
-                  </span>
-                )
-              )}
-            </div>
+  <section className="combat-health-card enemy">
+    <span className="combat-health-owner">
+      {
+        combat.enemy
+          .name
+      }
+    </span>
 
-            <small>
-              Dano:
-              {' '}
-              {
-                enemyDamage
-              }
-              /
-              {
-                combat.enemy
-                  ?.health
-                  ?.maximum ??
-                7
-              }
-            </small>
+    <span className="combat-health-title">
+      VITALIDADE
+    </span>
 
-            {combat.enemy
-              ?.status
-              ?.staked && (
-              <p className="combat-staked">
-                ESTACADO ·
-                PARALISADO
-              </p>
-            )}
+    <strong>
+      {
+        enemyHealth.label
+      }
+    </strong>
 
-            {combat.enemy
-              ?.status
-              ?.frenzy
-              ?.active && (
-              <p className="combat-frenzy">
-                {
-                  combat.enemy
-                    .status
-                    .frenzy
-                    .type ===
-                    'fear'
-                    ? 'RÖTSCHRECK'
-                    : 'FRENESI'
-                }
-              </p>
-            )}
-          </section>
-        </div>
+    <div className="combat-health-boxes">
+      {getCombatHealthSlots(
+        combat.enemy
+          .health
+      ).map(
+        (
+          slot,
+          index
+        ) => (
+          <span
+            key={
+              `enemy-health-${index}`
+            }
+            className={
+              `combat-health-slot ${slot.type}`
+            }
+          >
+            {
+              slot.symbol
+            }
+          </span>
+        )
+      )}
+    </div>
 
+    <div className="combat-damage-legend">
+      <span>
+        / Contusão
+      </span>
+
+      <span>
+        X Letal
+      </span>
+
+      <span>
+        * Agravado
+      </span>
+    </div>
+
+    <div className="combat-health-summary">
+      <small>
+        Dano:
+        {' '}
+        {
+          enemyDamage
+        }
+        /
+        {
+          combat.enemy
+            ?.health
+            ?.maximum ??
+          7
+        }
+      </small>
+
+      {combat.enemy
+        ?.vampire && (
+        <small>
+          Sangue:
+          {' '}
+          {
+            combat.enemy
+              ?.blood
+              ?.current ??
+            0
+          }
+          /
+          {
+            combat.enemy
+              ?.blood
+              ?.maximum ??
+            0
+          }
+        </small>
+      )}
+    </div>
+
+    {enemyHealth.penalty !==
+      0 &&
+      enemyHealth.penalty !==
+        null && (
+      <p>
+        Penalidade:
+        {' '}
+        {
+          enemyHealth
+            .penalty
+        }
+      </p>
+    )}
+
+    {combat.enemy
+      ?.status
+      ?.staked && (
+      <p className="combat-staked">
+        ESTACADO · PARALISADO
+      </p>
+    )}
+
+    {combat.enemy
+      ?.status
+      ?.frenzy
+      ?.active && (
+      <p className="combat-frenzy">
+        {
+          combat.enemy
+            .status
+            .frenzy
+            .type ===
+            'fear'
+            ? 'RÖTSCHRECK'
+            : 'FRENESI'
+        }
+      </p>
+    )}
+  </section>
+</div>
         {combat.status ===
           'active' && (
           <section className="combat-equipment">
@@ -899,6 +988,35 @@ export default function CombatPanel({
         {combat.status ===
           'active' && (
           <section className="combat-blood-boost">
+            <div className="combat-blood-turn-status">
+  <div>
+    <span>
+      USADO NESTE TURNO
+    </span>
+
+    <strong>
+      {
+        bloodTurn.spent
+      }
+      /
+      {
+        bloodTurn.limit
+      }
+    </strong>
+  </div>
+
+  <div>
+    <span>
+      RESTANTE
+    </span>
+
+    <strong>
+      {
+        bloodTurn.remaining
+      }
+    </strong>
+  </div>
+</div>
             <div className="combat-blood-header">
               <div>
                 <span>
@@ -917,11 +1035,45 @@ export default function CombatPanel({
               </small>
             </div>
 
+            <div className="combat-healing-action">
+              <button
+                type="button"
+                disabled={
+                  blood <= 0 ||
+                  bloodTurn.remaining <= 0 ||
+                  (
+                    (game?.health
+                      ?.bashing ??
+                      0) <= 0 &&
+                    (game?.health
+                      ?.lethal ??
+                      0) <= 0
+                  )
+                }
+                onClick={
+                  onHeal
+                }
+              >
+                <span>
+                  CURAR FERIMENTO
+                </span>
+
+                <strong>
+                  1 ponto de sangue
+                </strong>
+
+                <small>
+                  Cura dano de Contusão ou Letal
+                </small>
+              </button>
+            </div>
+
             <div className="combat-boost-grid">
               <button
                 type="button"
                 disabled={
-                  blood <= 0
+                  blood <= 0 ||
+                  bloodTurn.remaining <= 0
                 }
                 onClick={() =>
                   onBoost(
@@ -952,7 +1104,8 @@ export default function CombatPanel({
               <button
                 type="button"
                 disabled={
-                  blood <= 0
+                  blood <= 0 ||
+                  bloodTurn.remaining <= 0
                 }
                 onClick={() =>
                   onBoost(
@@ -983,7 +1136,8 @@ export default function CombatPanel({
               <button
                 type="button"
                 disabled={
-                  blood <= 0
+                  blood <= 0 ||
+                  bloodTurn.remaining <= 0
                 }
                 onClick={() =>
                   onBoost(
@@ -1048,9 +1202,23 @@ export default function CombatPanel({
                       action.id
                     }
                     type="button"
-                    className="combat-discipline-action"
+                    className={
+                      (
+                        action.disabled ||
+                        (
+                          (action.bloodCost ?? 0) >
+                          bloodTurn.remaining
+                        )
+                      )
+                        ? 'combat-discipline-action combat-discipline-action--disabled'
+                        : 'combat-discipline-action'
+                    }
                     disabled={
-                      action.disabled
+                      action.disabled ||
+                      (
+                        (action.bloodCost ?? 0) >
+                        bloodTurn.remaining
+                      )
                     }
                     onClick={() =>
                       onDisciplineAction?.(
@@ -1107,7 +1275,12 @@ export default function CombatPanel({
                           action.type ===
                           'deactivation'
                             ? 'Desativar'
-                            : 'Ativar'
+                            : (
+                                (action.bloodCost ?? 0) >
+                                bloodTurn.remaining
+                              )
+                              ? 'Limite de sangue'
+                              : 'Ativar'
                         }
                       </span>
                     </div>

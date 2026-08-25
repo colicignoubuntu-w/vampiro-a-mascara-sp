@@ -1,3 +1,8 @@
+import {
+  canSpendBloodThisTurn,
+  spendBloodThisTurn,
+} from '../bloodTurnEngine'
+
 function normalizeText(
   value
 ) {
@@ -2695,42 +2700,59 @@ export function canUseDisciplinePower(
     }
   }
 
-  const currentBlood =
-    safeNumber(
-      game?.blood
-        ?.current,
-      0
-    )
+  /*
+    ========================================
+    CUSTO DE SANGUE
+
+    Todo poder com bloodCost > 0 passa
+    pelo controlador central do limite
+    de sangue por turno.
+    ========================================
+  */
 
   const bloodCost =
-    safeNumber(
-      power.bloodCost,
-      0
+    Math.max(
+      0,
+      safeNumber(
+        power.bloodCost,
+        0
+      )
     )
 
   if (
-    bloodCost >
-    currentBlood
+    bloodCost > 0
   ) {
-    return {
-      allowed: false,
+    const bloodCheck =
+      canSpendBloodThisTurn({
+        game,
 
-      reason:
-        'Sangue insuficiente.',
+        amount:
+          bloodCost,
+      })
+
+    if (
+      !bloodCheck.allowed
+    ) {
+      return {
+        allowed: false,
+
+        reason:
+          bloodCheck.message ??
+          'Você não pode gastar esse sangue neste turno.',
+      }
     }
   }
 
-  const target =
-    {
-      ...(context.target ??
-        {}),
+  const target = {
+    ...(context.target ??
+      {}),
 
-      requiresEyeContact:
-        power.requiresEyeContact ??
-        context.target
-          ?.requiresEyeContact ??
-        false,
-    }
+    requiresEyeContact:
+      power.requiresEyeContact ??
+      context.target
+        ?.requiresEyeContact ??
+      false,
+  }
 
   /*
     Caso o poder declare tipos de alvo,
@@ -2833,7 +2855,17 @@ export function payDisciplineCost(
     )
 
   if (!power) {
-    return game
+    return {
+      success: false,
+
+      reason:
+        'power-not-found',
+
+      message:
+        'Poder não encontrado.',
+
+      game,
+    }
   }
 
   const cost =
@@ -2845,42 +2877,97 @@ export function payDisciplineCost(
       )
     )
 
+  /*
+    Poder sem custo de sangue.
+  */
+
   if (
     cost === 0
   ) {
-    return game
-  }
+    return {
+      success: true,
 
-  const current =
-    safeNumber(
-      game?.blood
-        ?.current,
-      0
-    )
+      reason: null,
 
-  if (
-    current <
-    cost
-  ) {
-    return game
-  }
+      message: null,
 
-  return {
-    ...game,
+      game,
 
-    blood: {
-      ...(game.blood ??
-        {}),
+      bloodCost: 0,
 
-      current:
+      spentThisTurn:
+        game?.blood
+          ?.spentThisTurn ??
+        0,
+
+      remainingThisTurn:
         Math.max(
           0,
-          current - cost
+          safeNumber(
+            game?.blood
+              ?.perTurn,
+            1
+          ) -
+          safeNumber(
+            game?.blood
+              ?.spentThisTurn,
+            0
+          )
         ),
-    },
+    }
+  }
+
+  /*
+    Todo gasto de vitae passa pelo
+    controlador central de sangue.
+  */
+
+  const spendResult =
+    spendBloodThisTurn({
+      game,
+
+      amount:
+        cost,
+
+      reason:
+        `discipline-${power.id}`,
+    })
+
+  if (
+    !spendResult.success
+  ) {
+    return {
+      success: false,
+
+      reason:
+        spendResult.reason,
+
+      message:
+        spendResult.message,
+
+      game,
+
+      bloodCost:
+        cost,
+
+      spentThisTurn:
+        spendResult
+          .spentThisTurn ??
+        0,
+
+      remainingThisTurn:
+        spendResult
+          .remainingThisTurn ??
+        0,
+    }
+  }
+
+  const updatedGame = {
+    ...spendResult.game,
 
     history: [
-      ...(game.history ??
+      ...(spendResult.game
+        ?.history ??
         []),
 
       {
@@ -2896,11 +2983,40 @@ export function payDisciplineCost(
         bloodCost:
           cost,
 
+        bloodSpentThisTurn:
+          spendResult
+            .spentThisTurn,
+
+        bloodPerTurn:
+          spendResult.limit,
+
         timestamp:
           new Date()
             .toISOString(),
       },
     ],
+  }
+
+  return {
+    success: true,
+
+    reason: null,
+
+    message: null,
+
+    game:
+      updatedGame,
+
+    bloodCost:
+      cost,
+
+    spentThisTurn:
+      spendResult
+        .spentThisTurn,
+
+    remainingThisTurn:
+      spendResult
+        .remainingThisTurn,
   }
 }
 

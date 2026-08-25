@@ -12,6 +12,10 @@ import {
   minutesUntilSunrise,
 } from '../engine/time/timeEngine'
 
+import {
+  applyQuestEvents,
+} from '../engine/quests/questEventEngine'
+
 /*
   ========================================
   SAVE
@@ -58,9 +62,14 @@ export function loadGame() {
     Mantém compatibilidade com
     saves antigos.
 
-    Se o save foi criado antes de
-    termos horário de nascer/pôr do sol,
-    adicionamos os valores padrão.
+    DAY:
+    dia do calendário.
+
+    NIGHT:
+    noite vampírica.
+
+    Saves antigos que não possuem
+    day começam no Dia 1.
   */
 
   return {
@@ -68,6 +77,10 @@ export function loadGame() {
 
     world: {
       ...(game.world ?? {}),
+
+      day:
+        game.world
+          ?.day ?? 1,
 
       night:
         game.world
@@ -114,12 +127,12 @@ export function loadGame() {
 /*
   ========================================
   COMPATIBILIDADE
+  ========================================
 
   Alguns arquivos antigos podem ainda
   importar addMinutes().
 
-  Agora ela usa o novo timeEngine.
-  ========================================
+  Agora ela usa o timeEngine.
 */
 
 export function addMinutes(
@@ -166,6 +179,14 @@ export function getTimeInfo(
         world
       ),
 
+    day:
+      world?.day ??
+      1,
+
+    night:
+      world?.night ??
+      1,
+
     minutesUntilSunrise:
       minutesUntilSunrise(
         world
@@ -177,9 +198,6 @@ export function getTimeInfo(
   ========================================
   VERIFICAR SE UMA AÇÃO ATRAVESSA
   O AMANHECER
-
-  Isso será útil depois para mostrar
-  alertas antes de viagens longas.
   ========================================
 */
 
@@ -198,15 +216,16 @@ export function actionCrossesSunrise(
 /*
   ========================================
   AVANÇAR TEMPO MANUALMENTE
+  ========================================
 
   Pode ser usado por:
+
   - combate
   - alimentação
   - viagem
   - espera
   - investigação
   - uso de disciplinas
-  ========================================
 */
 
 export function advanceTime(
@@ -260,6 +279,10 @@ export function applyChoice(
         choice.flags ??
         {},
 
+      questEvents:
+        choice.questEvents ??
+        [],
+
       historyType:
         'choice',
 
@@ -296,9 +319,9 @@ export function applyTestOutcome(
     ]
 
   /*
-    Se esse teste não tiver um resultado
-    específico, usa o comportamento normal
-    da escolha.
+    Se o teste não tiver um resultado
+    específico, usa o comportamento
+    normal da escolha.
   */
 
   if (!outcome) {
@@ -329,6 +352,14 @@ export function applyTestOutcome(
         ...(outcome.flags ??
           {}),
       },
+
+      questEvents: [
+        ...(choice.questEvents ??
+          []),
+
+        ...(outcome.questEvents ??
+          []),
+      ],
 
       historyType:
         'test-choice',
@@ -369,17 +400,19 @@ export function applyTestOutcome(
 /*
   ========================================
   TRANSIÇÃO NARRATIVA CENTRAL
+  ========================================
 
   Toda escolha normal e todo resultado
   de teste passam por aqui.
 
-  Isso garante que:
+  Isso garante:
+
   - tempo avance;
+  - calendário avance;
   - amanhecer seja detectado;
   - flags sejam preservadas;
   - histórico seja salvo;
   - próxima cena seja registrada.
-  ========================================
 */
 
 function applyNarrativeTransition(
@@ -431,6 +464,11 @@ function applyNarrativeTransition(
       game.world
     )
 
+  const dayBefore =
+    game.world
+      ?.day ??
+    1
+
   const sunriseWasCrossed =
     timeMinutes > 0
       ? crossesSunrise({
@@ -450,14 +488,14 @@ function applyNarrativeTransition(
   /*
     ========================================
     LOCAL DA CENA ATUAL
+    ========================================
 
     Durante a ação o personagem ainda
     está no local da cena atual.
 
     Quando a próxima cena for carregada,
-    updateSceneLocation() colocará o local
-    novo.
-    ========================================
+    updateSceneLocation() colocará o
+    local novo.
   */
 
   const gameWithLocation = {
@@ -477,9 +515,6 @@ function applyNarrativeTransition(
   /*
     ========================================
     AVANÇA TEMPO
-
-    advanceGameTime também adiciona um
-    registro "time-advance" ao history.
     ========================================
   */
 
@@ -501,6 +536,15 @@ function applyNarrativeTransition(
     formatGameTime(
       timedGame.world
     )
+
+  const dayAfter =
+    timedGame.world
+      ?.day ??
+    dayBefore
+
+  const calendarDayChange =
+    dayAfter -
+    dayBefore
 
   /*
     ========================================
@@ -530,6 +574,12 @@ function applyNarrativeTransition(
     minutes:
       timeMinutes,
 
+    dayBefore,
+
+    dayAfter,
+
+    calendarDayChange,
+
     timeBefore,
 
     timeAfter,
@@ -558,7 +608,7 @@ function applyNarrativeTransition(
     ========================================
   */
 
-  const updatedGame = {
+  const transitionedGame = {
     ...timedGame,
 
     flags: {
@@ -569,12 +619,8 @@ function applyNarrativeTransition(
         {}),
 
       /*
-        Esta flag é extremamente útil.
-
-        O Game.jsx já verifica o horário,
-        mas com ela também sabemos que
-        especificamente uma ação fez o
-        personagem atravessar o amanhecer.
+        Esta flag indica que uma ação
+        específica atravessou o amanhecer.
       */
 
       ...(sunriseWasCrossed
@@ -591,6 +637,21 @@ function applyNarrativeTransition(
             sunriseCrossedChoice:
               transition.choiceId ??
               null,
+          }
+        : {}),
+
+      /*
+        Marca mudança de dia do
+        calendário quando ocorreu.
+      */
+
+      ...(calendarDayChange > 0
+        ? {
+            calendarDayAdvanced:
+              true,
+
+            lastCalendarDayChange:
+              calendarDayChange,
           }
         : {}),
     },
@@ -619,6 +680,12 @@ function applyNarrativeTransition(
       null,
   }
 
+  const updatedGame =
+    applyQuestEvents(
+      transitionedGame,
+      transition.questEvents
+    )
+
   saveGame(
     updatedGame
   )
@@ -629,10 +696,10 @@ function applyNarrativeTransition(
 /*
   ========================================
   ATUALIZAR LOCALIZAÇÃO DA CENA
+  ========================================
 
   Executado pelo Game.jsx quando a
   próxima cena entra em tela.
-  ========================================
 */
 
 export function updateSceneLocation(

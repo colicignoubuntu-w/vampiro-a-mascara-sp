@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useState,
 } from 'react'
 
@@ -51,8 +52,9 @@ import {
 } from '../../engine/masquerade/masqueradeEngine'
 
 import {
-  addMinutes,
-} from '../../utils/gameState'
+  advanceGameTime,
+  isDaytime,
+} from '../../engine/time/timeEngine'
 
 import './FreeRoam.css'
 
@@ -174,6 +176,12 @@ export default function FreeRoam({
     setMasqueradeEvent,
   ] = useState(null)
 
+  /*
+    ========================================
+    LOCALIZAÇÃO
+    ========================================
+  */
+
   const locationId =
     game.world
       ?.location
@@ -183,6 +191,40 @@ export default function FreeRoam({
     getLocation(
       locationId
     )
+
+  /*
+    ========================================
+    ESTADO DO DIA
+    ========================================
+  */
+
+  const daytime =
+    isDaytime(
+      game.world
+    )
+
+  const shelterLocationId =
+    game.flags
+      ?.sunlightShelterLocationId ??
+    null
+
+  const shelteredHere =
+    Boolean(
+      game.flags
+        ?.sunlightSheltered
+    ) &&
+    shelterLocationId ===
+      locationId
+
+  const shelteredDuringDay =
+    daytime &&
+    shelteredHere
+
+  /*
+    ========================================
+    ESTADOS DO PERSONAGEM
+    ========================================
+  */
 
   const hunger =
     getHungerLabel(
@@ -194,7 +236,9 @@ export default function FreeRoam({
   const canHunt =
     Boolean(
       location?.hunting
-    )
+        ?.enabled
+    ) &&
+    !shelteredDuringDay
 
   const visiblyBloody =
     isVisiblyBloody(
@@ -214,20 +258,344 @@ export default function FreeRoam({
       game
     )
 
+  /*
+    ========================================
+    REAÇÃO PÚBLICA AO CHEGAR DE VIAGEM
+    ========================================
+
+    O Game.jsx marca uma checagem pendente
+    quando a viagem termina.
+
+    Aqui consumimos essa flag UMA vez.
+    Assim não existe loop de renderização.
+  */
+
+  useEffect(() => {
+    const pending =
+      Boolean(
+        game?.flags
+          ?.pendingPublicReactionCheck
+      )
+
+    if (!pending) {
+      return
+    }
+
+    if (!location) {
+      return
+    }
+
+    const expectedLocationId =
+      game?.flags
+        ?.publicReactionLocationId ??
+      null
+
+    if (
+      expectedLocationId &&
+      expectedLocationId !==
+        location.id
+    ) {
+      return
+    }
+
+    /*
+      Primeiro apagamos a checagem pendente.
+
+      Isso é importante para impedir que
+      uma mesma chegada gere várias reações
+      por causa de novos renders do React.
+    */
+
+    const clearedGame = {
+      ...game,
+
+      flags: {
+        ...(game.flags ?? {}),
+
+        pendingPublicReactionCheck:
+          false,
+
+        publicReactionLocationId:
+          null,
+
+        publicReactionReason:
+          null,
+      },
+    }
+
+    onGameChange(
+      clearedGame
+    )
+
+    /*
+      Se o personagem não estiver
+      visivelmente ensanguentado,
+      não existe reação pública por sangue.
+    */
+
+    if (
+      !isVisiblyBloody(
+        clearedGame
+      )
+    ) {
+      return
+    }
+
+    const event =
+      rollPublicReaction(
+        clearedGame,
+        location
+      )
+
+    if (event) {
+      setMasqueradeEvent(
+        event
+      )
+    }
+  }, [
+    game?.flags
+      ?.pendingPublicReactionCheck,
+
+    game?.flags
+      ?.publicReactionLocationId,
+
+    location?.id,
+  ])
+
+  /*
+    ========================================
+    TEMPO
+    ========================================
+  */
+
   function advanceTime(
     updatedGame,
-    minutes
+    minutes,
+    reason =
+      'Passagem do tempo'
   ) {
-    return {
+    return advanceGameTime(
+      updatedGame,
+      minutes,
+      {
+        reason,
+      }
+    )
+  }
+
+  /*
+    ========================================
+    ESPERAR ATÉ ANOITECER
+    ========================================
+  */
+
+  function waitUntilSunset() {
+    if (
+      !shelteredDuringDay
+    ) {
+      return
+    }
+
+    const currentHour =
+      Number(
+        game.world
+          ?.hour ?? 0
+      )
+
+    const currentMinute =
+      Number(
+        game.world
+          ?.minute ?? 0
+      )
+
+    const sunsetHour =
+      Number(
+        game.world
+          ?.sunsetHour ?? 18
+      )
+
+    const sunsetMinute =
+      Number(
+        game.world
+          ?.sunsetMinute ?? 30
+      )
+
+    const currentTotal =
+      currentHour *
+        60 +
+      currentMinute
+
+    const sunsetTotal =
+      sunsetHour *
+        60 +
+      sunsetMinute
+
+    let minutesToSunset =
+      sunsetTotal -
+      currentTotal
+
+    /*
+      Em situação normal isso sempre
+      será positivo, porque esta função
+      só aparece durante o dia.
+
+      Mantemos a proteção para saves
+      antigos ou horários inconsistentes.
+    */
+
+    if (
+      minutesToSunset <= 0
+    ) {
+      minutesToSunset =
+        1
+    }
+
+    let updatedGame =
+      advanceTime(
+        game,
+        minutesToSunset,
+        'Esperando protegido até o anoitecer'
+      )
+
+    updatedGame = {
       ...updatedGame,
 
-      world:
-        addMinutes(
-          updatedGame.world,
-          minutes
-        ),
+      flags: {
+        ...(updatedGame.flags ??
+          {}),
+
+        sunlightSheltered:
+          false,
+
+        sunlightShelterLocationId:
+          null,
+
+        sunriseCrossed:
+          false,
+      },
+
+      history: [
+        ...(updatedGame.history ??
+          []),
+
+        {
+          type:
+            'wait-until-sunset',
+
+          locationId,
+
+          minutes:
+            minutesToSunset,
+
+          day:
+            updatedGame.world
+              ?.day ?? 1,
+
+          hour:
+            updatedGame.world
+              ?.hour ?? 0,
+
+          minute:
+            updatedGame.world
+              ?.minute ?? 0,
+
+          timestamp:
+            new Date()
+              .toISOString(),
+        },
+      ],
     }
+
+    resetFeedingState()
+
+    setMapOpen(
+      false
+    )
+
+    setMessage(
+      'Você permanece escondido durante o dia. As horas passam lentamente. Quando o Sol finalmente desaparece, você pode voltar às ruas.'
+    )
+
+    onGameChange(
+      updatedGame
+    )
   }
+
+  /*
+    ========================================
+    SAIR DO ABRIGO DURANTE O DIA
+    ========================================
+  */
+
+  function leaveShelter() {
+    if (
+      !shelteredHere
+    ) {
+      return
+    }
+
+    const updatedGame = {
+      ...game,
+
+      flags: {
+        ...(game.flags ?? {}),
+
+        sunlightSheltered:
+          false,
+
+        sunlightShelterLocationId:
+          null,
+      },
+
+      history: [
+        ...(game.history ??
+          []),
+
+        {
+          type:
+            'left-sunlight-shelter',
+
+          locationId,
+
+          day:
+            game.world
+              ?.day ?? 1,
+
+          hour:
+            game.world
+              ?.hour ?? 0,
+
+          minute:
+            game.world
+              ?.minute ?? 0,
+
+          timestamp:
+            new Date()
+              .toISOString(),
+        },
+      ],
+    }
+
+    resetFeedingState()
+
+    setMapOpen(
+      false
+    )
+
+    setMessage(
+      'Você abandona a proteção do abrigo e volta para a rua. A luz do dia atinge o ambiente ao seu redor.'
+    )
+
+    onGameChange(
+      updatedGame
+    )
+  }
+
+  /*
+    ========================================
+    RESET ALIMENTAÇÃO
+    ========================================
+  */
 
   function resetFeedingState() {
     setPrey(null)
@@ -246,6 +614,12 @@ export default function FreeRoam({
 
     setFrenzyActive(false)
   }
+
+  /*
+    ========================================
+    REAÇÃO PÚBLICA
+    ========================================
+  */
 
   function maybeTriggerPublicReaction(
     gameState
@@ -269,19 +643,51 @@ export default function FreeRoam({
     }
   }
 
+  /*
+    ========================================
+    CAÇA
+    ========================================
+  */
+
   function searchForPrey() {
-    const found =
-      generatePrey(
-        locationId
+    if (
+      shelteredDuringDay
+    ) {
+      setMessage(
+        'Você não pode sair para caçar enquanto estiver escondido da luz do dia.'
       )
+
+      return
+    }
+
+    const preyLocation =
+      location?.hunting
+        ?.preyLocation
+
+    const found =
+      preyLocation
+        ? generatePrey(
+            preyLocation
+          )
+        : null
 
     const updatedGame =
       advanceTime(
         game,
-        10
+        10,
+        'Procurando uma presa'
       )
 
     onGameChange(
+      updatedGame
+    )
+
+    /*
+      Dez minutos circulando procurando
+      uma presa também podem chamar atenção.
+    */
+
+    maybeTriggerPublicReaction(
       updatedGame
     )
 
@@ -289,15 +695,25 @@ export default function FreeRoam({
       found
     )
 
-    setHuntingRoll(null)
+    setHuntingRoll(
+      null
+    )
 
-    setSelectedMethod(null)
+    setSelectedMethod(
+      null
+    )
 
-    setVictimBloodDrunk(0)
+    setVictimBloodDrunk(
+      0
+    )
 
-    setVictimCondition(null)
+    setVictimCondition(
+      null
+    )
 
-    setFrenzyActive(false)
+    setFrenzyActive(
+      false
+    )
 
     if (!found) {
       setMessage(
@@ -324,10 +740,21 @@ export default function FreeRoam({
     const updatedGame =
       advanceTime(
         game,
-        5
+        5,
+        'Tentativa de caça'
       )
 
     onGameChange(
+      updatedGame
+    )
+
+    /*
+      A tentativa de abordagem mantém o
+      personagem exposto em público por
+      mais alguns minutos.
+    */
+
+    maybeTriggerPublicReaction(
       updatedGame
     )
 
@@ -339,6 +766,12 @@ export default function FreeRoam({
       roll
     )
   }
+
+  /*
+    ========================================
+    HUMANIDADE
+    ========================================
+  */
 
   function startHumanityCheck(
     transgressionId,
@@ -382,6 +815,12 @@ export default function FreeRoam({
     setHumanityRoll(null)
   }
 
+  /*
+    ========================================
+    ALIMENTAÇÃO
+    ========================================
+  */
+
   function processFeeding(
     amount,
     options = {}
@@ -409,7 +848,8 @@ export default function FreeRoam({
     result.game =
       advanceTime(
         result.game,
-        2
+        2,
+        'Alimentação'
       )
 
     onGameChange(
@@ -706,6 +1146,12 @@ export default function FreeRoam({
     )
   }
 
+  /*
+    ========================================
+    TESTE DE HUMANIDADE
+    ========================================
+  */
+
   function rollHumanity() {
     if (
       !pendingHumanity
@@ -774,6 +1220,12 @@ export default function FreeRoam({
     )
   }
 
+  /*
+    ========================================
+    EVENTO DA MÁSCARA
+    ========================================
+  */
+
   function closeMasqueradeEvent(
     resolution
   ) {
@@ -838,6 +1290,12 @@ export default function FreeRoam({
       ),
   }
 
+  /*
+    ========================================
+    INTERFACE
+    ========================================
+  */
+
   return (
     <main className="free-roam-screen">
       <div className="free-roam-background" />
@@ -845,7 +1303,11 @@ export default function FreeRoam({
       <header className="free-roam-header">
         <div>
           <span>
-            NOITE LIVRE
+            {
+              shelteredDuringDay
+                ? 'ABRIGADO DURANTE O DIA'
+                : 'NOITE LIVRE'
+            }
           </span>
 
           <h1>
@@ -887,12 +1349,29 @@ export default function FreeRoam({
       <section className="free-roam-layout">
         <div className="free-roam-main">
           <section className="free-roam-description">
-            <p>
-              {
-                location?.description ??
-                'A cidade continua viva ao seu redor.'
-              }
-            </p>
+            {shelteredDuringDay ? (
+              <>
+                <p>
+                  Você permanece protegido
+                  da luz solar.
+                </p>
+
+                <blockquote>
+                  O dia domina São Paulo
+                  lá fora. Permanecer aqui
+                  é seguro. Sair agora
+                  significa voltar à
+                  exposição direta ao Sol.
+                </blockquote>
+              </>
+            ) : (
+              <p>
+                {
+                  location?.description ??
+                  'A cidade continua viva ao seu redor.'
+                }
+              </p>
+            )}
 
             {visiblyBloody && (
               <blockquote>
@@ -915,42 +1394,81 @@ export default function FreeRoam({
           </section>
 
           <section className="free-roam-actions">
-            <button
-              type="button"
-              onClick={() =>
-                setMapOpen(
-                  true
-                )
-              }
-            >
-              <strong>
-                Mapa
-              </strong>
+            {shelteredDuringDay ? (
+              <>
+                <button
+                  type="button"
+                  onClick={
+                    waitUntilSunset
+                  }
+                >
+                  <strong>
+                    Esperar até anoitecer
+                  </strong>
 
-              <span>
-                Escolher outro local
-              </span>
-            </button>
+                  <span>
+                    Permanecer protegido
+                    até o pôr do sol
+                  </span>
+                </button>
 
-            {canHunt && (
-              <button
-                type="button"
-                onClick={
-                  searchForPrey
-                }
-              >
-                <strong>
-                  Caçar
-                </strong>
+                <button
+                  type="button"
+                  onClick={
+                    leaveShelter
+                  }
+                >
+                  <strong>
+                    Sair do abrigo
+                  </strong>
 
-                <span>
-                  Procurar uma presa
-                </span>
-              </button>
+                  <span>
+                    Voltar para a rua
+                    mesmo sob a luz do dia
+                  </span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMapOpen(
+                      true
+                    )
+                  }
+                >
+                  <strong>
+                    Mapa
+                  </strong>
+
+                  <span>
+                    Escolher outro local
+                  </span>
+                </button>
+
+                {canHunt && (
+                  <button
+                    type="button"
+                    onClick={
+                      searchForPrey
+                    }
+                  >
+                    <strong>
+                      Caçar
+                    </strong>
+
+                    <span>
+                      Procurar uma presa
+                    </span>
+                  </button>
+                )}
+              </>
             )}
           </section>
 
-          {prey && (
+          {prey &&
+            !shelteredDuringDay && (
             <section className="hunting-panel">
               <span className="hunting-kicker">
                 PRESA
@@ -1195,6 +1713,19 @@ export default function FreeRoam({
         <aside className="free-roam-sidebar">
           <section>
             <span>
+              DIA
+            </span>
+
+            <strong>
+              {
+                game.world
+                  ?.day ?? 1
+              }
+            </strong>
+          </section>
+
+          <section>
+            <span>
               HORÁRIO
             </span>
 
@@ -1217,6 +1748,20 @@ export default function FreeRoam({
                   2,
                   '0'
                 )
+              }
+            </strong>
+          </section>
+
+          <section>
+            <span>
+              PERÍODO
+            </span>
+
+            <strong>
+              {
+                daytime
+                  ? 'DIA'
+                  : 'NOITE'
               }
             </strong>
           </section>
@@ -1386,7 +1931,8 @@ export default function FreeRoam({
         </aside>
       </section>
 
-      {mapOpen && (
+      {mapOpen &&
+        !shelteredDuringDay && (
         <CityMap
           game={game}
 

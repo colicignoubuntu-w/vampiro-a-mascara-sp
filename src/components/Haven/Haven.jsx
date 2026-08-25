@@ -5,14 +5,12 @@ import {
 import CityMap from '../CityMap/CityMap'
 
 import {
-  addMinutes,
-} from '../../utils/gameState'
+  advanceGameTime,
+} from '../../engine/time/timeEngine'
 
 import {
-  changeClothes,
   getBloodMessLabel,
   isVisiblyBloody,
-  shower,
 } from '../../engine/feeding/feedingEngine'
 
 import './Haven.css'
@@ -22,6 +20,7 @@ export default function Haven({
   onGameChange,
   onTravel,
   onComputer,
+  onInvestigateDisappearances,
 }) {
   const [
     mapOpen,
@@ -45,80 +44,108 @@ export default function Haven({
       game
     )
 
-  function takeShower() {
-    let updatedGame =
-      shower(
-        game
-      )
+  /*
+    ========================================
+    MISSÃO
+    OS MORTOS NÃO DORMEM
+    ========================================
+  */
 
-    updatedGame = {
-      ...updatedGame,
+  const strangeHospitalsQuest =
+    game?.quests
+      ?.strange_hospitals ??
+    null
 
-      world:
-        addMinutes(
-          updatedGame.world,
-          15
-        ),
+  const strangeHospitalsActive =
+    strangeHospitalsQuest
+      ?.status ===
+    'active'
+
+  const hospitalVictorDiscovered =
+    Boolean(
+      game?.flags
+        ?.hospitalVictorDiscovered
+    ) ||
+    Boolean(
+      game?.flags
+        ?.hospitalVictorIdentified
+    ) ||
+    Boolean(
+      game?.flags
+        ?.hospitalVictorUnlocked
+    )
+
+  const canInvestigateDisappearances =
+    strangeHospitalsActive &&
+    !hospitalVictorDiscovered
+
+  /*
+    ========================================
+    BANHO + TROCA DE ROUPA
+    ========================================
+
+    Uma única ação remove completamente
+    o sangue visível do corpo e das roupas.
+  */
+
+  function cleanUp() {
+    let updatedGame = {
+      ...game,
+
+      appearance: {
+        ...(game.appearance ??
+          {}),
+
+        bodyBlood:
+          0,
+
+        clothesBlood:
+          0,
+      },
+
+      history: [
+        ...(game.history ??
+          []),
+
+        {
+          type:
+            'haven-clean-up',
+
+          locationId:
+            game.world
+              ?.location
+              ?.id ??
+            'livia_apartment',
+
+          timestamp:
+            new Date()
+              .toISOString(),
+        },
+      ],
     }
+
+    /*
+      Banho + troca de roupa:
+      20 minutos.
+    */
+
+    updatedGame =
+      advanceGameTime(
+        updatedGame,
+        20,
+        {
+          reason:
+            'Tomar banho e trocar de roupa no refúgio',
+        }
+      )
 
     onGameChange(
       updatedGame
     )
 
-    if (
-      (
-        updatedGame
-          .appearance
-          ?.clothesBlood ??
-        0
-      ) > 0
-    ) {
-      setMessage(
-        'Depois de quinze minutos, o sangue desaparece da sua pele e do cabelo. Suas roupas, porém, continuam manchadas.'
-      )
-    } else {
-      setMessage(
-        'Você toma um banho e remove os últimos vestígios de sangue do corpo.'
-      )
-    }
-  }
-
-  function putOnCleanClothes() {
-    let updatedGame =
-      changeClothes(
-        game
-      )
-
-    updatedGame = {
-      ...updatedGame,
-
-      world:
-        addMinutes(
-          updatedGame.world,
-          5
-        ),
-    }
-
-    onGameChange(
-      updatedGame
+    setMessage(
+      'Você toma um banho, remove o sangue da pele e do cabelo e veste roupas limpas. Não há mais sangue visível em você.'
     )
-
-    if (
-      (
-        updatedGame
-          .appearance
-          ?.bodyBlood ??
-        0
-      ) > 0
-    ) {
-      setMessage(
-        'Você coloca roupas limpas, mas ainda há sangue seco na pele, rosto e cabelo. Um banho ainda seria uma boa ideia.'
-      )
-    } else {
-      setMessage(
-        'Você troca as roupas ensanguentadas por roupas limpas.'
-      )
-    }
   }
 
   return (
@@ -207,6 +234,25 @@ export default function Haven({
             </blockquote>
           )}
 
+          {strangeHospitalsActive &&
+            !hospitalVictorDiscovered && (
+              <blockquote>
+                Os arquivos deixados por
+                Lívia ainda contêm pistas
+                sobre pessoas desaparecidas
+                e registros hospitalares.
+              </blockquote>
+            )}
+
+          {hospitalVictorDiscovered && (
+            <blockquote>
+              As pistas levaram até o
+              Hospital Victor, na Vila
+              Mariana. O endereço já está
+              marcado no seu mapa.
+            </blockquote>
+          )}
+
           <blockquote>
             {message}
           </blockquote>
@@ -217,7 +263,7 @@ export default function Haven({
             type="button"
             onClick={() => {
               setMessage(
-                'O computador está bloqueado por senha. Talvez Lívia tenha deixado pistas.'
+                'O computador ainda guarda os arquivos e documentos deixados por Lívia.'
               )
 
               onComputer?.()
@@ -248,27 +294,33 @@ export default function Haven({
             Investigar o apartamento
           </button>
 
-          <button
-            type="button"
-            onClick={
-              takeShower
-            }
-          >
-            Tomar banho
-            {' '}
-            (+15 min)
-          </button>
+          {canInvestigateDisappearances && (
+            <button
+              type="button"
+              onClick={() => {
+                setMessage(
+                  'Você reúne os prontuários, anotações e listas de nomes deixados por Lívia.'
+                )
 
-          <button
-            type="button"
-            onClick={
-              putOnCleanClothes
-            }
-          >
-            Trocar de roupa
-            {' '}
-            (+5 min)
-          </button>
+                onInvestigateDisappearances?.()
+              }}
+            >
+              Investigar os desaparecimentos
+            </button>
+          )}
+
+          {visiblyBloody && (
+            <button
+              type="button"
+              onClick={
+                cleanUp
+              }
+            >
+              Tomar banho e trocar de roupa
+              {' '}
+              (+20 min)
+            </button>
+          )}
 
           <button
             type="button"

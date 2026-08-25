@@ -933,15 +933,41 @@ export function resolveCombatDisciplineAction({
     roll?.result ??
     'success'
 
-  let updatedGame =
-    payDisciplineCost(
-      game,
-      action.powerId
-    )
+  const payment =
+  payDisciplineCost(
+    game,
+    action.powerId
+  )
 
-  const effectResult =
-    applyDisciplineEffect(
-      updatedGame,
+if (
+  !payment.success
+) {
+  return {
+    success: false,
+
+    game,
+
+    combat,
+
+    log: [
+      {
+        type:
+          'discipline',
+
+        text:
+          payment.message ??
+          'Você não consegue pagar o custo dessa Disciplina.',
+      },
+    ],
+  }
+}
+
+let updatedGame =
+  payment.game
+
+const effectResult =
+  applyDisciplineEffect(
+    updatedGame,
       evaluation,
       roll ?? {
         result:

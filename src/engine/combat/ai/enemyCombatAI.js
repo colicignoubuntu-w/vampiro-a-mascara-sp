@@ -2,76 +2,181 @@ import {
   getWeapon,
 } from '../../../data/items'
 
-function safeNumber(value, fallback = 0) {
-  const parsed = Number(value)
-  return Number.isNaN(parsed) ? fallback : parsed
+import {
+  getEnemyMovementScores,
+  getEnemyPreferredDistance,
+} from '../movementTacticsEngine'
+
+function safeNumber(
+  value,
+  fallback = 0
+) {
+  const parsed =
+    Number(value)
+
+  return Number.isNaN(
+    parsed
+  )
+    ? fallback
+    : parsed
 }
 
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value))
+function clamp(
+  value,
+  min,
+  max
+) {
+  return Math.min(
+    max,
+    Math.max(
+      min,
+      value
+    )
+  )
 }
 
-function isVampire(enemy) {
+function isVampire(
+  enemy
+) {
   return Boolean(
     enemy?.vampire ||
-    enemy?.type === 'vampire'
+    enemy?.type ===
+      'vampire'
   )
 }
 
-function getHealthRatio(enemy) {
-  const health = enemy?.health ?? {}
-  const maximum = Math.max(1, safeNumber(health.maximum, 7))
-  const damage =
-    safeNumber(health.bashing, 0) +
-    safeNumber(health.lethal, 0) +
-    safeNumber(health.aggravated, 0)
+function getHealthRatio(
+  enemy
+) {
+  const health =
+    enemy?.health ??
+    {}
 
-  return clamp(
-    1 - damage / maximum,
-    0,
-    1
-  )
-}
-
-function getBloodRatio(enemy) {
   const maximum =
     Math.max(
       1,
       safeNumber(
-        enemy?.blood?.maximum,
-        10
+        health.maximum,
+        7
       )
     )
 
-  return clamp(
+  const damage =
     safeNumber(
-      enemy?.blood?.current,
-      maximum
-    ) / maximum,
+      health.bashing,
+      0
+    ) +
+    safeNumber(
+      health.lethal,
+      0
+    ) +
+    safeNumber(
+      health.aggravated,
+      0
+    )
+
+  return clamp(
+    1 -
+      damage /
+        maximum,
     0,
     1
   )
 }
 
-function getDistance(combat) {
+function getBloodRatio(
+  enemy
+) {
+  const maximum =
+    Math.max(
+      1,
+      safeNumber(
+        enemy?.blood
+          ?.maximum,
+        10
+      )
+    )
+
+  const current =
+    Math.max(
+      0,
+      safeNumber(
+        enemy?.blood
+          ?.current,
+        maximum
+      )
+    )
+
+  return clamp(
+    current /
+      maximum,
+    0,
+    1
+  )
+}
+
+function getDistance(
+  combat
+) {
   return (
     combat?.distance ??
-    combat?.environment?.distance ??
+    combat?.environment
+      ?.distance ??
     'close'
   )
 }
 
-function getWeaponData(enemy) {
+function getWeaponData(
+  enemy
+) {
+  /*
+    Garras da Besta são tratadas
+    como arma natural mesmo que não
+    estejam no catálogo de itens.
+  */
+
+  if (
+    enemy?.status
+      ?.feralClaws
+  ) {
+    return {
+      id:
+        'feralClaws',
+
+      name:
+        'Garras da Besta',
+
+      category:
+        'natural',
+
+      damageType:
+        'aggravated',
+
+      damageMode:
+        'strength',
+
+      damageBonus: 1,
+
+      attackAbility:
+        'brawl',
+    }
+  }
+
   return (
     getWeapon(
       enemy?.weaponId ??
       'fists'
     ) ??
-    getWeapon('fists')
+    getWeapon(
+      'fists'
+    )
   )
 }
 
-function getLoadedAmmo(enemy, weapon) {
+function getLoadedAmmo(
+  enemy,
+  weapon
+) {
   if (
     weapon?.category !==
     'firearm'
@@ -82,18 +187,23 @@ function getLoadedAmmo(enemy, weapon) {
   return Math.max(
     0,
     safeNumber(
-      enemy?.ammo?.loaded,
-      weapon?.ammunition?.magazine ??
+      enemy?.ammo
+        ?.loaded,
+      weapon?.ammunition
+        ?.magazine ??
         0
     )
   )
 }
 
-function getReserveAmmo(enemy) {
+function getReserveAmmo(
+  enemy
+) {
   return Math.max(
     0,
     safeNumber(
-      enemy?.ammo?.reserve,
+      enemy?.ammo
+        ?.reserve,
       0
     )
   )
@@ -106,7 +216,8 @@ function getDisciplineLevel(
   return Math.max(
     0,
     safeNumber(
-      enemy?.disciplines?.[discipline],
+      enemy?.disciplines
+        ?.[discipline],
       0
     )
   )
@@ -118,20 +229,27 @@ function addScore(
   score,
   reason
 ) {
-  if (!scores[id]) {
+  if (
+    !scores[id]
+  ) {
     scores[id] = {
       id,
+
       score: 0,
+
       reasons: [],
     }
   }
 
-  scores[id].score += score
+  scores[id].score +=
+    score
 
   if (reason) {
-    scores[id].reasons.push(
-      reason
-    )
+    scores[id]
+      .reasons
+      .push(
+        reason
+      )
   }
 }
 
@@ -141,35 +259,60 @@ export function evaluateEnemyCombatActions(
 ) {
   if (
     !combat?.enemy ||
-    combat.status !== 'active'
+    combat.status !==
+      'active'
   ) {
     return []
   }
 
-  const enemy = combat.enemy
+  const enemy =
+    combat.enemy
+
   const scores = {}
 
   const vampire =
-    isVampire(enemy)
+    isVampire(
+      enemy
+    )
 
   const healthRatio =
-    getHealthRatio(enemy)
+    getHealthRatio(
+      enemy
+    )
 
   const bloodRatio =
-    getBloodRatio(enemy)
+    getBloodRatio(
+      enemy
+    )
 
   const distance =
-    getDistance(combat)
+    getDistance(
+      combat
+    )
+
+  const preferredDistance =
+    getEnemyPreferredDistance(
+      combat
+    )
+
+  const movementScores =
+    getEnemyMovementScores(
+      combat
+    )
 
   const personality =
-    enemy.combatPersonality ??
+    enemy
+      .combatPersonality ??
     'balanced'
 
   const frenzy =
-    enemy?.status?.frenzy
+    enemy?.status
+      ?.frenzy
 
   const weapon =
-    getWeaponData(enemy)
+    getWeaponData(
+      enemy
+    )
 
   const firearm =
     weapon?.category ===
@@ -182,27 +325,50 @@ export function evaluateEnemyCombatActions(
     )
 
   const reserveAmmo =
-    getReserveAmmo(enemy)
+    getReserveAmmo(
+      enemy
+    )
 
   const controlsGrapple =
     Boolean(
-      combat?.grapple?.active &&
-      combat?.grapple?.controller ===
+      combat?.grapple
+        ?.active &&
+      combat?.grapple
+        ?.controller ===
         'enemy'
     )
 
+  const enemyIsGrappled =
+    Boolean(
+      combat?.grapple
+        ?.active &&
+      combat?.grapple
+        ?.controller ===
+        'player'
+    )
+
   /*
-    Frenesi tem prioridade absoluta.
+    ========================================
+    FRENESI
+
+    Frenesi ignora raciocínio tático.
+    ========================================
   */
 
-  if (frenzy?.active) {
+  if (
+    frenzy?.active
+  ) {
     if (
-      frenzy.type === 'fear'
+      frenzy.type ===
+      'fear'
     ) {
       return [
         {
-          id: 'escape',
+          id:
+            'escape',
+
           score: 999,
+
           reasons: [
             'Rötschreck força fuga.',
           ],
@@ -212,21 +378,71 @@ export function evaluateEnemyCombatActions(
 
     if (
       vampire &&
-      bloodRatio <= 0.3
+      bloodRatio <=
+        0.3
     ) {
+      if (
+        controlsGrapple
+      ) {
+        return [
+          {
+            id:
+              'bite',
+
+            score: 999,
+
+            reasons: [
+              'A presa está dominada e a Besta quer vitae.',
+            ],
+          },
+        ]
+      }
+
+      if (
+        distance ===
+        'close'
+      ) {
+        return [
+          {
+            id:
+              'grapple',
+
+            score: 999,
+
+            reasons: [
+              'A Besta quer agarrar a presa para beber.',
+            ],
+          },
+        ]
+      }
+
       return [
         {
           id:
-            controlsGrapple
-              ? 'bite'
-              : 'grapple',
+            'advance',
 
           score: 999,
 
           reasons: [
-            controlsGrapple
-              ? 'A presa está dominada e a Besta quer vitae.'
-              : 'A Besta quer agarrar a presa para beber.',
+            'A fome em frenesi força aproximação.',
+          ],
+        },
+      ]
+    }
+
+    if (
+      distance !==
+      'close'
+    ) {
+      return [
+        {
+          id:
+            'advance',
+
+          score: 950,
+
+          reasons: [
+            'Frenesi violento força aproximação.',
           ],
         },
       ]
@@ -234,8 +450,11 @@ export function evaluateEnemyCombatActions(
 
     return [
       {
-        id: 'melee',
+        id:
+          'melee',
+
         score: 900,
+
         reasons: [
           'Frenesi violento elimina cautela.',
         ],
@@ -244,125 +463,307 @@ export function evaluateEnemyCombatActions(
   }
 
   /*
-    Sobrevivência.
+    ========================================
+    AGARRÃO
+
+    Um inimigo preso pelo jogador não
+    deve tentar simplesmente correr.
+    ========================================
   */
 
   if (
-    healthRatio <= 0.2
+    enemyIsGrappled
+  ) {
+    addScore(
+      scores,
+      'melee',
+      55,
+      'Está agarrado e precisa reagir fisicamente.'
+    )
+
+    addScore(
+      scores,
+      'escape',
+      25,
+      'Tenta se libertar do controle.'
+    )
+  }
+
+  /*
+    ========================================
+    SOBREVIVÊNCIA
+    ========================================
+  */
+
+  if (
+    healthRatio <=
+    0.15
   ) {
     addScore(
       scores,
       'escape',
       personality ===
         'aggressive'
-        ? 25
-        : 75,
+        ? 35
+        : 100,
+      'Ferimentos quase incapacitantes.'
+    )
+  } else if (
+    healthRatio <=
+    0.3
+  ) {
+    addScore(
+      scores,
+      'escape',
+      personality ===
+        'aggressive'
+        ? 20
+        : 65,
       'Ferimentos críticos.'
+    )
+
+    addScore(
+      scores,
+      'retreat',
+      30,
+      'Tenta criar espaço para sobreviver.'
     )
   }
 
   /*
-    Arma de fogo.
+    ========================================
+    MOVIMENTO TÁTICO
+
+    O motor separado define qual distância
+    esse NPC prefere.
+    ========================================
+  */
+
+  if (
+    movementScores.advance >
+    0
+  ) {
+    addScore(
+      scores,
+      'advance',
+      movementScores.advance,
+      `Distância preferida: ${preferredDistance}.`
+    )
+  }
+
+  if (
+    movementScores.retreat >
+      0 &&
+    !enemyIsGrappled
+  ) {
+    addScore(
+      scores,
+      'retreat',
+      movementScores.retreat,
+      `Distância preferida: ${preferredDistance}.`
+    )
+  }
+
+  /*
+    ========================================
+    ARMA DE FOGO
+    ========================================
   */
 
   if (firearm) {
     if (
-      loadedAmmo <= 0 &&
+      loadedAmmo <=
+        0 &&
       reserveAmmo > 0
     ) {
       addScore(
         scores,
         'reload',
         100,
-        'Arma descarregada.'
+        'A arma está descarregada.'
       )
     }
 
     if (
       loadedAmmo > 0
     ) {
-      addScore(
-        scores,
-        'shoot',
-        distance === 'far'
-          ? 70
-          : distance === 'medium'
-            ? 55
-            : 30,
-        'Arma de fogo disponível.'
-      )
+      if (
+        distance ===
+        'far'
+      ) {
+        addScore(
+          scores,
+          'shoot',
+          65,
+          'Possui arma de fogo e linha de tiro longa.'
+        )
+      }
+
+      if (
+        distance ===
+        'medium'
+      ) {
+        addScore(
+          scores,
+          'shoot',
+          75,
+          'Distância média favorece disparos.'
+        )
+      }
+
+      if (
+        distance ===
+        'close'
+      ) {
+        addScore(
+          scores,
+          'shoot',
+          personality ===
+            'ranged'
+            ? 35
+            : 25,
+          'Ainda pode disparar a curta distância.'
+        )
+      }
     }
 
     if (
-      loadedAmmo <= 0 &&
-      reserveAmmo <= 0
+      loadedAmmo <=
+        0 &&
+      reserveAmmo <=
+        0
     ) {
       addScore(
         scores,
         'melee',
-        65,
-        'Sem munição.'
+        60,
+        'Está sem munição.'
       )
+
+      if (
+        distance !==
+        'close'
+      ) {
+        addScore(
+          scores,
+          'advance',
+          60,
+          'Sem munição, precisa aproximar-se.'
+        )
+      }
     }
   }
 
   /*
-    Distância.
+    ========================================
+    CORPO A CORPO
+    ========================================
   */
 
   if (
-    distance === 'close'
+    distance ===
+    'close'
   ) {
     addScore(
       scores,
       'melee',
       35,
-      'Curta distância.'
+      'O alvo está em curta distância.'
     )
 
     addScore(
       scores,
       'grapple',
       18,
-      'O alvo está ao alcance.'
+      'O alvo está ao alcance para agarrar.'
     )
   } else if (
-    !firearm ||
-    loadedAmmo <= 0
+    !firearm
   ) {
     addScore(
       scores,
       'advance',
-      45,
-      'Precisa reduzir a distância.'
+      55,
+      'A arma atual exige aproximação.'
     )
   }
 
   /*
-    Vampiros.
+    ========================================
+    VAMPIROS E FOME
+    ========================================
   */
 
   if (vampire) {
-    if (controlsGrapple) {
-      addScore(
-        scores,
-        'bite',
-        bloodRatio <= 0.5
-          ? 85
-          : 40,
-        'O alvo já está agarrado.'
-      )
-    } else if (
-      bloodRatio <= 0.35 &&
-      distance === 'close'
+    if (
+      bloodRatio <=
+      0.15
     ) {
-      addScore(
-        scores,
-        'grapple',
-        75,
-        'Fome severa incentiva alimentação.'
-      )
+      if (
+        controlsGrapple
+      ) {
+        addScore(
+          scores,
+          'bite',
+          120,
+          'Fome crítica e presa já dominada.'
+        )
+      } else if (
+        distance ===
+        'close'
+      ) {
+        addScore(
+          scores,
+          'grapple',
+          95,
+          'Fome crítica: precisa capturar uma fonte de sangue.'
+        )
+      } else {
+        addScore(
+          scores,
+          'advance',
+          90,
+          'Fome crítica força aproximação.'
+        )
+      }
+    } else if (
+      bloodRatio <=
+      0.35
+    ) {
+      if (
+        controlsGrapple
+      ) {
+        addScore(
+          scores,
+          'bite',
+          85,
+          'Pouca vitae e alvo já dominado.'
+        )
+      } else if (
+        distance ===
+        'close'
+      ) {
+        addScore(
+          scores,
+          'grapple',
+          70,
+          'Fome severa incentiva alimentação.'
+        )
+      } else {
+        addScore(
+          scores,
+          'advance',
+          50,
+          'A fome incentiva aproximação.'
+        )
+      }
     }
+
+    /*
+      ========================================
+      CELERIDADE
+      ========================================
+    */
 
     if (
       getDisciplineLevel(
@@ -375,10 +776,19 @@ export function evaluateEnemyCombatActions(
       addScore(
         scores,
         'discipline_celerity',
-        35,
-        'Celeridade aumenta a pressão ofensiva.'
+        personality ===
+          'aggressive'
+          ? 45
+          : 35,
+        'Celeridade concede vantagem de ações.'
       )
     }
+
+    /*
+      ========================================
+      PROTEANISMO
+      ========================================
+    */
 
     if (
       getDisciplineLevel(
@@ -386,31 +796,75 @@ export function evaluateEnemyCombatActions(
         'protean'
       ) >= 2 &&
       !enemy?.status
-        ?.feralClaws &&
-      distance === 'close'
+        ?.feralClaws
     ) {
-      addScore(
-        scores,
-        'discipline_feral_claws',
-        48,
-        'Garras da Besta aumentam a letalidade.'
-      )
+      if (
+        distance ===
+        'close'
+      ) {
+        addScore(
+          scores,
+          'discipline_feral_claws',
+          50,
+          'Garras da Besta aumentam a letalidade corpo a corpo.'
+        )
+      } else if (
+        personality ===
+        'predator'
+      ) {
+        addScore(
+          scores,
+          'discipline_feral_claws',
+          18,
+          'Predador prepara as Garras antes de se aproximar.'
+        )
+      }
     }
+
+    /*
+      ========================================
+      PRESENÇA
+      ========================================
+    */
 
     if (
       getDisciplineLevel(
         enemy,
         'presence'
-      ) >= 2 &&
-      healthRatio <= 0.55
+      ) >= 2
     ) {
+      let presenceScore =
+        22
+
+      if (
+        healthRatio <=
+        0.55
+      ) {
+        presenceScore +=
+          25
+      }
+
+      if (
+        personality ===
+        'coward'
+      ) {
+        presenceScore +=
+          15
+      }
+
       addScore(
         scores,
         'discipline_dread_gaze',
-        42,
-        'Olhar Aterrorizante pode encerrar o confronto.'
+        presenceScore,
+        'Olhar Aterrorizante pode afastar ou neutralizar o adversário.'
       )
     }
+
+    /*
+      ========================================
+      DOMINAÇÃO
+      ========================================
+    */
 
     if (
       getDisciplineLevel(
@@ -418,95 +872,377 @@ export function evaluateEnemyCombatActions(
         'dominate'
       ) >= 1
     ) {
+      let dominateScore =
+        28
+
+      if (
+        personality ===
+        'balanced'
+      ) {
+        dominateScore +=
+          8
+      }
+
+      if (
+        healthRatio <=
+        0.5
+      ) {
+        dominateScore +=
+          10
+      }
+
       addScore(
         scores,
         'discipline_dominate',
-        28,
-        'Dominação pode neutralizar o oponente.'
+        dominateScore,
+        'Dominação pode neutralizar o adversário sem troca física.'
       )
     }
   }
 
   /*
-    Personalidade.
+    ========================================
+    PERSONALIDADE — AGGRESSIVE
+    ========================================
   */
 
   if (
-    personality === 'aggressive'
+    personality ===
+    'aggressive'
   ) {
-    addScore(
-      scores,
-      'melee',
-      25,
-      'Perfil agressivo.'
-    )
+    if (
+      distance ===
+      'close'
+    ) {
+      addScore(
+        scores,
+        'melee',
+        30,
+        'Perfil agressivo favorece ataque direto.'
+      )
+
+      addScore(
+        scores,
+        'grapple',
+        15,
+        'Perfil agressivo aceita confronto físico.'
+      )
+    } else {
+      addScore(
+        scores,
+        'advance',
+        35,
+        'Perfil agressivo tenta fechar distância.'
+      )
+    }
 
     addScore(
       scores,
-      'grapple',
-      12,
-      'Perfil agressivo.'
+      'retreat',
+      -30,
+      'Perfil agressivo evita recuar.'
     )
-  }
 
-  if (
-    personality === 'coward'
-  ) {
     addScore(
       scores,
       'escape',
-      35,
-      'Perfil covarde.'
+      -25,
+      'Perfil agressivo evita fugir.'
     )
   }
 
-  if (
-    personality === 'ranged'
-  ) {
-    addScore(
-      scores,
-      'shoot',
-      25,
-      'Prefere combate à distância.'
-    )
-  }
+  /*
+    ========================================
+    PERSONALIDADE — RANGED
+    ========================================
+  */
 
   if (
-    personality === 'predator'
+    personality ===
+    'ranged'
   ) {
-    addScore(
-      scores,
-      'grapple',
-      25,
-      'Predador prefere dominar a presa.'
-    )
-
-    if (vampire) {
+    if (
+      firearm &&
+      loadedAmmo > 0
+    ) {
       addScore(
         scores,
-        'bite',
-        controlsGrapple
-          ? 30
-          : 5,
-        'Predador vampírico procura sangue.'
+        'shoot',
+        30,
+        'Especialista em combate à distância.'
+      )
+    }
+
+    if (
+      distance ===
+      'close'
+    ) {
+      addScore(
+        scores,
+        'retreat',
+        55,
+        'Especialista à distância quer sair do corpo a corpo.'
+      )
+
+      addScore(
+        scores,
+        'melee',
+        -20,
+        'Evita combate corpo a corpo.'
+      )
+    }
+
+    if (
+      distance ===
+      'medium'
+    ) {
+      addScore(
+        scores,
+        'shoot',
+        25,
+        'Distância média é a posição ideal.'
+      )
+    }
+
+    if (
+      distance ===
+      'far'
+    ) {
+      addScore(
+        scores,
+        'shoot',
+        15,
+        'Mantém distância segura.'
       )
     }
   }
 
   /*
-    Segurança: sempre há ação ofensiva.
+    ========================================
+    PERSONALIDADE — PREDATOR
+    ========================================
   */
 
-  if (!firearm) {
+  if (
+    personality ===
+    'predator'
+  ) {
+    if (
+      distance !==
+      'close'
+    ) {
+      addScore(
+        scores,
+        'advance',
+        45,
+        'Predador busca proximidade com a presa.'
+      )
+    } else {
+      addScore(
+        scores,
+        'grapple',
+        30,
+        'Predador prefere controlar fisicamente a presa.'
+      )
+
+      if (
+        vampire &&
+        controlsGrapple
+      ) {
+        addScore(
+          scores,
+          'bite',
+          35,
+          'Predador vampírico procura sangue.'
+        )
+      }
+    }
+
     addScore(
       scores,
-      'melee',
-      20,
-      'Ataque padrão.'
+      'retreat',
+      -25,
+      'Predador evita abrir distância.'
     )
   }
 
-  return Object.values(scores)
+  /*
+    ========================================
+    PERSONALIDADE — COWARD
+    ========================================
+  */
+
+  if (
+    personality ===
+    'coward'
+  ) {
+    if (
+      distance ===
+      'close'
+    ) {
+      addScore(
+        scores,
+        'retreat',
+        50,
+        'Perfil covarde tenta criar distância.'
+      )
+    }
+
+    if (
+      healthRatio <=
+      0.5
+    ) {
+      addScore(
+        scores,
+        'escape',
+        50,
+        'Ferimentos aumentam desejo de fugir.'
+      )
+    }
+
+    if (
+      firearm &&
+      loadedAmmo > 0
+    ) {
+      addScore(
+        scores,
+        'shoot',
+        15,
+        'Prefere combater sem se aproximar.'
+      )
+    }
+  }
+
+  /*
+    ========================================
+    PERSONALIDADE — BALANCED
+    ========================================
+  */
+
+  if (
+    personality ===
+    'balanced'
+  ) {
+    if (
+      firearm &&
+      distance ===
+      'medium'
+    ) {
+      addScore(
+        scores,
+        'shoot',
+        10,
+        'Combate equilibrado favorece posição segura.'
+      )
+    }
+
+    if (
+      !firearm &&
+      distance !==
+      'close'
+    ) {
+      addScore(
+        scores,
+        'advance',
+        20,
+        'Precisa entrar no alcance da arma.'
+      )
+    }
+  }
+
+  /*
+    ========================================
+    EVITA MOVIMENTOS IMPOSSÍVEIS
+    ========================================
+  */
+
+  if (
+    distance ===
+    'close'
+  ) {
+    if (
+      scores.advance
+    ) {
+      scores.advance.score =
+        -999
+
+      scores.advance
+        .reasons
+        .push(
+          'Já está na menor distância possível.'
+        )
+    }
+  }
+
+  if (
+    distance ===
+    'far'
+  ) {
+    if (
+      scores.retreat
+    ) {
+      scores.retreat.score =
+        -999
+
+      scores.retreat
+        .reasons
+        .push(
+          'Já está na maior distância possível.'
+        )
+    }
+  }
+
+  if (
+    combat?.grapple
+      ?.active
+  ) {
+    if (
+      scores.retreat
+    ) {
+      scores.retreat.score =
+        -999
+
+      scores.retreat
+        .reasons
+        .push(
+          'Agarrão impede recuo normal.'
+        )
+    }
+  }
+
+  /*
+    ========================================
+    SEGURANÇA
+
+    Sempre deve existir pelo menos uma
+    ação possível.
+    ========================================
+  */
+
+  if (
+    Object.keys(
+      scores
+    ).length === 0
+  ) {
+    addScore(
+      scores,
+      distance ===
+        'close'
+        ? 'melee'
+        : 'advance',
+      10,
+      'Ação padrão.'
+    )
+  }
+
+  return Object.values(
+    scores
+  )
+    .filter(
+      (action) =>
+        action.score >
+        -900
+    )
     .sort(
       (a, b) =>
         b.score -
@@ -525,20 +1261,41 @@ export function chooseEnemyCombatAction(
     )
 
   if (
-    ranked.length === 0
+    ranked.length ===
+    0
   ) {
     return {
-      id: 'melee',
+      id:
+        getDistance(
+          combat
+        ) ===
+        'close'
+          ? 'melee'
+          : 'advance',
+
       score: 0,
+
       reasons: [
         'Ação padrão.',
       ],
+
       ranked: [],
     }
   }
 
+  /*
+    Não escolhemos sempre exatamente
+    o primeiro colocado.
+
+    Qualquer ação até 8 pontos abaixo
+    da melhor pode ser escolhida.
+
+    Isso evita NPCs totalmente previsíveis.
+  */
+
   const topScore =
-    ranked[0].score
+    ranked[0]
+      .score
 
   const candidates =
     ranked.filter(
@@ -557,6 +1314,7 @@ export function chooseEnemyCombatAction(
 
   return {
     ...selected,
+
     ranked,
   }
 }
@@ -565,19 +1323,46 @@ export function getEnemyAiDebug(
   game,
   combat
 ) {
+  const enemy =
+    combat?.enemy
+
+  const weapon =
+    getWeaponData(
+      enemy
+    )
+
+  const movement =
+    getEnemyMovementScores(
+      combat
+    )
+
   return {
     enemy:
-      combat?.enemy?.name ??
+      enemy?.name ??
       null,
+
+    clan:
+      enemy?.clan ??
+      null,
+
+    generation:
+      enemy
+        ?.generation ??
+      null,
+
+    personality:
+      enemy
+        ?.combatPersonality ??
+      'balanced',
 
     healthRatio:
       getHealthRatio(
-        combat?.enemy
+        enemy
       ),
 
     bloodRatio:
       getBloodRatio(
-        combat?.enemy
+        enemy
       ),
 
     distance:
@@ -585,10 +1370,54 @@ export function getEnemyAiDebug(
         combat
       ),
 
-    personality:
-      combat?.enemy
-        ?.combatPersonality ??
-      'balanced',
+    preferredDistance:
+      getEnemyPreferredDistance(
+        combat
+      ),
+
+    vampire:
+      isVampire(
+        enemy
+      ),
+
+    weapon:
+      weapon?.id ??
+      null,
+
+    weaponName:
+      weapon?.name ??
+      null,
+
+    loadedAmmo:
+      getLoadedAmmo(
+        enemy,
+        weapon
+      ),
+
+    reserveAmmo:
+      getReserveAmmo(
+        enemy
+      ),
+
+    frenzy:
+      enemy?.status
+        ?.frenzy ??
+      null,
+
+    grapple: {
+      active:
+        Boolean(
+          combat?.grapple
+            ?.active
+        ),
+
+      controller:
+        combat?.grapple
+          ?.controller ??
+        null,
+    },
+
+    movement,
 
     ranked:
       evaluateEnemyCombatActions(

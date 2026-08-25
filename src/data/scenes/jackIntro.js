@@ -820,6 +820,181 @@ const jackIntroScenes = {
       },
     ],
   },
+  jack_after_trial: {
+    id:
+      'jack_after_trial',
+
+    chapter:
+      'PRÓLOGO',
+
+    title:
+      'Depois da Corte',
+
+    location: {
+      id:
+        'court_exit',
+
+      name:
+        'Saída da Corte',
+
+      district:
+        'São Paulo',
+    },
+
+    narration: [
+      'Jack espera alguns metros adiante.',
+
+      'As portas da Corte se fecham atrás de você.',
+
+      'Por alguns segundos nenhum dos dois diz nada.',
+
+      'Lívia está morta.',
+
+      'A Camarilla decidiu que você continua existindo.',
+
+      'Pelo menos por enquanto.',
+
+      'Jack olha para a rua e depois para você.',
+
+      'São Paulo continua funcionando como se nada tivesse acontecido.',
+    ],
+
+    dialogue: {
+      speaker:
+        'Jack',
+
+      text:
+        'Bem-vindo à sua primeira noite de verdade. Você sobreviveu ao Príncipe. Já é mais do que muita gente consegue.',
+    },
+
+    choices: [
+      {
+        id:
+          'ask_jack_what_now',
+
+        text:
+          '"E agora?"',
+
+        nextScene:
+          'jack_after_trial_livia',
+
+        timeMinutes: 1,
+      },
+
+      {
+        id:
+          'ask_jack_about_livia_after_trial',
+
+        text:
+          '"E as coisas da Lívia?"',
+
+        nextScene:
+          'jack_after_trial_livia',
+
+        timeMinutes: 1,
+      },
+    ],
+  },
+
+  jack_after_trial_livia: {
+    id:
+      'jack_after_trial_livia',
+
+    chapter:
+      'PRÓLOGO',
+
+    title:
+      'O Que Ela Deixou',
+
+    location: {
+      id:
+        'court_exit',
+
+      name:
+        'Saída da Corte',
+
+      district:
+        'São Paulo',
+    },
+
+    narration: [
+      'Jack enfia as mãos nos bolsos do casaco.',
+
+      'A expressão dele fica um pouco mais séria.',
+
+      'Ele parece escolher as palavras antes de continuar.',
+    ],
+
+    dialogue: {
+      speaker:
+        'Jack',
+
+      text:
+        'O apartamento dela ainda está lá. Computador, papéis, fotografias, o que quer que ela tenha deixado. Se eu fosse você, passava lá antes que alguém resolva limpar tudo.',
+    },
+
+    choices: [
+      {
+        id:
+          'go_livia_apartment_after_trial',
+
+        text:
+          'Ir ao apartamento de Lívia.',
+
+        nextScene:
+          'livia_apartment_arrival',
+
+        timeMinutes: 15,
+
+        flags: {
+          survivedTrial:
+            true,
+
+          liviaDead:
+            true,
+
+          metJack:
+            true,
+
+          knowsLiviaLeftEvidence:
+            true,
+
+          liviaApartmentUnlocked:
+            true,
+        },
+      },
+
+      {
+        id:
+          'go_free_roam_after_trial',
+
+        text:
+          'Dizer que irá depois.',
+
+        nextScene:
+          'free_roam',
+
+        timeMinutes: 2,
+
+        flags: {
+          survivedTrial:
+            true,
+
+          liviaDead:
+            true,
+
+          metJack:
+            true,
+
+          knowsLiviaLeftEvidence:
+            true,
+
+          liviaApartmentUnlocked:
+            true,
+        },
+      },
+    ],
+  },
 }
 
 export default jackIntroScenes

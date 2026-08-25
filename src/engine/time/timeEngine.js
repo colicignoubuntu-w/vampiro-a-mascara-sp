@@ -61,6 +61,12 @@ function normalizeClock(
   }
 }
 
+/*
+  ========================================
+  CONVERTER HORÁRIO PARA MINUTOS
+  ========================================
+*/
+
 export function worldToMinutes(
   world
 ) {
@@ -80,6 +86,12 @@ export function worldToMinutes(
     )
   )
 }
+
+/*
+  ========================================
+  FORMATAR RELÓGIO
+  ========================================
+*/
 
 export function formatClock(
   world
@@ -107,6 +119,12 @@ export function formatClock(
   )
 }
 
+/*
+  ========================================
+  NASCER DO SOL
+  ========================================
+*/
+
 export function getSunriseMinutes(
   world
 ) {
@@ -123,6 +141,12 @@ export function getSunriseMinutes(
   )
 }
 
+/*
+  ========================================
+  PÔR DO SOL
+  ========================================
+*/
+
 export function getSunsetMinutes(
   world
 ) {
@@ -138,6 +162,12 @@ export function getSunsetMinutes(
     )
   )
 }
+
+/*
+  ========================================
+  É DIA?
+  ========================================
+*/
 
 export function isDaytime(
   world
@@ -163,6 +193,12 @@ export function isDaytime(
   )
 }
 
+/*
+  ========================================
+  É NOITE?
+  ========================================
+*/
+
 export function isNighttime(
   world
 ) {
@@ -172,14 +208,15 @@ export function isNighttime(
 }
 
 /*
-  Retorna quantos minutos faltam
-  para o amanhecer.
+  ========================================
+  MINUTOS ATÉ O AMANHECER
+  ========================================
 
-  Exemplo:
+  Exemplos:
 
-  23:30 -> 420 minutos até 06:30
-  05:30 -> 60 minutos
-  06:40 -> 0 porque já é dia
+  23:30 -> 420 min
+  05:30 -> 60 min
+  06:40 -> 0
 */
 
 export function minutesUntilSunrise(
@@ -221,17 +258,43 @@ export function minutesUntilSunrise(
 }
 
 /*
-  Detecta se uma ação atravessou
-  o amanhecer.
+  ========================================
+  MINUTOS ATÉ O PÔR DO SOL
+  ========================================
+*/
 
-  Importante porque:
+export function minutesUntilSunset(
+  world
+) {
+  const current =
+    worldToMinutes(
+      world
+    )
 
-  06:20 + 20 minutos
-  termina às 06:40.
+  const sunset =
+    getSunsetMinutes(
+      world
+    )
 
-  Nesse caso o personagem estava
-  executando uma ação quando o sol
-  nasceu.
+  if (
+    !isDaytime(
+      world
+    )
+  ) {
+    return 0
+  }
+
+  return Math.max(
+    0,
+    sunset -
+      current
+  )
+}
+
+/*
+  ========================================
+  ATRAVESSOU O AMANHECER?
+  ========================================
 */
 
 export function crossesSunrise({
@@ -252,6 +315,12 @@ export function crossesSunrise({
   ) {
     return false
   }
+
+  /*
+    Se já está durante o dia,
+    qualquer avanço continua sob
+    risco solar.
+  */
 
   if (
     isDaytime(
@@ -276,6 +345,17 @@ export function crossesSunrise({
   ========================================
   AVANÇAR RELÓGIO
   ========================================
+
+  world.day:
+  dia do calendário.
+
+  world.night:
+  noite vampírica.
+
+  O DAY muda ao cruzar 00:00.
+
+  O NIGHT continua sendo tratado
+  pelo sistema de sono/despertar.
 */
 
 export function advanceWorldTime(
@@ -318,8 +398,21 @@ export function advanceWorldTime(
         amount
     )
 
+  const currentDay =
+    safeNumber(
+      world?.day,
+      1
+    )
+
   return {
     ...(world ?? {}),
+
+    day:
+      Math.max(
+        1,
+        currentDay +
+          normalized.dayChange
+      ),
 
     hour:
       normalized.hour,
@@ -378,6 +471,22 @@ export function advanceGameTime(
       amount
     )
 
+  const oldDay =
+    safeNumber(
+      oldWorld.day,
+      1
+    )
+
+  const newDay =
+    safeNumber(
+      newWorld.day,
+      1
+    )
+
+  const dayChange =
+    newDay -
+    oldDay
+
   const reason =
     options.reason ??
     'Passagem do tempo'
@@ -397,6 +506,16 @@ export function advanceGameTime(
               true,
           }
         : {}),
+
+      ...(dayChange > 0
+        ? {
+            calendarDayAdvanced:
+              true,
+
+            lastCalendarDayChange:
+              dayChange,
+          }
+        : {}),
     },
 
     history: [
@@ -412,6 +531,9 @@ export function advanceGameTime(
         reason,
 
         from: {
+          day:
+            oldDay,
+
           hour:
             oldWorld.hour,
 
@@ -420,12 +542,17 @@ export function advanceGameTime(
         },
 
         to: {
+          day:
+            newDay,
+
           hour:
             newWorld.hour,
 
           minute:
             newWorld.minute,
         },
+
+        dayChange,
 
         crossedSunrise,
 
@@ -441,9 +568,6 @@ export function advanceGameTime(
   ========================================
   TEMPOS PADRÃO
   ========================================
-
-  Usaremos estes valores como base,
-  mas cada cena poderá sobrescrever.
 */
 
 export const TIME_COSTS = {

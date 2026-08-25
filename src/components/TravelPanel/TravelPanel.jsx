@@ -105,20 +105,22 @@ export default function TravelPanel({
     ========================================
   */
 
-  const destinations =
-    useMemo(
-      () =>
-        getAvailableDestinations(
-          routeOriginId
-        ).filter(
-          (location) =>
-            location.id !==
-            'prologue'
-        ),
-      [
+const destinations =
+  useMemo(
+    () =>
+      getAvailableDestinations(
         routeOriginId,
-      ]
-    )
+        game
+      ).filter(
+        (location) =>
+          location.id !==
+          'prologue'
+      ),
+    [
+      routeOriginId,
+      game,
+    ]
+  )
 
   const destination =
     destinationId
