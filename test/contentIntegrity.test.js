@@ -121,3 +121,35 @@ test(
   }
 )
 
+test(
+  'o julgamento acontece antes do apartamento de Lívia',
+  () => {
+    assert.equal(
+      scenes.door.choices.find(
+        (choice) =>
+          choice.id === 'ask_livia'
+      )?.nextScene,
+      'jack_intro',
+      'Perguntar por Lívia não pode pular o julgamento.'
+    )
+
+    assert.equal(
+      scenes.prologue_end.choices.find(
+        (choice) =>
+          choice.id ===
+            'follow_jack_after_trial'
+      )?.nextScene,
+      'jack_after_trial'
+    )
+
+    assert.equal(
+      scenes.jack_after_trial_livia
+        .choices.find(
+          (choice) =>
+            choice.id ===
+              'go_livia_apartment_after_trial'
+        )?.nextScene,
+      'livia_apartment_arrival'
+    )
+  }
+)

@@ -1344,7 +1344,7 @@ const prologueScenes = {
           '"Onde está a Lívia?"',
 
         nextScene:
-          'jack_after_trial',
+          'jack_intro',
 
         timeMinutes: 1,
 

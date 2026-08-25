@@ -941,37 +941,114 @@ if (sunlightSheltered) {
     ATUALIZA SELECT DEV
     ========================================
   */
+/*
+  ========================================
+  LOCALIZAÇÃO
+  ========================================
+
+  REGRA:
+
+  Cenas narrativas com location própria
+  podem alterar world.location.
+
+  A cena free_roam NÃO controla a
+  localização. Ela representa o jogador
+  circulando livremente pela cidade.
+
+  Portanto, quando estamos em free_roam,
+  preservamos exatamente o local definido
+  pelo sistema de viagem/mapa.
+
+  Também não sincronizamos localização
+  enquanto um evento de viagem estiver
+  sendo resolvido.
+  ========================================
+*/
+
+useEffect(() => {
+  if (
+    !game ||
+    !scene
+  ) {
+    return
+  }
 
   /*
     ========================================
-    LOCALIZAÇÃO
+    FREE ROAM
+    ========================================
+
+    A localização durante free roam pertence
+    ao mapa/travelEngine.
+
+    Nunca substituir game.world.location
+    usando a cena free_roam.
+  */
+
+  if (
+    scene.id === 'free_roam'
+  ) {
+    return
+  }
+
+  /*
+    ========================================
+    CENA SEM LOCALIZAÇÃO
+    ========================================
+
+    Cenas neutras não devem modificar
+    a posição atual do personagem.
+  */
+
+  if (
+    !scene.location
+  ) {
+    return
+  }
+
+  /*
+    ========================================
+    VIAGEM EM ANDAMENTO
+    ========================================
+
+    Se acabamos de viajar ou existe evento
+    de viagem sendo resolvido, não deixamos
+    a cena sobrescrever a localização.
+  */
+
+  if (
+    travelOpen ||
+    travelEvent ||
+    travelEventTesting
+  ) {
+    return
+  }
+
+  /*
+    ========================================
+    SINCRONIZAÇÃO DE CENA NARRATIVA
     ========================================
   */
 
-  useEffect(() => {
-    if (
-      !game ||
-      !scene
-    ) {
-      return
-    }
+  const updatedGame =
+    updateSceneLocation(
+      game,
+      scene
+    )
 
-    const updatedGame =
-      updateSceneLocation(
-        game,
-        scene
-      )
-
-    if (
-      updatedGame !== game
-    ) {
-      setGame(
-        updatedGame
-      )
-    }
-  }, [
-    sceneId,
-  ])
+  if (
+    updatedGame !== game
+  ) {
+    setGame(
+      updatedGame
+    )
+  }
+}, [
+  sceneId,
+  travelOpen,
+  travelEvent,
+  travelEventTesting,
+])
 
   /*
     ========================================
@@ -1598,6 +1675,7 @@ if (sunlightSheltered) {
 
   const masquerade =
     getMasqueradeState(game)
+
   const availableDisciplineChoices =
     getAvailableSceneDisciplineChoices(
       game,
@@ -2480,49 +2558,6 @@ function handleHavenComputer() {
         historyItem: {
           type:
             'haven-computer',
-
-          locationId:
-            'livia_apartment',
-
-          timestamp:
-            new Date()
-              .toISOString(),
-        },
-      }
-    )
-
-  saveGame(
-    updatedGame
-  )
-
-  setGame(
-    updatedGame
-  )
-
-  resetSceneSystems()
-
-  clearTest()
-
-  goToTop()
-}
-
-/*
-  ========================================
-  INVESTIGAÇÃO DOS DESAPARECIMENTOS
-  ========================================
-*/
-
-function handleHavenInvestigation() {
-  const updatedGame =
-    transitionToScene(
-      game,
-      'strange_hospitals_records',
-      {
-        timeMinutes: 1,
-
-        historyItem: {
-          type:
-            'haven-hospital-investigation',
 
           locationId:
             'livia_apartment',
@@ -7449,10 +7484,6 @@ game.world?.location?.id ===
 
   onComputer={
     handleHavenComputer
-  }
-
-  onInvestigateDisappearances={
-    handleHavenInvestigation
   }
 />
 ) : scene.id === 'free_roam' ? (
