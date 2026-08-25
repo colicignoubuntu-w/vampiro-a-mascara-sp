@@ -55,6 +55,9 @@ import {
   advanceGameTime,
   isDaytime,
 } from '../../engine/time/timeEngine'
+import {
+  audioEngine,
+} from '../../engine/audio/audioEngine'
 
 import './FreeRoam.css'
 
@@ -731,6 +734,10 @@ export default function FreeRoam({
   function attemptHunt(
     method
   ) {
+    audioEngine.playSfx(
+      'dice_roll'
+    )
+
     const roll =
       rollHuntingAttempt(
         game,
@@ -995,6 +1002,10 @@ export default function FreeRoam({
       return
     }
 
+    audioEngine.playSfx(
+      'dice_roll'
+    )
+
     const roll =
       rollStopFeeding(
         game,
@@ -1158,6 +1169,10 @@ export default function FreeRoam({
     ) {
       return
     }
+
+    audioEngine.playSfx(
+      'dice_roll'
+    )
 
     const roll =
       rollDegeneration(

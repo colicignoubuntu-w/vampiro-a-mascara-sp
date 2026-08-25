@@ -8,6 +8,10 @@ import {
 import {
   getAllQuestDefinitions,
 } from '../src/data/quests/quests.js'
+import {
+  AUDIO_CATALOG,
+  SCENE_AUDIO,
+} from '../src/data/audio/audioCatalog.js'
 
 function assertSceneExists(
   target,
@@ -151,5 +155,38 @@ test(
         )?.nextScene,
       'livia_apartment_arrival'
     )
+  }
+)
+
+test(
+  'catálogo de áudio referencia cenas e arquivos públicos',
+  () => {
+    for (const [
+      channel,
+      entries,
+    ] of Object.entries(
+      AUDIO_CATALOG
+    )) {
+      for (const [key, entry] of
+        Object.entries(entries)) {
+        assert.match(
+          entry.src,
+          /^\/audio\/.+\.mp3$/,
+          `${channel}.${key} possui caminho inválido.`
+        )
+      }
+    }
+
+    for (const sceneId of
+      Object.keys(SCENE_AUDIO)) {
+      if (sceneId === 'main_menu') {
+        continue
+      }
+
+      assert.ok(
+        scenes[sceneId],
+        `O áudio referencia a cena inexistente "${sceneId}".`
+      )
+    }
   }
 )

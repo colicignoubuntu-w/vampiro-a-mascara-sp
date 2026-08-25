@@ -1,3 +1,7 @@
+import {
+  runWithDiceSound,
+} from '../../engine/audio/audioCues'
+
 import './TravelEventTest.css'
 
 export default function TravelEventTest({
@@ -84,8 +88,10 @@ export default function TravelEventTest({
           <button
             type="button"
             className="travel-test-roll-button"
-            onClick={
-              onRoll
+            onClick={() =>
+              runWithDiceSound(
+                onRoll
+              )
             }
           >
             Rolar Dados

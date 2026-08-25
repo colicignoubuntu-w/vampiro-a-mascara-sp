@@ -1,3 +1,7 @@
+import {
+  notifyDiceRoll,
+} from '../dice/diceRollEvents'
+
 /*
   ========================================
   COMBAT EXPOSURE ENGINE
@@ -933,6 +937,16 @@ export function rollCombatExposure({
           hostileChance
         )
       : false
+
+  if (
+    witnessed ||
+    policeAlerted ||
+    hostileAlerted
+  ) {
+    notifyDiceRoll(
+      'combat-witness'
+    )
+  }
 
   const level =
     getExposureLevel({

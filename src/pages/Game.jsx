@@ -196,6 +196,13 @@ import PoliceForcePanel from '../components/PoliceForcePanel/PoliceForcePanel'
 import MasqueradePanel from '../components/MasqueradePanel/MasqueradePanel'
 import DisciplineChoicePanel from '../components/DisciplineChoicePanel/DisciplineChoicePanel'
 import DisciplineTestPanel from '../components/DisciplineTestPanel/DisciplineTestPanel'
+import AudioControls from '../components/AudioControls/AudioControls'
+import {
+  useSceneAudio,
+} from '../engine/audio/useSceneAudio'
+import {
+  audioEngine,
+} from '../engine/audio/audioEngine'
 
 import './Game.css'
 
@@ -595,6 +602,11 @@ const [
 
   const scene =
     scenes[sceneId]
+
+  useSceneAudio(
+    sceneId,
+    scene
+  )
      /*
     ========================================
     EXPOSIÇÃO GLOBAL À LUZ DO DIA
@@ -2920,6 +2932,21 @@ function handleHavenDaySleep() {
     ) {
       return
     }
+
+    const choiceEffects =
+      Array.isArray(
+        choice.audio?.sfx
+      )
+        ? choice.audio.sfx
+        : choice.audio?.sfx
+          ? [choice.audio.sfx]
+          : []
+
+    for (const effect of
+      choiceEffects) {
+      audioEngine.playSfx(effect)
+    }
+
 if (
   scene.id ===
     'livia_apartment_rest' &&
@@ -3017,6 +3044,10 @@ if (
     if (!pendingTest) {
       return
     }
+
+    audioEngine.playSfx(
+      'dice_roll'
+    )
 
     const roll =
       executeTest(
@@ -3148,6 +3179,7 @@ if (
 
   function handleDisciplineRoll() {
     if (!disciplineEvaluation || !disciplineTest) return
+    audioEngine.playSfx('dice_roll')
     const roll = executeDisciplineTest(game, disciplineEvaluation)
     if (!roll) return
     setDisciplineRoll(roll)
@@ -3704,6 +3736,7 @@ function handleTravelEventContinue() {
 }
 
   function handleTravelEventRoll() {
+    audioEngine.playSfx('dice_roll')
     const roll = executeTravelEventTest(game, travelEvent)
     if (!roll) return
     setTravelEventRoll(roll)
@@ -4424,6 +4457,10 @@ function handleTravelEventTestContinue() {
     ) {
       return
     }
+
+    audioEngine.playSfx(
+      'dice_roll'
+    )
 
     const roll =
       executeDisciplineTest(
@@ -5463,6 +5500,10 @@ function handleTravelEventTestContinue() {
         }
       )
 
+    audioEngine.playSfx(
+      'dice_roll'
+    )
+
     const updatedGame = {
       ...game,
 
@@ -5677,6 +5718,10 @@ function handleFrenzyRoll() {
   if (!trigger) {
     return
   }
+
+  audioEngine.playSfx(
+    'dice_roll'
+  )
 
   const roll =
     executeFrenzyTest(
@@ -5965,6 +6010,10 @@ window.alert(
     if (!humanityTrigger) {
       return
     }
+
+    audioEngine.playSfx(
+      'dice_roll'
+    )
 
     const roll =
       executeDegenerationTest(
@@ -6970,6 +7019,8 @@ window.alert(
         </div>
 
         <div className="game-topbar-actions">
+          <AudioControls />
+
           {import.meta.env.DEV && (
             <button
               type="button"

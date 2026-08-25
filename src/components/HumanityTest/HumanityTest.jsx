@@ -1,3 +1,7 @@
+import {
+  runWithDiceSound,
+} from '../../engine/audio/audioCues'
+
 import './HumanityTest.css'
 
 function getResultTitle(
@@ -142,8 +146,10 @@ export default function HumanityTest({
             <button
               type="button"
               className="humanity-roll-button"
-              onClick={
-                onRoll
+              onClick={() =>
+                runWithDiceSound(
+                  onRoll
+                )
               }
             >
               Testar Consciência

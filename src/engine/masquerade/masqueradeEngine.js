@@ -1,3 +1,7 @@
+import {
+  notifyDiceRoll,
+} from '../dice/diceRollEvents'
+
 function clamp(
   value,
   min,
@@ -24,6 +28,10 @@ function rollPool(
   pool,
   difficulty
 ) {
+  notifyDiceRoll(
+    'masquerade-test'
+  )
+
   const safePool =
     Math.max(
       1,

@@ -2,6 +2,9 @@ import {
   calculateTestPool,
   canSpendWillpower,
 } from '../../engine/tests/testEngine'
+import {
+  runWithDiceSound,
+} from '../../engine/audio/audioCues'
 
 import './DiceRoll.css'
 
@@ -323,8 +326,10 @@ export default function DiceRoll({
               <button
                 type="button"
                 className="primary-button"
-                onClick={
-                  onRoll
+                onClick={() =>
+                  runWithDiceSound(
+                    onRoll
+                  )
                 }
               >
                 Rolar Dados

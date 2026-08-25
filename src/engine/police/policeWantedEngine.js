@@ -1,3 +1,7 @@
+import {
+  notifyDiceRoll,
+} from '../dice/diceRollEvents'
+
 /*
   ========================================
   POLICE WANTED ENGINE
@@ -993,10 +997,18 @@ export function rollPoliceWantedEncounter(
       options
     )
 
+  const triggered =
+    Math.random() <
+    chance
+
+  if (triggered) {
+    notifyDiceRoll(
+      'police-encounter'
+    )
+  }
+
   return {
-    triggered:
-      Math.random() <
-      chance,
+    triggered,
 
     chance,
 
@@ -1217,9 +1229,17 @@ export function rollPoliceRecognition(
   const roll =
     Math.random()
 
+  const recognized =
+    roll < chance
+
+  if (recognized) {
+    notifyDiceRoll(
+      'police-recognition'
+    )
+  }
+
   return {
-    recognized:
-      roll < chance,
+    recognized,
 
     chance,
 

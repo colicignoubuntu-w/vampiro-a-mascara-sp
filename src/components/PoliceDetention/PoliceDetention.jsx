@@ -10,6 +10,9 @@ import {
 import {
   addMinutes,
 } from '../../utils/gameState'
+import {
+  audioEngine,
+} from '../../engine/audio/audioEngine'
 
 import './PoliceDetention.css'
 
@@ -250,6 +253,10 @@ export default function PoliceDetention({
   ========================================== */
 
   function lieAboutBody() {
+    audioEngine.playSfx(
+      'dice_roll'
+    )
+
     const manipulation =
       game.attributes
         ?.social
@@ -415,6 +422,10 @@ export default function PoliceDetention({
   ========================================== */
 
   function flee() {
+    audioEngine.playSfx(
+      'dice_roll'
+    )
+
     const dexterity =
       game.attributes
         ?.physical

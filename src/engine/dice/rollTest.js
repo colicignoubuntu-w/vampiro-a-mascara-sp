@@ -1,3 +1,7 @@
+import {
+  notifyDiceRoll,
+} from './diceRollEvents'
+
 function rollD10() {
   return (
     Math.floor(
@@ -11,6 +15,8 @@ export function rollDicePool({
   difficulty = 6,
   automaticSuccesses = 0,
 }) {
+  notifyDiceRoll('dice-pool')
+
   const safePool =
     Math.max(
       1,

@@ -1,3 +1,7 @@
+import {
+  runWithDiceSound,
+} from '../../engine/audio/audioCues'
+
 import './InstinctCheck.css'
 
 function resultTitle(
@@ -159,7 +163,11 @@ export default function InstinctCheck({
               <button
                 type="button"
                 className="primary-button"
-                onClick={onRoll}
+                onClick={() =>
+                  runWithDiceSound(
+                    onRoll
+                  )
+                }
               >
                 Resistir
               </button>

@@ -1,3 +1,7 @@
+import {
+  runWithDiceSound,
+} from '../../engine/audio/audioCues'
+
 import './CombatDisciplineTest.css'
 
 export default function CombatDisciplineTest({
@@ -110,7 +114,11 @@ export default function CombatDisciplineTest({
           <button
             type="button"
             className="combat-discipline-roll-button"
-            onClick={onRoll}
+            onClick={() =>
+              runWithDiceSound(
+                onRoll
+              )
+            }
           >
             Rolar Dados
           </button>

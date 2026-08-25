@@ -1,3 +1,7 @@
+import {
+  runWithDiceSound,
+} from '../../engine/audio/audioCues'
+
 import './FrenzyTest.css'
 
 function getTypeName(
@@ -154,8 +158,10 @@ export default function FrenzyTest({
             <button
               type="button"
               className="frenzy-roll-button"
-              onClick={
-                onRoll
+              onClick={() =>
+                runWithDiceSound(
+                  onRoll
+                )
               }
             >
               Resistir à Besta

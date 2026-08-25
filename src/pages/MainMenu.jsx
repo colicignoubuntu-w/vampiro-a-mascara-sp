@@ -2,12 +2,21 @@ import {
   hasFinishedCharacter,
   loadFinalCharacter,
 } from '../utils/characterFinalizer'
+import AudioControls from '../components/AudioControls/AudioControls'
+import {
+  useSceneAudio,
+} from '../engine/audio/useSceneAudio'
 
 export default function MainMenu({
   onNewGame,
   onContinue,
   onOpenSheet,
 }) {
+  useSceneAudio(
+    'main_menu',
+    null
+  )
+
   const hasCharacter =
     hasFinishedCharacter()
 
@@ -106,6 +115,8 @@ export default function MainMenu({
           >
             Ficha
           </button>
+
+          <AudioControls />
         </nav>
 
         {!hasCharacter && (

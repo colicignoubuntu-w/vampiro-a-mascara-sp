@@ -1,3 +1,7 @@
+import {
+  runWithDiceSound,
+} from '../../engine/audio/audioCues'
+
 import './DisciplineTestPanel.css'
 
 export default function DisciplineTestPanel({
@@ -105,7 +109,11 @@ export default function DisciplineTestPanel({
               <button
                 type="button"
                 className="discipline-test-roll"
-                onClick={onRoll}
+                onClick={() =>
+                  runWithDiceSound(
+                    onRoll
+                  )
+                }
               >
                 Rolar Dados
               </button>

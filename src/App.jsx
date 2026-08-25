@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useState,
 } from 'react'
 
@@ -7,6 +8,9 @@ import Game from './pages/Game'
 import CharacterCreation from './pages/CharacterCreation'
 
 import CharacterSheetView from './components/CharacterSheet/CharacterSheetView'
+import {
+  audioEngine,
+} from './engine/audio/audioEngine'
 
 function App() {
   const [
@@ -15,6 +19,38 @@ function App() {
   ] = useState(
     'menu'
   )
+
+  useEffect(() => {
+    const unlockAudio = () => {
+      audioEngine.unlock()
+    }
+
+    window.addEventListener(
+      'pointerdown',
+      unlockAudio,
+      {
+        once: true,
+      }
+    )
+    window.addEventListener(
+      'keydown',
+      unlockAudio,
+      {
+        once: true,
+      }
+    )
+
+    return () => {
+      window.removeEventListener(
+        'pointerdown',
+        unlockAudio
+      )
+      window.removeEventListener(
+        'keydown',
+        unlockAudio
+      )
+    }
+  }, [])
 
   function goToMenu() {
     setScreen(

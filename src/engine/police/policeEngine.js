@@ -5,6 +5,9 @@ import {
 import {
   processMasqueradeTime,
 } from '../consequences/consequenceEngine'
+import {
+  notifyDiceRoll,
+} from '../dice/diceRollEvents'
 
 function clamp(
   value,
@@ -32,6 +35,10 @@ function rollPool(
   pool,
   difficulty
 ) {
+  notifyDiceRoll(
+    'police-test'
+  )
+
   const safePool =
     Math.max(
       1,
