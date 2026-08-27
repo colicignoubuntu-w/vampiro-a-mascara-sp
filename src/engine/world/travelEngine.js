@@ -1105,7 +1105,7 @@ export function getAvailableDestinations(
         ?.hasHaven
     )
 
-  return getAllLocations().filter(
+  return getAllLocations(game).filter(
     (location) => {
       /*
         Não mostra o local atual.

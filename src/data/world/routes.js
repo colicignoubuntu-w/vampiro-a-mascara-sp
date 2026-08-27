@@ -137,6 +137,57 @@ const routes = [
 
   {
     from: 'paulista',
+    to: 'vesuvius',
+
+    distance: 1,
+
+    walking: {
+      minutes: 10,
+      cost: 0,
+      risk: 'low',
+    },
+
+    bus: {
+      minutes: 7,
+      cost: 5,
+      risk: 'low',
+    },
+
+    subway: {
+      minutes: 8,
+      cost: 5,
+      risk: 'low',
+    },
+
+    car: {
+      minutes: 5,
+      cost: 6,
+      risk: 'low',
+    },
+  },
+
+  {
+    from: 'paulista',
+    to: 'asylum',
+    distance: 2,
+    walking: { minutes: 18, cost: 0, risk: 'low' },
+    bus: { minutes: 12, cost: 5, risk: 'low' },
+    subway: { minutes: 10, cost: 5, risk: 'low' },
+    car: { minutes: 8, cost: 8, risk: 'low' },
+  },
+
+  {
+    from: 'centro',
+    to: 'mercurio_apartment',
+    distance: 5,
+    walking: { minutes: 55, cost: 0, risk: 'medium' },
+    bus: { minutes: 28, cost: 5, risk: 'medium' },
+    subway: { minutes: 18, cost: 5, risk: 'low' },
+    car: { minutes: 16, cost: 14, risk: 'low' },
+  },
+
+  {
+    from: 'paulista',
     to: 'vila_mariana',
 
     distance: 4,

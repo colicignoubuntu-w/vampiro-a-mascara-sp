@@ -97,6 +97,18 @@
     1px solid #463137;
 
   cursor: pointer;
+
+  min-width: 74px;
+  min-height: 52px;
+  padding: 7px 9px;
+  border-radius: 8px;
+}
+
+.city-map-marker:hover,
+.city-map-marker:focus-visible {
+  z-index: 10;
+  background: rgba(35, 17, 22, 0.92);
+  outline: 1px solid #7d3440;
 }
 
 .city-map-layout {
@@ -119,21 +131,13 @@
   overflow: hidden;
 
   background:
-    radial-gradient(
-      circle at 55% 45%,
-      rgba(
-        99,
-        35,
-        48,
-        0.13
-      ),
-      transparent 30%
-    ),
     linear-gradient(
-      135deg,
-      #0c0a0b,
-      #151012
-    );
+      rgba(9, 7, 8, 0.2),
+      rgba(9, 7, 8, 0.58)
+    ),
+    url('/images/mapa-sao-paulo.png')
+      center / cover
+      no-repeat;
 }
 
 .city-map-board::before {
@@ -143,7 +147,7 @@
 
   inset: 0;
 
-  opacity: 0.2;
+  opacity: 0.08;
 
   background-image:
     linear-gradient(

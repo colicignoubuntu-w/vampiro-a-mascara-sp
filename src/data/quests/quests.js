@@ -230,6 +230,110 @@ const quests = {
       },
     },
   },
+
+  vi_hunter: {
+    id: 'vi_hunter',
+    title: 'Castidade Não É Inocência',
+    category: 'side',
+    chapter: 'chapter_2',
+    initialStatus: 'locked',
+
+    descriptions: {
+      default:
+        'Vi descobriu que uma caçadora se infiltrou no circuito de clubes da Augusta. Ela precisa ser afastada do Vesuvius sem que clientes ou funcionárias inocentes sejam feridos.',
+      find_chastity:
+        'A caçadora usa o nome artístico Castidade e trabalha agora em outro clube da Augusta. Cabelo loiro no topo e uma tatuagem de coração partido nas costas devem denunciá-la.',
+      deal_with_chastity:
+        'Castidade já não pode vigiar o Vesuvius. Resta contar a Vi como a ameaça foi neutralizada.',
+      report_to_vi:
+        'Vi recebeu a notícia. Para ela, o método empregado importa tanto quanto o resultado.',
+    },
+
+    objectives: [
+      { id: 'find_chastity', text: 'Localizar Castidade no circuito da Augusta.', required: true, hidden: false },
+      { id: 'deal_with_chastity', text: 'Impedir que Castidade continue vigiando o Vesuvius.', required: true, hidden: false },
+      { id: 'avoid_innocent_casualties', text: 'Não ferir clientes nem funcionárias.', required: false, hidden: false },
+      { id: 'report_to_vi', text: 'Voltar ao Vesuvius e falar com Vi.', required: true, hidden: false },
+    ],
+
+    rewards: {
+      experience: 3,
+      flags: { viTrustsPlayer: true },
+    },
+  },
+
+  vi_hatter: {
+    id: 'vi_hatter',
+    title: 'O Roteiro da Máscara',
+    category: 'side',
+    chapter: 'chapter_2',
+    initialStatus: 'locked',
+
+    descriptions: {
+      default:
+        'David Hatter escreveu um roteiro preciso demais sobre a sociedade dos Membros. Vi quer o texto destruído e a fonte vampírica identificada, mas David deve permanecer vivo.',
+      recover_script:
+        'David administra o Motel Estrela da Sorte, no Centro. Dinheiro, conversa ou persuasão podem convencê-lo a entregar o roteiro e revelar seu colaborador.',
+      identify_source:
+        'O roteiro está seguro e a fonte indiscreta foi identificada. Falta decidir como preservar a Máscara sem transformar David em dano colateral.',
+      report_hatter:
+        'Vi espera a confirmação de que David sobreviveu e de que seu trabalho não chegará ao público.',
+    },
+
+    objectives: [
+      { id: 'recover_script', text: 'Recuperar o roteiro de David Hatter.', required: true, hidden: false },
+      { id: 'identify_source', text: 'Descobrir qual Membro contou a verdade a David.', required: true, hidden: false },
+      { id: 'spare_david', text: 'Manter David Hatter vivo.', required: false, hidden: false },
+      { id: 'report_hatter', text: 'Levar o desfecho a Vi.', required: true, hidden: false },
+    ],
+
+    rewards: {
+      experience: 3,
+      flags: { viConfidante: true },
+    },
+  },
+
+  mercurio_astrolite: {
+    id: 'mercurio_astrolite',
+    title: 'Uma Entrega Desastrosa',
+    category: 'main',
+    chapter: 'chapter_2',
+    initialStatus: 'locked',
+    descriptions: {
+      default: 'Mercurio foi roubado durante uma negociação clandestina. O explosivo Astrolite e o dinheiro da Camarilla desapareceram.',
+      inspect_mercurio: 'Os ferimentos e resíduos nas roupas de Mercurio podem revelar onde ocorreu a emboscada.',
+      trace_gang: 'As pistas apontam para Dennis e sua quadrilha num galpão junto à Marginal Tietê.',
+      recover_astrolite: 'O Astrolite foi recuperado. Mercurio ainda precisa saber se seu segredo está seguro.',
+    },
+    objectives: [
+      { id: 'inspect_mercurio', text: 'Investigar a emboscada de Mercurio.', required: true, hidden: false },
+      { id: 'trace_gang', text: 'Localizar Dennis e sua quadrilha.', required: true, hidden: false },
+      { id: 'recover_astrolite', text: 'Recuperar o Astrolite.', required: true, hidden: false },
+      { id: 'report_mercurio', text: 'Voltar até Mercurio.', required: true, hidden: false },
+    ],
+    rewards: { experience: 4, flags: { mercurioContact: true, asylumLeadUnlocked: true } },
+  },
+
+  voerman_feud: {
+    id: 'voerman_feud',
+    title: 'Duas Faces no Espelho',
+    category: 'main',
+    chapter: 'chapter_2',
+    initialStatus: 'locked',
+    descriptions: {
+      default: 'Therese e Janette Voerman disputam o controle do Asylum e arrastam aliados para versões incompatíveis da mesma história.',
+      meet_sisters: 'As irmãs acusam uma à outra de sabotagem. Documentos do clube e uma propriedade assombrada podem revelar o que existe por trás da disputa.',
+      investigate_hotel: 'Therese quer um objeto ligado ao fantasma do Hotel Mar Atlântico; Janette quer que ele desapareça.',
+      confront_sisters: 'As provas reunidas permitem confrontar as duas sem aceitar cegamente nenhuma versão.',
+    },
+    objectives: [
+      { id: 'meet_sisters', text: 'Ouvir Therese e Janette separadamente.', required: true, hidden: false },
+      { id: 'investigate_hotel', text: 'Investigar o Hotel Mar Atlântico.', required: true, hidden: false },
+      { id: 'recover_pendant', text: 'Recuperar o pingente ligado à assombração.', required: true, hidden: false },
+      { id: 'confront_sisters', text: 'Confrontar as versões das irmãs.', required: true, hidden: false },
+    ],
+    rewards: { experience: 5, flags: { voermanFeudResolved: true, bertramLead: true } },
+  },
 }
 
 export function getQuestDefinition(

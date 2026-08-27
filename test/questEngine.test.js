@@ -4,6 +4,9 @@ import test from 'node:test'
 import {
   applyQuestEvents,
 } from '../src/engine/quests/questEventEngine.js'
+import {
+  applyQuestStoryProgress,
+} from '../src/engine/quests/questStoryBridge.js'
 
 function createGame() {
   return {
@@ -103,3 +106,36 @@ test(
   }
 )
 
+test(
+  'progressão automática estabiliza após revelar objetivos ocultos',
+  () => {
+    let game = {
+      ...createGame(),
+      story: {
+        scene:
+          'hospital_connection_discovered',
+      },
+      flags: {
+        liviaApartmentUnlocked: true,
+        visitedLiviaApartment: true,
+        searchedLiviaApartment: true,
+        foundLiviaDiary: true,
+        inspectedLiviaComputer: true,
+        discoveredHospitalConnection: true,
+      },
+    }
+
+    for (let index = 0; index < 5; index += 1) {
+      game =
+        applyQuestStoryProgress(
+          game
+        )
+    }
+
+    assert.strictEqual(
+      applyQuestStoryProgress(game),
+      game,
+      'A ponte não deve criar outro objeto sem progresso real.'
+    )
+  }
+)

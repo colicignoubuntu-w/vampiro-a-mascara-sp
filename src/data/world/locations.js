@@ -56,8 +56,8 @@ const locations = {
       'special',
 
     coordinates: {
-      x: 50,
-      y: 50,
+      x: 55,
+      y: 53,
     },
 
     danger:
@@ -177,8 +177,8 @@ const locations = {
       'haven',
 
     coordinates: {
-      x: 53,
-      y: 43,
+      x: 58,
+      y: 39,
     },
 
     danger:
@@ -292,6 +292,106 @@ const locations = {
     },
   },
 
+  vesuvius: {
+    id: 'vesuvius',
+
+    name: 'Vesuvius',
+
+    district: 'Bela Vista',
+
+    description:
+      'Um clube de striptease na região da Augusta. Veludo vermelho, luz baixa e música alta escondem uma discreta corte da noite paulistana.',
+
+    type: 'club',
+
+    coordinates: {
+      x: 40,
+      y: 57,
+    },
+
+    danger: 0.4,
+
+    policePresence: 0.5,
+
+    crowdLevel: 0.8,
+
+    exposure: {
+      publicAccess: true,
+      crowdLevel: 0.8,
+      policePresence: 0.5,
+      soundIsolation: 0.6,
+      hostilePresence: 0.1,
+    },
+
+    arrivalScene: 'vesuvius_entrance',
+  },
+
+  asylum: {
+    id: 'asylum',
+    name: 'Asylum',
+    district: 'Consolação',
+    description:
+      'Uma boate gótica instalada num antigo teatro da Rua Augusta, administrada pelas irmãs Janette e Therese Voerman.',
+    type: 'club',
+    coordinates: { x: 68, y: 61 },
+    danger: 0.5,
+    policePresence: 0.5,
+    crowdLevel: 0.9,
+    exposure: {
+      publicAccess: true,
+      crowdLevel: 0.9,
+      policePresence: 0.5,
+      soundIsolation: 0.55,
+      hostilePresence: 0.1,
+    },
+    arrivalScene: 'asylum_entrance',
+  },
+
+  mercurio_apartment: {
+    id: 'mercurio_apartment',
+    name: 'Apartamento de Mercurio',
+    district: 'Barra Funda',
+    description:
+      'Um apartamento discreto usado por Mercurio como residência, depósito e ponto de contatos clandestinos.',
+    type: 'contact',
+    coordinates: { x: 34, y: 36 },
+    danger: 0.4,
+    policePresence: 0.3,
+    crowdLevel: 0.1,
+    exposure: {
+      publicAccess: false,
+      crowdLevel: 0.1,
+      policePresence: 0.2,
+      soundIsolation: 0.7,
+      hostilePresence: 0,
+    },
+    arrivalScene: 'mercurio_wounded',
+  },
+
+  lucky_star_motel: {
+    id: 'lucky_star_motel', name: 'Motel Estrela da Sorte', district: 'Centro',
+    description: 'O motel administrado por David Hatter, onde ele escreve seus roteiros de terror durante a madrugada.',
+    type: 'investigation', coordinates: { x: 62, y: 36 }, danger: 0.3, policePresence: 0.5, crowdLevel: 0.3,
+    exposure: { publicAccess: true, crowdLevel: 0.3, policePresence: 0.5, soundIsolation: 0.45, hostilePresence: 0 },
+    requiresFlag: 'luckyStarUnlocked', arrivalScene: 'vesuvius_david_meeting',
+  },
+
+  dennis_warehouse: {
+    id: 'dennis_warehouse', name: 'Galpão de Dennis', district: 'Limão',
+    description: 'Um galpão clandestino próximo à Marginal Tietê, identificado pelas pistas encontradas nas roupas de Mercurio.',
+    type: 'investigation', coordinates: { x: 22, y: 24 }, danger: 0.8, policePresence: 0.2, crowdLevel: 0.1,
+    exposure: { publicAccess: false, crowdLevel: 0.1, policePresence: 0.2, soundIsolation: 0.7, hostilePresence: 0.8 },
+    requiresFlag: 'dennisWarehouseUnlocked', arrivalScene: 'mercurio_warehouse',
+  },
+
+  ocean_house_sp: {
+    id: 'ocean_house_sp', name: 'Hotel Mar Atlântico', district: 'Santos',
+    description: 'Uma propriedade incendiada e abandonada no litoral, ligada à disputa entre Janette e Therese.',
+    type: 'investigation', coordinates: { x: 80, y: 78 }, danger: 0.7, policePresence: 0.1, crowdLevel: 0,
+    exposure: { publicAccess: false, crowdLevel: 0, policePresence: 0.1, soundIsolation: 0.8, hostilePresence: 0.5 },
+    requiresFlag: 'oceanHouseUnlocked', arrivalScene: 'ocean_house_investigation',
+  },
+
   /*
     ========================================
     LIBERDADE
@@ -315,8 +415,8 @@ const locations = {
       'district',
 
     coordinates: {
-      x: 49,
-      y: 47,
+      x: 55,
+      y: 46,
     },
 
     danger:
@@ -383,8 +483,8 @@ const locations = {
       'district',
 
     coordinates: {
-      x: 47,
-      y: 48,
+      x: 44,
+      y: 52,
     },
 
     danger:
@@ -1331,8 +1431,8 @@ const locations = {
       'hospital',
 
     coordinates: {
-      x: 50,
-      y: 58,
+      x: 55,
+      y: 65,
     },
 
     danger:

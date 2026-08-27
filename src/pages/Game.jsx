@@ -3557,44 +3557,12 @@ function handleTravel(
     ========================================
   */
 
-  if (
-    destination.id ===
-      'livia_apartment' &&
-    !result.event
-  ) {
+  if (!result.event) {
     updatedGame =
-      transitionToScene(
+      transitionToTravelArrival(
         updatedGame,
-        getLiviaApartmentScene(
-          updatedGame
-        ),
-        {
-          flags: {
-            visitedLiviaApartment:
-              true,
-
-            hasHaven:
-              true,
-
-            inheritedLiviaApartment:
-              true,
-
-            liviaApartmentUnlocked:
-              true,
-          },
-
-          historyItem: {
-            type:
-              'haven-arrival',
-
-            locationId:
-              'livia_apartment',
-
-            timestamp:
-              new Date()
-                .toISOString(),
-          },
-        }
+        destination.id,
+        'location-arrival'
       )
   }
 
@@ -3664,6 +3632,87 @@ function handleTravel(
   goToTop()
 }
 
+function transitionToTravelArrival(
+  currentGame,
+  destinationId,
+  historyType = 'location-arrival'
+) {
+  const destination =
+    getLocation(destinationId)
+
+  if (!destination) {
+    return currentGame
+  }
+
+  if (
+    destination.id ===
+      'livia_apartment'
+  ) {
+    return transitionToScene(
+      currentGame,
+      getLiviaApartmentScene(
+        currentGame
+      ),
+      {
+        flags: {
+          visitedLiviaApartment: true,
+          hasHaven: true,
+          inheritedLiviaApartment: true,
+          liviaApartmentUnlocked: true,
+        },
+        historyItem: {
+          type: historyType,
+          locationId: destination.id,
+          timestamp:
+            new Date().toISOString(),
+        },
+      }
+    )
+  }
+
+  let arrivalScene =
+    destination.arrivalScene
+
+  if (
+    destination.id === 'mercurio_apartment' &&
+    currentGame?.flags?.astroliteRecovered
+  ) {
+    arrivalScene = 'mercurio_return'
+  }
+
+  if (
+    destination.id === 'asylum' &&
+    currentGame?.flags?.ghostPendantRecovered
+  ) {
+    arrivalScene = 'voerman_confrontation'
+  }
+
+  if (
+    destination.id === 'vesuvius' &&
+    currentGame?.flags?.adderIdentified &&
+    !currentGame?.flags?.hatterScriptDestroyed
+  ) {
+    arrivalScene = 'vesuvius_hatter_return'
+  }
+
+  if (!arrivalScene) {
+    return currentGame
+  }
+
+  return transitionToScene(
+    currentGame,
+    arrivalScene,
+    {
+      historyItem: {
+        type: historyType,
+        locationId: destination.id,
+        timestamp:
+          new Date().toISOString(),
+      },
+    }
+  )
+}
+
 function handleTravelEventContinue() {
   if (!travelEvent) {
     return
@@ -3697,38 +3746,14 @@ function handleTravelEventContinue() {
     finalmente entramos no refúgio.
   */
 
-  if (
-    travelEventInfo
-      ?.toId ===
-      'livia_apartment'
-  ) {
-    updatedGame =
-      transitionToScene(
-        updatedGame,
-        getLiviaApartmentScene(
-  updatedGame
-),
-        {
-          flags: {
-            visitedLiviaApartment:
-              true,
-
-            hasHaven:
-              true,
-
-            inheritedLiviaApartment:
-              true,
-
-            liviaApartmentUnlocked:
-              true,
-          },
-        }
-      )
-
-    persist(
-      updatedGame
+  updatedGame =
+    transitionToTravelArrival(
+      updatedGame,
+      travelEventInfo?.toId,
+      'location-arrival-after-event'
     )
-  }
+
+  persist(updatedGame)
 
   clearTravelEvent()
   resetSceneTriggers()
@@ -3786,41 +3811,12 @@ function handleTravelEventTestContinue() {
           },
         }
       )
-  } else if (
-    travelEventInfo
-      ?.toId ===
-      'livia_apartment'
-  ) {
+  } else {
     updatedGame =
-      transitionToScene(
+      transitionToTravelArrival(
         updatedGame,
-        getLiviaApartmentScene(
-  updatedGame
-),
-        {
-          flags: {
-            visitedLiviaApartment:
-              true,
-
-            hasHaven:
-              true,
-
-            inheritedLiviaApartment:
-              true,
-
-            liviaApartmentUnlocked:
-              true,
-          },
-
-          historyItem: {
-            type:
-              'haven-arrival-after-event',
-
-            timestamp:
-              new Date()
-                .toISOString(),
-          },
-        }
+        travelEventInfo?.toId,
+        'location-arrival-after-event-test'
       )
   }
 

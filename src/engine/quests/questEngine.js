@@ -345,6 +345,14 @@ export function revealQuestObjective(
     return game
   }
 
+  if (
+    quest.objectives[
+      objectiveId
+    ].revealed
+  ) {
+    return game
+  }
+
   return {
     ...game,
 
