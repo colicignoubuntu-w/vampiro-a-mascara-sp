@@ -841,23 +841,25 @@ const jackIntroScenes = {
         'São Paulo',
     },
 
-    narration: [
-      'Jack espera alguns metros adiante.',
+   narration: [
+  `Jack espera alguns metros adiante.
 
-      'As portas da Corte se fecham atrás de você.',
+As portas da Corte se fecham atrás de você.
 
-      'Por alguns segundos nenhum dos dois diz nada.',
+Por alguns segundos, nenhum dos dois diz nada.`,
 
-      'Lívia está morta.',
+  `Você continua andando.
 
-      'A Camarilla decidiu que você continua existindo.',
+A Camarilla decidiu que você pode continuar existindo.
 
-      'Pelo menos por enquanto.',
+Pelo menos por enquanto.`,
 
-      'Jack olha para a rua e depois para você.',
+  `Jack olha para a rua e depois para você. Parece perceber que não há muito o que dizer naquele momento.`,
 
-      'São Paulo continua funcionando como se nada tivesse acontecido.',
-    ],
+  `Carros passam pela avenida. Pessoas caminham pelas calçadas. Em algum lugar próximo, alguém ri. Para todos eles, aquela é apenas mais uma noite na cidade.`,
+
+  `Para você, é a primeira.`,
+],
 
     dialogue: {
       speaker:

@@ -13,9 +13,11 @@ import {
 const STORAGE_KEY =
   'vampiro-sp:audio-settings'
 
+const SETTINGS_VERSION = 2
+
 const DEFAULT_SETTINGS = {
   muted: false,
-  music: 0.5,
+  music: 0.15,
   ambience: 0.5,
   sfx: 1,
 }
@@ -29,17 +31,36 @@ function clamp(value) {
 
 function loadSettings() {
   try {
-    return {
-      ...DEFAULT_SETTINGS,
-      ...JSON.parse(
+    const savedSettings =
+      JSON.parse(
         localStorage.getItem(
           STORAGE_KEY
         ) ?? '{}'
-      ),
+      )
+
+    if (
+      savedSettings.version !==
+      SETTINGS_VERSION
+    ) {
+      return {
+        ...DEFAULT_SETTINGS,
+        ...savedSettings,
+        music:
+          DEFAULT_SETTINGS.music,
+        version:
+          SETTINGS_VERSION,
+      }
+    }
+
+    return {
+      ...DEFAULT_SETTINGS,
+      ...savedSettings,
     }
   } catch {
     return {
       ...DEFAULT_SETTINGS,
+      version:
+        SETTINGS_VERSION,
     }
   }
 }
