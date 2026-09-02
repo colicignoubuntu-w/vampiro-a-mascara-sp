@@ -13,6 +13,7 @@ import policeForceScenes from './policeForceScenes'
 import liviaApartmentScenes from './liviaApartmentScenes'
 import vesuviusScenes from './vesuviusScenes'
 import cityNpcScenes from './cityNpcScenes'
+import voermanScenes from './voermanScenes'
 
 const scenes = {
   ...prologueScenes,
@@ -44,6 +45,7 @@ const scenes = {
 
   ...vesuviusScenes,
   ...cityNpcScenes,
+  ...voermanScenes,
 
   /*
     ========================================

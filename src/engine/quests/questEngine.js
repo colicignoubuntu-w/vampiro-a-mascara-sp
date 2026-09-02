@@ -108,12 +108,45 @@ export function initializeQuestSystem(
     return game
   }
 
+  const quests = {
+    ...(game.quests ?? {}),
+  }
+
+  /*
+    A antiga missão das Voerman usava o Hotel Mar Atlântico.
+    Saves que estavam com ela ativa precisam receber os objetivos
+    da Galeria Noir; caso contrário, nunca conseguiriam concluí-la.
+  */
+  const legacyVoermanQuest =
+    quests.voerman_feud
+
+  if (
+    legacyVoermanQuest?.status ===
+      'active' &&
+    !legacyVoermanQuest
+      ?.objectives
+      ?.resolve_tung_dispute
+  ) {
+    const migratedQuest =
+      createQuestState(
+        'voerman_feud'
+      )
+
+    if (migratedQuest) {
+      quests.voerman_feud = {
+        ...migratedQuest,
+        status: 'active',
+        startedAt:
+          legacyVoermanQuest.startedAt ??
+          new Date().toISOString(),
+      }
+    }
+  }
+
   return {
     ...game,
 
-    quests: {
-      ...(game.quests ?? {}),
-    },
+    quests,
 
     experience: {
       current:

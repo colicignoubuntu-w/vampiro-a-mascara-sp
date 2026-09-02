@@ -590,6 +590,11 @@ const [
     setDevScene,
   ] = useState('')
 
+  const [
+    devChoiceHistory,
+    setDevChoiceHistory,
+  ] = useState([])
+
   /*
     ========================================
     CENA ATUAL
@@ -2933,6 +2938,18 @@ function handleHavenDaySleep() {
       return
     }
 
+    if (import.meta.env.DEV) {
+      const snapshot =
+        structuredClone(game)
+
+      setDevChoiceHistory(
+        (current) => [
+          ...current.slice(-24),
+          snapshot,
+        ]
+      )
+    }
+
     const choiceEffects =
       Array.isArray(
         choice.audio?.sfx
@@ -3682,9 +3699,22 @@ function transitionToTravelArrival(
 
   if (
     destination.id === 'asylum' &&
-    currentGame?.flags?.ghostPendantRecovered
+    currentGame?.flags?.jeanetteAgreedToMeet &&
+    !currentGame?.flags?.voermanReconciliationResolved
   ) {
-    arrivalScene = 'voerman_confrontation'
+    arrivalScene = 'therese_reconciliation_return'
+  } else if (
+    destination.id === 'asylum' &&
+    currentGame?.flags?.oceanSpiritObjectRecovered &&
+    !currentGame?.flags?.oceanHouseReturned
+  ) {
+    arrivalScene = 'voerman_ocean_return'
+  } else if (
+    destination.id === 'asylum' &&
+    currentGame?.flags?.gallerySabotageResolved &&
+    !currentGame?.flags?.gallerySabotageReported
+  ) {
+    arrivalScene = 'therese_gallery_confrontation'
   }
 
   if (
@@ -6496,6 +6526,42 @@ window.alert(
     goToTop()
   }
 
+  function devGoBackChoice() {
+    const previousGame =
+      devChoiceHistory[
+        devChoiceHistory.length - 1
+      ]
+
+    if (!previousGame) {
+      return
+    }
+
+    saveGame(
+      previousGame
+    )
+
+    setGame(
+      previousGame
+    )
+
+    setDevChoiceHistory(
+      (current) =>
+        current.slice(0, -1)
+    )
+
+    clearTest()
+    clearFeeding()
+    clearFrenzy()
+    clearHumanity()
+    clearTravelEvent()
+    clearDiscipline()
+    resetSceneSystems()
+
+    setDevOpen(false)
+
+    goToTop()
+  }
+
   function devGiveArsenal() {
     const updatedGame =
       grantDevCombatArsenal(
@@ -7118,6 +7184,28 @@ window.alert(
 
               <small>
                 {scene.title}
+              </small>
+            </div>
+
+            <div className="game-dev-section">
+              <span className="game-dev-label">
+                Navegação de cenas
+              </span>
+
+              <button
+                type="button"
+                className="game-dev-primary"
+                disabled={
+                  devChoiceHistory.length === 0
+                }
+                onClick={devGoBackChoice}
+              >
+                ← Voltar à escolha anterior
+              </button>
+
+              <small>
+                {devChoiceHistory.length}{' '}
+                escolha(s) disponível(is)
               </small>
             </div>
 

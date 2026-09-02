@@ -2,7 +2,7 @@ export const AUDIO_CATALOG = {
   music: {
     main_menu: {
       src: '/audio/music/main-menu.mp3',
-      volume: 0.55,
+      volume: 0.5,
       loop: true,
       stream: true,
     },
@@ -40,8 +40,8 @@ export const AUDIO_CATALOG = {
 
   ambience: {
     hospital: {
-      src: '/audio/ambience/hospital.mp3',
-      volume: 0.35,
+      src: '/audio/ambience/ambience.mp3',
+      volume: 0.5,
       loop: true,
       stream: true,
     },
@@ -151,4 +151,3 @@ export function getSceneAudio(
 
   return null
 }
-

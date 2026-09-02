@@ -331,7 +331,7 @@ const locations = {
     name: 'Asylum',
     district: 'Consolação',
     description:
-      'Uma boate gótica instalada num antigo teatro da Rua Augusta, administrada pelas irmãs Janette e Therese Voerman.',
+      'Uma boate gótica instalada num antigo teatro da Rua Augusta, administrada pelas irmãs Jeanette e Therese Voerman.',
     type: 'club',
     coordinates: { x: 68, y: 61 },
     danger: 0.5,
@@ -384,12 +384,28 @@ const locations = {
     requiresFlag: 'dennisWarehouseUnlocked', arrivalScene: 'mercurio_warehouse',
   },
 
+  gallery_noir: {
+    id: 'gallery_noir', name: 'Galeria Noir', district: 'Jardins',
+    description: 'Uma galeria de arte contemporânea que recebe uma inauguração beneficente frequentada pela elite paulistana.',
+    type: 'investigation', coordinates: { x: 73, y: 48 }, danger: 0.55, policePresence: 0.55, crowdLevel: 0.85,
+    exposure: { publicAccess: true, crowdLevel: 0.85, policePresence: 0.55, soundIsolation: 0.35, hostilePresence: 0.15 },
+    requiresFlag: 'galleryNoirUnlocked', arrivalScene: 'gallery_noir_infiltration',
+  },
+
   ocean_house_sp: {
-    id: 'ocean_house_sp', name: 'Hotel Mar Atlântico', district: 'Santos',
-    description: 'Uma propriedade incendiada e abandonada no litoral, ligada à disputa entre Janette e Therese.',
+    id: 'ocean_house_sp', name: 'Ocean House Hotel', district: 'Santos',
+    description: 'Um hotel incendiado e abandonado no litoral, agora assombrado por uma presença que impede os planos imobiliários de Therese.',
     type: 'investigation', coordinates: { x: 80, y: 78 }, danger: 0.7, policePresence: 0.1, crowdLevel: 0,
     exposure: { publicAccess: false, crowdLevel: 0, policePresence: 0.1, soundIsolation: 0.8, hostilePresence: 0.5 },
     requiresFlag: 'oceanHouseUnlocked', arrivalScene: 'ocean_house_investigation',
+  },
+
+  surfside_diner: {
+    id: 'surfside_diner', name: 'Surfside Diner', district: 'Santa Monica',
+    description: 'Uma lanchonete quase vazia perto da orla. A cabine dos fundos fica ao lado dos telefones públicos.',
+    type: 'contact', coordinates: { x: 77, y: 72 }, danger: 0.3, policePresence: 0.3, crowdLevel: 0.35,
+    exposure: { publicAccess: true, crowdLevel: 0.35, policePresence: 0.3, soundIsolation: 0.4, hostilePresence: 0.05 },
+    requiresFlag: 'surfsideMeetingUnlocked', arrivalScene: 'surfside_wait_jeanette',
   },
 
   /*

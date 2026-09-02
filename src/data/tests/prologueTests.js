@@ -293,6 +293,160 @@ const prologueTests = {
     botchText:
       'Seu silêncio parece hostil e aumenta a tensão no corredor.',
   },
+
+  'judgment_prince.challenge_prince': {
+    id:
+      'judgment-prince-courage',
+
+    label:
+      'Coragem',
+
+    attributeGroup:
+      'virtues',
+
+    attribute:
+      'courage',
+
+    attributeLabel:
+      'Coragem',
+
+    ability:
+      null,
+
+    abilityLabel:
+      null,
+
+    difficulty: 6,
+
+    modifier: 0,
+
+    ignoreHealthPenalty:
+      true,
+
+    outcomes: {
+      success: {
+        nextScene:
+          'challenge_prince_success',
+
+        timeMinutes: 2,
+
+        flags: {
+          challengedPrince:
+            true,
+        },
+      },
+
+      failure: {
+        nextScene:
+          'challenge_prince_failure',
+
+        timeMinutes: 2,
+
+        flags: {
+          failedPrinceCourage:
+            true,
+        },
+      },
+
+      botch: {
+        nextScene:
+          'challenge_prince_failure',
+
+        timeMinutes: 2,
+
+        flags: {
+          botchedPrinceCourage:
+            true,
+        },
+      },
+    },
+
+    successText:
+      'Você vence o peso da presença do Príncipe e consegue falar.',
+
+    failureText:
+      'A pressão do salão faz as palavras morrerem em sua garganta.',
+
+    botchText:
+      'O medo toma sua voz e você não consegue terminar a frase.',
+  },
+
+  'judgment_mission.ask_choice': {
+    id:
+      'judgment-refusal-courage',
+
+    label:
+      'Coragem',
+
+    attributeGroup:
+      'virtues',
+
+    attribute:
+      'courage',
+
+    attributeLabel:
+      'Coragem',
+
+    ability:
+      null,
+
+    abilityLabel:
+      null,
+
+    difficulty: 6,
+
+    modifier: 0,
+
+    ignoreHealthPenalty:
+      true,
+
+    outcomes: {
+      success: {
+        nextScene:
+          'judgment_refusal',
+
+        timeMinutes: 1,
+
+        flags: {
+          questionedRefusal:
+            true,
+        },
+      },
+
+      failure: {
+        nextScene:
+          'judgment_refusal_failure',
+
+        timeMinutes: 1,
+
+        flags: {
+          failedToQuestionRefusal:
+            true,
+        },
+      },
+
+      botch: {
+        nextScene:
+          'judgment_refusal_failure',
+
+        timeMinutes: 1,
+
+        flags: {
+          botchedRefusalCourage:
+            true,
+        },
+      },
+    },
+
+    successText:
+      'Mesmo diante das cinzas de Lívia, você encontra coragem para questionar o Príncipe.',
+
+    failureText:
+      'A resposta implícita nas cinzas de Lívia impede que você faça a pergunta.',
+
+    botchText:
+      'O medo fecha sua garganta antes que a provocação possa ser pronunciada.',
+  },
 }
 
 export function getChoiceTest(

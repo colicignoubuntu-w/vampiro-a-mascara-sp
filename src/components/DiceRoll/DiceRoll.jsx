@@ -128,23 +128,27 @@ export default function DiceRoll({
             </strong>
           </div>
 
-          <span className="dice-plus">
-            +
-          </span>
+          {test.ability && (
+            <>
+              <span className="dice-plus">
+                +
+              </span>
 
-          <div>
-            <span>
-              {
-                test.abilityLabel
-              }
-            </span>
+              <div>
+                <span>
+                  {
+                    test.abilityLabel
+                  }
+                </span>
 
-            <strong>
-              {
-                poolData.abilityValue
-              }
-            </strong>
-          </div>
+                <strong>
+                  {
+                    poolData.abilityValue
+                  }
+                </strong>
+              </div>
+            </>
+          )}
 
           {poolData.modifier !==
             0 && (

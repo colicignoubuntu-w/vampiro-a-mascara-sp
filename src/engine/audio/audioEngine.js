@@ -15,9 +15,9 @@ const STORAGE_KEY =
 
 const DEFAULT_SETTINGS = {
   muted: false,
-  music: 0.7,
-  ambience: 0.65,
-  sfx: 0.8,
+  music: 0.5,
+  ambience: 0.5,
+  sfx: 1,
 }
 
 function clamp(value) {

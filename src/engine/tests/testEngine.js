@@ -7,6 +7,14 @@ function getAttribute(
   group,
   attribute
 ) {
+  if (group === 'virtues') {
+    return (
+      game?.virtues
+        ?.[attribute] ??
+      0
+    )
+  }
+
   return (
     game?.attributes
       ?.[group]
@@ -104,9 +112,11 @@ export function calculateTestPool(
     )
 
   const healthPenalty =
-    getHealthPenalty(
-      game
-    )
+    test.ignoreHealthPenalty
+      ? 0
+      : getHealthPenalty(
+          game
+        )
 
   const calculatedPool =
     attributeValue +
