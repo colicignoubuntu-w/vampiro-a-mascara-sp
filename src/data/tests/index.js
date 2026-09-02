@@ -14,6 +14,10 @@ import {
   getPoliceChoiceTest,
 } from './policeTests'
 
+import {
+  getLiviaApartmentChoiceTest,
+} from './liviaApartmentTests'
+
 export function getChoiceTest(
   sceneId,
   choiceId,
@@ -25,6 +29,11 @@ export function getChoiceTest(
       choiceId
     ) ??
     getSecurityChoiceTest(
+      sceneId,
+      choiceId,
+      game
+    ) ??
+    getLiviaApartmentChoiceTest(
       sceneId,
       choiceId
     ) ??

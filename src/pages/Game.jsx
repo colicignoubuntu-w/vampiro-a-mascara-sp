@@ -206,6 +206,14 @@ import {
 
 import './Game.css'
 
+function normalizePassword(value) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+}
+
 export default function Game({
   onMenu,
   onOpenSheet,
@@ -263,6 +271,11 @@ const [
     spendWillpower,
     setSpendWillpower,
   ] = useState(false)
+
+  const [
+    passwordAttempt,
+    setPasswordAttempt,
+  ] = useState('')
 
   /*
     ========================================
@@ -2907,7 +2920,57 @@ function handleHavenDaySleep() {
 
     resetSceneSystems()
     clearTest()
-    goToTop()
+  goToTop()
+  }
+
+  function handlePasswordSubmit(
+    event
+  ) {
+    event.preventDefault()
+
+    const challenge =
+      scene?.passwordChallenge
+
+    if (
+      !challenge ||
+      !passwordAttempt.trim()
+    ) {
+      return
+    }
+
+    const expectedPassword =
+      normalizePassword(
+        `${characterName}${challenge.suffix ?? ''}`
+      )
+    const passwordIsCorrect =
+      normalizePassword(
+        passwordAttempt
+      ) === expectedPassword
+
+    setPasswordAttempt('')
+
+    performNormalChoice({
+      id: 'type_livia_password',
+      text:
+        'Digitar uma senha no computador de Lívia.',
+      nextScene:
+        passwordIsCorrect
+          ? challenge.successScene
+          : challenge.failureScene,
+      timeMinutes: 1,
+      flags:
+        passwordIsCorrect
+          ? {
+              enteredLiviaPassword:
+                true,
+              unlockedLiviaComputer:
+                true,
+            }
+          : {
+              failedLiviaPasswordAttempt:
+                true,
+            },
+    })
   }
 
   function handleChoice(
@@ -7709,6 +7772,51 @@ game.world?.location?.id ===
           </button>
         )}
 
+        {scene.passwordChallenge && (
+          <form
+            className="game-password-entry"
+            onSubmit={
+              handlePasswordSubmit
+            }
+          >
+            <label
+              htmlFor="livia-password"
+            >
+              Digitar senha
+            </label>
+
+            <div>
+              <input
+                id="livia-password"
+                type="text"
+                value={passwordAttempt}
+                autoComplete="off"
+                autoFocus
+                disabled={
+                  interactionBlocked
+                }
+                onChange={(event) =>
+                  setPasswordAttempt(
+                    event.target.value
+                  )
+                }
+                placeholder="Senha"
+                aria-label="Senha do computador de Lívia"
+              />
+
+              <button
+                type="submit"
+                disabled={
+                  interactionBlocked ||
+                  !passwordAttempt.trim()
+                }
+              >
+                Confirmar
+              </button>
+            </div>
+          </form>
+        )}
+
         {scene.choices?.length >
         0 ? (
           <div className="game-choice-list">
@@ -7720,7 +7828,8 @@ game.world?.location?.id ===
                 const test =
                   getChoiceTest(
                     scene.id,
-                    choice.id
+                    choice.id,
+                    game
                   )
 
                 return (

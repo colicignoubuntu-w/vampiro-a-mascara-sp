@@ -16,6 +16,11 @@ import {
   applyQuestEvents,
 } from '../engine/quests/questEventEngine'
 
+import {
+  addInventoryItem,
+  hasInventoryItem,
+} from '../engine/inventoryEngine'
+
 /*
   ========================================
   SAVE
@@ -283,6 +288,10 @@ export function applyChoice(
         choice.questEvents ??
         [],
 
+      inventoryItems:
+        choice.inventoryItems ??
+        [],
+
       historyType:
         'choice',
 
@@ -358,6 +367,14 @@ export function applyTestOutcome(
           []),
 
         ...(outcome.questEvents ??
+          []),
+      ],
+
+      inventoryItems: [
+        ...(choice.inventoryItems ??
+          []),
+
+        ...(outcome.inventoryItems ??
           []),
       ],
 
@@ -608,7 +625,7 @@ function applyNarrativeTransition(
     ========================================
   */
 
-  const transitionedGame = {
+  let transitionedGame = {
     ...timedGame,
 
     flags: {
@@ -678,6 +695,23 @@ function applyNarrativeTransition(
       transition.test ??
       timedGame.lastRoll ??
       null,
+  }
+
+  for (const item of
+    transition.inventoryItems ??
+    []) {
+    if (
+      !hasInventoryItem(
+        transitionedGame,
+        item.id
+      )
+    ) {
+      transitionedGame =
+        addInventoryItem(
+          transitionedGame,
+          item
+        )
+    }
   }
 
   const updatedGame =

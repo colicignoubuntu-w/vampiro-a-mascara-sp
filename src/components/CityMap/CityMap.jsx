@@ -35,6 +35,10 @@ export default function CityMap({
  const locations =
   getAllLocations(
     game
+  ).filter(
+    (location) =>
+      location.showOnMap !==
+      false
   )
 
   const currentLocationId =

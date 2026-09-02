@@ -5,6 +5,7 @@ import {
 
 import {
   AUDIO_CATALOG,
+  MUSIC_PLAYLIST,
 } from '../../data/audio/audioCatalog'
 import {
   subscribeToDiceRolls,
@@ -13,11 +14,11 @@ import {
 const STORAGE_KEY =
   'vampiro-sp:audio-settings'
 
-const SETTINGS_VERSION = 2
+const SETTINGS_VERSION = 3
 
 const DEFAULT_SETTINGS = {
   muted: false,
-  music: 0.15,
+  music: 0.05,
   ambience: 0.5,
   sfx: 1,
 }
@@ -220,22 +221,7 @@ class AudioEngine {
       cache: 'no-store',
     })
       .then((response) => {
-        const contentType =
-          response.headers.get(
-            'content-type'
-          ) ?? ''
-
-        return (
-          response.ok &&
-          (
-            contentType.startsWith(
-              'audio/'
-            ) ||
-            contentType.includes(
-              'application/octet-stream'
-            )
-          )
-        )
+        return response.ok
       })
       .catch(() => false)
 
@@ -295,6 +281,17 @@ class AudioEngine {
       },
       onplayerror: () => {
         this.unlocked = false
+      },
+      onend: () => {
+        if (
+          channel === 'music' &&
+          this.current.music?.key ===
+            key &&
+          !this.playback.musicPaused &&
+          !this.playback.musicStopped
+        ) {
+          this.playNextMusic()
+        }
       },
     })
 
@@ -417,9 +414,8 @@ class AudioEngine {
   async playNextMusic() {
     await this.unlock()
 
-    const musicKeys = Object.keys(
-      AUDIO_CATALOG.music
-    )
+    const musicKeys =
+      MUSIC_PLAYLIST
 
     if (musicKeys.length === 0) {
       return

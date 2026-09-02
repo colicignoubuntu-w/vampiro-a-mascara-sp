@@ -1,3 +1,34 @@
+function createLiviaFileScene({
+  id,
+  title,
+  narration,
+  flag,
+}) {
+  return {
+    id,
+    chapter: 'O LEGADO DE LÍVIA',
+    title,
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+    narration,
+    dialogue: null,
+    choices: [
+      {
+        id: `${id}_return`,
+        text: 'Voltar à lista de arquivos.',
+        nextScene: 'livia_computer_unlocked',
+        timeMinutes: 1,
+        flags: {
+          [flag]: true,
+        },
+      },
+    ],
+  }
+}
+
 const liviaApartmentScenes = {
   /*
     ========================================
@@ -18,49 +49,47 @@ const liviaApartmentScenes = {
       district: 'Centro de São Paulo',
     },
 
-    narration: [
-      'O prédio parece ainda mais velho à noite.',
+   narration: [
+  `O prédio parece ainda mais velho à noite. A fachada manchada pela chuva quase desaparece entre as construções do centro de São Paulo.
 
-      'A fachada manchada pela chuva se mistura às construções do centro de São Paulo.',
+Você reconhece o lugar antes mesmo de entrar. Já esteve ali vezes suficientes para não precisar pensar no caminho.`,
 
-      'Você reconhece o lugar antes mesmo de entrar.',
+  `Ainda assim, atravessar a entrada agora é diferente.
 
-      'Fragmentos da sua antiga vida voltam sem pedir permissão.',
+Algumas lembranças surgem sem que você as procure: Lívia abrindo a porta para você, a voz dela vindo de algum lugar do apartamento, o cheiro familiar que encontrava sempre que entrava.
 
-      'Lívia abrindo a porta.',
+Por um momento, são lembranças comuns.
 
-      'A voz dela.',
+Depois vem o sangue.`,
 
-      'O cheiro do apartamento.',
+  `Você sobe as escadas até o andar onde ela morava.
 
-      'Depois, sangue.',
+Quando chega ao apartamento, encontra a porta fechada.
 
-      'Você sobe as escadas até o andar onde ela morava.',
+Você tenta a maçaneta.
 
-      'A porta continua fechada.',
+Trancada.`,
 
-      'Por alguns segundos, parece absurdo pensar que Lívia nunca mais vai abri-la.',
+  `Você permanece diante dela por alguns segundos.
 
-      'Mas Jack estava certo.',
+É estranho pensar que Lívia nunca mais vai aparecer do outro lado para abrir a porta e deixar você entrar.`,
 
-      'Se ela deixou respostas em algum lugar, provavelmente estão aqui.',
-    ],
+  `Jack estava certo.
+
+Se ela deixou alguma resposta para o que aconteceu — ou qualquer coisa que possa explicar por que escolheu você — provavelmente está aqui.`,
+],
 
     dialogue: null,
 
     choices: [
       {
-        id: 'enter_livia_apartment',
+        id: 'try_open_livia_door',
 
-        text: 'Entrar no apartamento.',
+        text: 'Tentar abrir a porta.',
 
-        nextScene: 'livia_apartment_inside',
+        nextScene: 'livia_apartment_locked_door',
 
-        timeMinutes: 2,
-
-        flags: {
-          visitedLiviaApartment: true,
-        },
+        timeMinutes: 1,
       },
 
       {
@@ -71,6 +100,234 @@ const liviaApartmentScenes = {
         nextScene: 'free_roam',
 
         timeMinutes: 1,
+      },
+    ],
+  },
+
+  /*
+    ========================================
+    A PORTA TRANCADA
+    ========================================
+  */
+
+  livia_apartment_locked_door: {
+    id: 'livia_apartment_locked_door',
+
+    chapter: 'O LEGADO DE LÍVIA',
+
+    title: 'A Porta',
+
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+
+    narration: [
+      `Você segura a maçaneta e examina a porta. Poderia tentar forçá-la, mas Jack percebe sua intenção antes que você faça qualquer coisa.
+
+Ele toca seu braço de leve e balança a cabeça.`,
+    ],
+
+    dialogue: {
+      speaker: 'Jack',
+
+      text:
+        'Calma aí, garoto. Você acabou de ganhar uma segunda chance e já quer começar com vizinho chamando a polícia? Primeiro a gente tenta entrar sem transformar isso numa cena de crime.',
+    },
+
+    choices: [
+      {
+        id: 'ask_jack_how_to_enter',
+
+        text: '"E como a gente entra?"',
+
+        nextScene: 'jack_lockpick_kit',
+
+        timeMinutes: 1,
+      },
+    ],
+  },
+
+  jack_lockpick_kit: {
+    id: 'jack_lockpick_kit',
+
+    chapter: 'O LEGADO DE LÍVIA',
+
+    title: 'Ferramentas do Ofício',
+
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+
+    narration: [
+      `Jack enfia a mão por dentro da jaqueta e tira um pequeno estojo escuro. Quando abre, você encontra algumas ferramentas finas de metal organizadas lado a lado.
+
+Ele estende o estojo para você.`,
+    ],
+
+    dialogue: {
+      speaker: 'Jack',
+
+       text:
+    'Primeira lição grátis: força resolve muita coisa. Discrição resolve sem deixar vizinho, câmera e polícia fazendo perguntas depois. Toma, fica com isso por enquanto. Vamos ver se você sabe usar.',
+},
+
+    choices: [
+      {
+        id: 'pick_livia_lock',
+
+        text: '[Segurança] Tentar abrir a fechadura.',
+
+        test: {
+          ability: 'security',
+          difficulty: 6,
+          successScene: 'livia_lockpick_success',
+          failureScene: 'livia_lockpick_failure',
+        },
+
+        timeMinutes: 2,
+      },
+    ],
+  },
+
+  livia_lockpick_success: {
+    id: 'livia_lockpick_success',
+
+    chapter: 'O LEGADO DE LÍVIA',
+
+    title: 'Clique',
+
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+
+    narration: [
+      `Você se ajoelha diante da fechadura e encaixa as ferramentas.
+
+No começo, sente apenas a resistência do mecanismo. Então começa a perceber pequenas mudanças na pressão. Você ajusta uma das ferramentas, tenta novamente e escuta um clique discreto.`,
+
+      `A fechadura cede.
+
+Você gira a maçaneta e olha para Jack.`,
+    ],
+
+    dialogue: {
+      speaker: 'Jack',
+
+      text:
+        'Olha só. Talvez você dure mais de uma semana.',
+    },
+
+    choices: [
+      {
+        id: 'enter_livia_apartment_after_lockpick',
+
+        text: 'Abrir a porta.',
+
+        nextScene: 'livia_apartment_inside',
+
+        timeMinutes: 1,
+
+        flags: {
+          visitedLiviaApartment: true,
+          pickedLiviaApartmentLock: true,
+        },
+      },
+    ],
+  },
+
+  livia_lockpick_failure: {
+    id: 'livia_lockpick_failure',
+
+    chapter: 'O LEGADO DE LÍVIA',
+
+    title: 'Clique Errado',
+
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+
+    narration: [
+      `Você tenta reproduzir o que imagina que deveria fazer, movimentando as ferramentas dentro da fechadura.
+
+Nada.
+
+Muda a pressão, tenta outro ângulo e continua por mais alguns segundos. A fechadura permanece exatamente como estava.`,
+
+      `Jack observa em silêncio até estender a mão.`,
+    ],
+
+    dialogue: {
+      speaker: 'Jack',
+
+      text:
+        'Tá bom, garoto. Antes que você transforme uma fechadura de trinta reais num problema de trezentos, me dá isso aqui.',
+    },
+
+    choices: [
+      {
+        id: 'give_lockpicks_to_jack',
+
+        text: 'Entregar as ferramentas.',
+
+        nextScene: 'jack_opens_livia_door',
+
+        timeMinutes: 1,
+      },
+    ],
+  },
+
+  jack_opens_livia_door: {
+    id: 'jack_opens_livia_door',
+
+    chapter: 'O LEGADO DE LÍVIA',
+
+    title: 'Experiência',
+
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+
+    narration: [
+      `Jack se abaixa diante da porta e coloca as ferramentas na fechadura.
+
+Ele faz dois movimentos curtos.
+
+Clique.
+
+Jack gira a maçaneta, recolhe as ferramentas e guarda o estojo dentro da jaqueta.`,
+    ],
+
+    dialogue: {
+      speaker: 'Jack',
+
+      text:
+        'Você tem tempo para aprender. Uma das poucas vantagens de estar morto.',
+    },
+
+    choices: [
+      {
+        id: 'enter_livia_apartment_with_jack',
+
+        text: 'Entrar no apartamento.',
+
+        nextScene: 'livia_apartment_inside',
+
+        timeMinutes: 1,
+
+        flags: {
+          visitedLiviaApartment: true,
+          jackOpenedLiviaApartment: true,
+        },
       },
     ],
   },
@@ -94,31 +351,35 @@ const liviaApartmentScenes = {
       district: 'Centro de São Paulo',
     },
 
-    narration: [
-      'O ar está parado.',
+  narration: [
+  `O ar está parado quando você entra. As cortinas permanecem fechadas, deixando o apartamento mergulhado em uma penumbra que torna tudo estranhamente familiar.
 
-      'As cortinas permanecem fechadas.',
+Uma fina camada de poeira começa a se formar sobre os móveis. `,
 
-      'Uma camada fina de poeira começa a se formar sobre os móveis.',
+  `Na sala, livros dividem espaço com fotografias, discos e papéis espalhados. Um computador está sobre uma pequena escrivaninha, enquanto algumas caixas permanecem empilhadas perto da estante.
 
-      'Nada parece ter sido organizado depois da morte de Lívia.',
+O quarto fica no fim do corredor.`,
 
-      'Na sala há livros, fotografias, discos e papéis espalhados.',
+  `Você reconhece boa parte daquilo. Já esteve naquele apartamento outras vezes, mas nunca teve motivo para prestar tanta atenção ao que Lívia guardava.
 
-      'Um computador está sobre uma pequena escrivaninha.',
+Agora cada gaveta, caixa ou arquivo pode esconder alguma coisa que ela nunca contou a você.`,
 
-      'O quarto fica no fim do corredor.',
+  `Jack entra logo atrás.
 
-      'Há também caixas empilhadas perto de uma estante.',
-
-      'Jack falou em computador, papéis e fotografias.',
-
-      'Agora você entende que procurar tudo pode levar algum tempo.',
-    ],
+Ele havia falado em computador, papéis e fotografias. Olhando para tudo que Lívia deixou, descobrir o que realmente importa pode levar algum tempo.`,
+],
 
     dialogue: null,
 
     choices: [
+      {
+        id: 'investigate_livia_apartment',
+
+        text: 'Examinar atentamente as alterações no apartamento.',
+
+        timeMinutes: 5,
+      },
+
       {
         id: 'search_livia_living_room',
 
@@ -171,6 +432,146 @@ const liviaApartmentScenes = {
     ========================================
   */
 
+  livia_apartment_investigation_success: {
+    id: 'livia_apartment_investigation_success',
+    chapter: 'O LEGADO DE LÍVIA',
+    title: 'Alguém Esteve Aqui',
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+    narration: [
+      `À primeira vista, o apartamento parece apenas abandonado. Quando começa a prestar atenção aos detalhes, porém, alguma coisa não combina com suas lembranças do lugar.`,
+
+      `Uma das gavetas da escrivaninha não fecha completamente. Você a abre e encontra papéis empurrados para um dos lados, deixando um espaço vazio no fundo. Pela marca mais clara na madeira, alguma coisa costumava ficar ali.
+
+Não está mais.`,
+
+      `Perto da estante, alguns livros foram colocados de volta fora de ordem. Uma das caixas também parece ter sido aberta e fechada novamente. Nada foi jogado no chão e nenhum móvel foi quebrado.
+
+Quem esteve ali não estava procurando dinheiro.`,
+
+      `Quanto mais você examina o apartamento, mais percebe que algumas ausências parecem específicas demais para serem acaso.
+
+Em uma gaveta há divisórias vazias entre documentos que continuam organizados. Em outra, restaram apenas algumas folhas soltas, como se alguém tivesse retirado uma pasta inteira e colocado o restante de volta no lugar.`,
+
+      `Dentro de uma das caixas, você encontra cópias de notícias antigas, recibos e anotações de Lívia. Algumas palavras aparecem circuladas várias vezes:
+
+“órgãos.”
+
+“sangue.”
+
+“desaparecidos.”
+
+“transferências.”
+
+“doações.”`,
+
+      `Há também nomes escritos à mão, alguns acompanhados de cargos ou instituições.
+
+Empresários. Médicos. Policiais. Funcionários públicos. Assessores.
+
+Em alguns casos, Lívia desenhou linhas entre os nomes, mas partes do esquema desapareceram junto com os documentos que foram levados.`,
+
+      `Outra folha parece ainda mais estranha.
+
+Há endereços de fóruns da internet, nomes de usuários e títulos de vídeos anotados nas margens. Ao lado de alguns deles, Lívia escreveu:
+
+“encenação?”
+
+Em outros:
+
+“não parece.”
+
+E, perto do fim da página:
+
+“mesmas pessoas?”`,
+
+      `Você encontra ainda referências isoladas a drogas, casas noturnas, clínicas particulares e pessoas desaparecidas.
+
+Nada daquilo é suficiente para explicar o que Lívia estava investigando.
+
+Mas é suficiente para perceber que ela não estava seguindo apenas um hospital.`,
+    ],
+    dialogue: {
+      speaker: 'Jack',
+      text:
+        'Camarilla. Aposto meu traseiro. Entraram, procuraram o que interessava e deixaram o resto parecendo normal. Pelo menos tiveram educação de fechar a porta quando saíram.',
+    },
+    choices: [
+      {
+        id: 'ask_jack_why_computer_remains',
+        text: '“Então por que deixaram o computador?”',
+        nextScene: 'jack_explains_livia_search',
+        timeMinutes: 1,
+      },
+      {
+        id: 'continue_after_apartment_investigation',
+        text: 'Continuar procurando.',
+        nextScene: 'livia_apartment_inside',
+        timeMinutes: 1,
+      },
+    ],
+  },
+
+  livia_apartment_investigation_failure: {
+    id: 'livia_apartment_investigation_failure',
+    chapter: 'O LEGADO DE LÍVIA',
+    title: 'Vestígios',
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+    narration: [
+      'Você examina gavetas, caixas e estantes, mas o abandono torna difícil separar desordem de intenção.',
+      'Se alguém esteve ali antes de vocês, não deixou sinais que você consiga reconhecer.',
+    ],
+    dialogue: null,
+    choices: [
+      {
+        id: 'continue_after_failed_apartment_investigation',
+        text: 'Continuar procurando.',
+        nextScene: 'livia_apartment_inside',
+        timeMinutes: 1,
+      },
+    ],
+  },
+
+  jack_explains_livia_search: {
+    id: 'jack_explains_livia_search',
+    chapter: 'O LEGADO DE LÍVIA',
+    title: 'Lívia Vesper',
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+    narration: [
+      'Jack olha para o computador antigo sobre a escrivaninha e dá de ombros.',
+    ],
+    dialogue: {
+      speaker: 'Jack',
+      text:
+        'Porque provavelmente olharam pra ele e não encontraram nada. Lívia tinha fama de arrumar problema, garoto. Fazia perguntas demais, comprava briga demais e desconfiava de todo mundo. Depois de um tempo, quando alguém assim diz que descobriu uma conspiração, metade da Corte só escuta “Lívia sendo Lívia”.',
+    },
+    choices: [
+      {
+        id: 'inspect_computer_after_search',
+        text: 'Examinar o computador.',
+        nextScene: 'livia_computer',
+        timeMinutes: 1,
+      },
+      {
+        id: 'continue_search_after_jack_explanation',
+        text: 'Continuar procurando.',
+        nextScene: 'livia_apartment_inside',
+        timeMinutes: 1,
+      },
+    ],
+  },
+
   livia_apartment_search: {
     id: 'livia_apartment_search',
 
@@ -184,33 +585,19 @@ const liviaApartmentScenes = {
       district: 'Centro de São Paulo',
     },
 
-    narration: [
-      'Você começa pela sala.',
+   narration: [
+  `Você começa pela sala.
 
-      'Contas antigas.',
+Contas antigas, livros com páginas marcadas, fotografias sem data, recibos de lugares que você não reconhece. Nada parece importante isoladamente, mas existe uma estranha organização no caos.
 
-      'Livros com páginas marcadas.',
+Lívia guardava coisas. Muitas coisas.`,
 
-      'Fotografias sem data.',
+  `Algumas fotografias mostram você antes do Abraço.
 
-      'Recibos de lugares que você não reconhece.',
+Em uma delas, você está saindo de um estabelecimento sem perceber que estava sendo observado. A fotografia foi tirada semanas antes de você conhecer Lívia.
 
-      'Nada parece importante isoladamente.',
-
-      'Mas existe uma estranha organização no caos.',
-
-      'Lívia guardava coisas.',
-
-      'Muitas coisas.',
-
-      'Algumas fotografias mostram você antes do Abraço.',
-
-      'Em uma delas, você está saindo de um estabelecimento sem perceber que estava sendo observado.',
-
-      'A fotografia foi tirada semanas antes de você conhecer Lívia.',
-
-      'Isso significa que ela já sabia quem você era.',
-    ],
+Isso significa que ela já sabia quem você era.`,
+],
 
     dialogue: {
       speaker: 'A Voz',
@@ -271,27 +658,23 @@ const liviaApartmentScenes = {
       district: 'Centro de São Paulo',
     },
 
-    narration: [
-      'O quarto é mais organizado que a sala.',
+   narration: [
+  `O quarto é mais organizado que a sala. Roupas escuras ocupam boa parte do armário, enquanto livros se acumulam perto da cama. Algumas coisas estão fora do lugar, mas ainda existe ali uma organização que parece muito mais com Lívia do que a desordem da sala.`,
 
-      'Roupas escuras ocupam metade do armário.',
+  `Você começa a procurar. Abre gavetas, afasta roupas e examina algumas das caixas guardadas no quarto.
 
-      'Livros estão empilhados perto da cama.',
+Debaixo de uma pequena pilha de roupas, encontra três cadernos de capa preta.`,
 
-      'Você abre gavetas e examina caixas.',
+  `Nenhum deles possui título. Há apenas datas escritas nas primeiras páginas, indicando períodos diferentes.
 
-      'Debaixo de algumas roupas encontra três cadernosde capa preta.',
+Você coloca os três lado a lado e percebe que o mais antigo começa meses antes do seu Abraço.`,
 
-      'Não existem títulos.',
+  `Você abre o caderno em uma página qualquer.
 
-      'Somente datas.',
+No meio de anotações que ainda não fazem sentido para você, uma palavra imediatamente chama sua atenção.
 
-      'O mais antigo começa meses antes de seu Abraço.',
-
-      'Você abre uma página ao acaso.',
-
-      'Seu nome está escrito nela.',
-    ],
+Seu nome.`,
+],
 
     dialogue: {
       speaker: 'A Voz',
@@ -361,44 +744,30 @@ const liviaApartmentScenes = {
     },
 
     narration: [
-      'As primeiras páginas são difíceis de interpretar.',
+  `As primeiras páginas são difíceis de interpretar. Lívia escrevia como se nunca esperasse que outra pessoa fosse ler aquilo. Nomes aparecem sem explicação, misturados a endereços, horários e descrições de pessoas que você não reconhece.
 
-      'Lívia escrevia como se os textos fossem destinados apenas a ela.',
+Você continua avançando pelas páginas, tentando encontrar algum sentido nas anotações.`,
 
-      'Nomes aparecem sem explicação.',
+  `Depois de algum tempo, seu nome começa a aparecer com mais frequência.
 
-      'Endereços.',
+Lívia escreveu sobre seus hábitos, os lugares que você frequentava, as noites em que voltava sozinho e até sobre algumas das pessoas com quem costumava conversar. Há datas ao lado das anotações, algumas muito anteriores à noite em que vocês se conheceram.`,
 
-      'Horários.',
+  `Quanto mais você lê, mais difícil fica interpretar aquilo como simples curiosidade.
 
-      'Descrições de pessoas.',
+Não parece o diário de alguém apaixonado.
 
-      'Então você começa a aparecer cada vez mais.',
+Parece o relatório de alguém observando uma pessoa antes de tomar uma decisão.`,
 
-      'Ela escreveu sobre seus hábitos.',
+  `Nas páginas mais próximas do seu Abraço, uma mesma frase aparece diversas vezes, às vezes sozinha, outras no meio de anotações sobre você:
 
-      'Os lugares que frequentava.',
+"Ainda existe humanidade suficiente."`,
 
-      'As noites em que voltava sozinho.',
+  `Depois disso, os registros mudam. As anotações ficam mais confusas, alguns nomes desaparecem e outros passam a ser identificados apenas por iniciais.
 
-      'As pessoas com quem conversava.',
+No meio de tudo aquilo, uma palavra começa a se repetir com frequência cada vez maior.
 
-      'Não parece o diário de alguém apaixonado.',
-
-      'Parece o relatório de alguém escolhendo uma pessoa.',
-
-      'Nas páginas próximas ao seu Abraço, uma frase aparece repetidamente:',
-
-      '"Ainda existe humanidade suficiente."',
-
-      'Depois disso as anotações ficam mais confusas.',
-
-      'Alguns nomes são substituídos por iniciais.',
-
-      'E uma palavra começa a aparecer várias vezes.',
-
-      'Hospital.',
-    ],
+Hospital.`,
+],
 
     dialogue: {
       speaker: 'A Voz',
@@ -441,7 +810,7 @@ const liviaApartmentScenes = {
 
     chapter: 'O LEGADO DE LÍVIA',
 
-    title: 'Arquivos de Lívia',
+    title: 'A Senha',
 
     location: {
       id: 'livia_apartment',
@@ -450,54 +819,301 @@ const liviaApartmentScenes = {
     },
 
     narration: [
-      'O computador é antigo, mas ainda funciona.',
+  `O computador é antigo, mas ainda funciona. Você aperta o botão e espera enquanto o sistema demora alguns segundos para iniciar.`,
 
-      'O sistema demora para iniciar.',
+  `Em vez da área de trabalho, surge a tela de login de Lívia.
 
-      'A área de trabalho parece quase vazia.',
+Um campo vazio pede a senha.`,
 
-      'Existem algumas fotografias, documentos pessoaise pastas comuns.',
+  `Você procura alguma indicação do que ela poderia ter usado e percebe que existe uma dica cadastrada.
 
-      'Nada que justifique o aviso de Jack.',
+Ao abri-la, uma única frase aparece na tela:
 
-      'Até você perceber uma pasta escondida entre arquivos de sistema.',
+"Você sempre me deu uma razão."`,
 
-      'Dentro dela existem dezenas de documentos.',
+  `Você fica olhando para aquelas palavras por alguns segundos.
 
-      'Listas de nomes.',
-
-      'Datas.',
-
-      'Anotações sobre sangue.',
-
-      'Registros de internação.',
-
-      'Alguns arquivos estão protegidos.',
-
-      'Outros possuem nomes de hospitais de São Paulo.',
-
-      'Lívia estava investigando alguma coisa.',
-    ],
+Elas parecem familiares.`,
+],
 
     dialogue: null,
 
+    passwordChallenge: {
+      suffix: 'viver',
+      successScene: 'livia_computer_unlocked',
+      failureScene: 'livia_computer_wrong_password',
+    },
+
     choices: [
       {
-        id: 'investigate_hospital_files',
+        id: 'hack_livia_password',
 
-        text: 'Investigar os arquivos relacionados aos hospitais.',
+        text: 'Tentar quebrar a senha pelo sistema.',
 
-        nextScene: 'livia_hospital_clue',
+        timeMinutes: 10,
+      },
 
-        timeMinutes: 15,
+      {
+        id: 'reason_livia_password',
 
-        flags: {
-          inspectedLiviaComputer: true,
-        },
+        text: 'Relacionar a dica às lembranças e aos objetos do apartamento.',
+
+        timeMinutes: 5,
       },
 
       {
         id: 'computer_return_room',
+
+        text: 'Deixar o computador por enquanto.',
+
+        nextScene: 'livia_apartment_inside',
+
+        timeMinutes: 1,
+      },
+    ],
+  },
+
+  livia_computer_wrong_password: {
+    id: 'livia_computer_wrong_password',
+    chapter: 'O LEGADO DE LÍVIA',
+    title: 'Acesso Negado',
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+    narration: [
+      'Você confirma a senha.',
+      'O computador demora um instante antes de exibir uma mensagem curta: “Acesso negado.”',
+      'A dica continua na tela. Lívia esperava que você entendesse.',
+    ],
+    dialogue: null,
+    choices: [
+      {
+        id: 'retry_livia_password',
+        text: 'Tentar novamente.',
+        nextScene: 'livia_computer',
+        timeMinutes: 1,
+      },
+    ],
+  },
+
+  livia_computer_hack_failed: {
+    id: 'livia_computer_hack_failed',
+    chapter: 'O LEGADO DE LÍVIA',
+    title: 'Proteção',
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+    narration: [
+      'Você procura uma forma de contornar a tela de acesso.',
+      'O sistema é antigo, mas Lívia o protegeu melhor do que você esperava.',
+      'Depois de várias tentativas, você percebe que insistir daquele jeito não produzirá resultado.',
+    ],
+    dialogue: null,
+    choices: [
+      {
+        id: 'return_after_failed_hack',
+        text: 'Voltar à tela da senha.',
+        nextScene: 'livia_computer',
+        timeMinutes: 1,
+      },
+    ],
+  },
+
+  livia_password_clue_found: {
+    id: 'livia_password_clue_found',
+    chapter: 'O LEGADO DE LÍVIA',
+    title: 'Uma Razão',
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+    narration: [
+      'Você observa novamente as fotografias, os livros marcados e as anotações espalhadas pelo apartamento.',
+      'Então se lembra de algo que Lívia disse: você lhe dava vontade de viver.',
+      'A dica não fala apenas de uma razão. Ela fala de você.',
+      'Seu nome e a palavra “viver”. Essa deve ser a senha.',
+    ],
+    dialogue: null,
+    choices: [
+      {
+        id: 'use_discovered_password',
+        text: 'Voltar ao computador e digitar a senha.',
+        nextScene: 'livia_computer',
+        timeMinutes: 1,
+
+        flags: {
+          discoveredLiviaPassword: true,
+        },
+      },
+    ],
+  },
+
+  livia_password_reasoning_failed: {
+    id: 'livia_password_reasoning_failed',
+    chapter: 'O LEGADO DE LÍVIA',
+    title: 'Peças Soltas',
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+    narration: [
+      'Você tenta relacionar a dica às coisas que Lívia deixou.',
+      'Existem lembranças demais e nenhuma parece se encaixar por completo.',
+      'Por enquanto, a resposta continua fora de alcance.',
+    ],
+    dialogue: null,
+    choices: [
+      {
+        id: 'return_after_failed_reasoning',
+        text: 'Voltar à tela da senha.',
+        nextScene: 'livia_computer',
+        timeMinutes: 1,
+      },
+    ],
+  },
+
+  livia_computer_unlocked: {
+    id: 'livia_computer_unlocked',
+    chapter: 'O LEGADO DE LÍVIA',
+    title: 'Arquivos de Lívia',
+    location: {
+      id: 'livia_apartment',
+      name: 'Apartamento de Lívia',
+      district: 'Centro de São Paulo',
+    },
+    narration: [
+  `A tela de acesso desaparece e, alguns segundos depois, a área de trabalho surge diante de você.
+
+À primeira vista, não há nada de incomum. Algumas fotografias, documentos pessoais e pastas com nomes comuns ocupam a tela. Nada que pareça justificar o interesse de Jack pelo computador.`,
+
+  `Você começa a examinar os arquivos com mais atenção.
+
+É então que percebe uma pasta escondida entre os arquivos do sistema. O nome não chama atenção e, se não estivesse procurando alguma coisa fora do lugar, provavelmente passaria por ela sem perceber.`,
+
+  `Dentro estão dezenas de documentos.
+
+Listas de nomes, datas, anotações sobre sangue e registros de internação se acumulam em diferentes arquivos. Alguns possuem nomes de hospitais de São Paulo; outros são identificados apenas por datas ou iniciais.`,
+
+  `Você abre alguns deles, tentando entender o que está diante de você.
+
+Ainda é cedo para saber como todas aquelas informações se relacionam, mas uma coisa fica evidente:
+
+Lívia estava investigando alguma coisa.`,
+
+  `Você continua abrindo as pastas.
+
+A primeira impressão de que se trata apenas de registros hospitalares desaparece rapidamente. Existem documentos sobre transplantes e retirada de órgãos. Em várias planilhas, órgãos de pacientes declarados mortos aparecem associados a códigos, valores e destinos diferentes.
+
+Lívia marcou diversos deles com a mesma palavra: “vendido.”`,
+
+  `Outra pasta reúne informações sobre estoques de sangue. Bolsas desaparecem de hospitais e bancos de sangue sem registro de descarte ou utilização. Algumas são transferidas durante a madrugada para veículos que não pertencem às instituições.
+
+Há datas, placas incompletas, nomes de funcionários e fotografias tiradas à distância.`,
+
+  `Os arquivos seguintes são piores. Listas de pessoas desaparecidas aparecem ao lado de registros de clínicas, abrigos, delegacias e hospitais. Algumas vítimas surgem também em anotações relacionadas a prostituição, trabalho clandestino e transporte entre cidades.
+
+Em certos documentos, Lívia escreveu apenas: “tráfico de pessoas.”`,
+
+  `Há ainda uma pasta inteira dedicada a drogas. Apreensões que nunca chegaram aos depósitos. Medicamentos desviados de hospitais. Entregas através de empresas aparentemente legítimas. Traficantes aparecem ao lado de médicos, seguranças privados e intermediários não identificados.`,
+
+  `Então você encontra um arquivo diferente. Não é uma lista de crimes. É uma rede.
+
+Empresários, diretores de hospitais, advogados, delegados, assessores, funcionários de gabinetes e políticos importantes aparecem conectados por encontros, telefonemas, empresas, doações e contratos.
+
+Alguns nomes são conhecidos dos jornais; todos os envolvidos diretamente nas anotações são pessoas fictícias.`,
+
+  `Algumas conexões terminam em pontos de interrogação. Outras atravessam várias páginas. Não parece que todos façam parte da mesma organização.
+
+Parece uma rede de pessoas que, por motivos diferentes, protegem umas às outras.`,
+
+  `Entre os documentos existe uma pasta chamada apenas “FILMES”. Dentro dela há capturas de fóruns antigos e conversas sobre vídeos sem créditos que aparecem durante algumas semanas e depois somem da internet.
+
+Lívia comparou cenários, roupas, ferimentos, datas e pessoas desaparecidas. Em uma discussão sobre uma gravação particularmente convincente, ela circulou a frase: “ninguém atua assim.”`,
+
+  `Uma postagem dizia reconhecer um prédio abandonado de São Paulo ao fundo de um vídeo. A postagem e a conta desapareceram dias depois.
+
+Em um quadro ampliado, uma figura alta demais e com braços longos demais aparece atrás de uma porta. Lívia escreveu: “Não é efeito. Encontrar o original.”`,
+
+  `Uma pasta menor contém referências a David Hatter, um humano, gerente de hotel e aspirante a roteirista. Lívia não o associou à produção dos filmes.
+
+O interesse dela estava nos trechos de um roteiro sobre sociedades vampíricas, regras de segredo, criadores, crias e uma criatura interior. Ao lado do nome, ela escreveu: “Ele sabe demais. Quem contou?”`,
+
+  `Separada das demais existe uma pasta chamada “CAÇADORES”. Fotografias mostram pessoas repetidas perto de clubes, bares e outros pontos marcados por Lívia.
+
+Uma anotação resume a suspeita dela: “Eles não estão procurando pessoas desaparecidas. Estão procurando a gente.”`,
+
+  `Você volta para a lista: órgãos, sangue, pessoas, drogas, hospitais, empresas, policiais, políticos e filmes que talvez não sejam filmes.
+
+À primeira vista, parecem investigações diferentes. Lívia guardou tudo no mesmo lugar, mas isso não prova que todas as linhas estejam realmente conectadas.`,
+],
+    dialogue: null,
+    choices: [
+      {
+        id: 'investigate_organ_traffic',
+        text: 'Investigar os registros sobre tráfico de órgãos.',
+        nextScene: 'livia_files_organs',
+        timeMinutes: 10,
+      },
+      {
+        id: 'investigate_blood_traffic',
+        text: 'Investigar o desaparecimento de bolsas de sangue.',
+        nextScene: 'livia_files_blood',
+        timeMinutes: 10,
+      },
+      {
+        id: 'investigate_missing_people',
+        text: 'Investigar as pessoas desaparecidas.',
+        nextScene: 'livia_files_people',
+        timeMinutes: 10,
+      },
+      {
+        id: 'investigate_drug_network',
+        text: 'Investigar os registros sobre drogas.',
+        nextScene: 'livia_files_drugs',
+        timeMinutes: 10,
+      },
+      {
+        id: 'investigate_influence_network',
+        text: 'Examinar a rede de influência.',
+        nextScene: 'livia_files_influence',
+        timeMinutes: 15,
+      },
+      {
+        id: 'investigate_macabre_films',
+        text: 'Abrir a pasta “FILMES”.',
+        nextScene: 'livia_files_films',
+        timeMinutes: 10,
+      },
+      {
+        id: 'investigate_david_hatter',
+        text: 'Examinar os arquivos sobre David Hatter.',
+        nextScene: 'livia_files_david_hatter',
+        timeMinutes: 10,
+      },
+      {
+        id: 'investigate_hunters',
+        text: 'Abrir a pasta “CAÇADORES”.',
+        nextScene: 'livia_files_hunters',
+        timeMinutes: 10,
+      },
+      {
+        id: 'investigate_hospital_files',
+        text: 'Investigar os arquivos relacionados aos hospitais.',
+        nextScene: 'livia_hospital_clue',
+        timeMinutes: 15,
+        flags: {
+          inspectedLiviaComputer: true,
+          unlockedLiviaComputer: true,
+        },
+      },
+      {
+        id: 'computer_return_room_unlocked',
 
         text: 'Voltar e procurar outras pistas.',
 
@@ -507,6 +1123,7 @@ const liviaApartmentScenes = {
 
         flags: {
           inspectedLiviaComputer: true,
+          unlockedLiviaComputer: true,
         },
       },
     ],
@@ -517,6 +1134,104 @@ const liviaApartmentScenes = {
     PISTA DOS HOSPITAIS
     ========================================
   */
+
+  livia_files_organs: createLiviaFileScene({
+    id: 'livia_files_organs',
+    title: 'Peças de Reposição',
+    flag: 'foundOrganTrafficLead',
+    narration: [
+      'As planilhas ligam cirurgias, funerárias e clínicas particulares por códigos repetidos.',
+      'Alguns órgãos possuem dois destinos: o declarado no prontuário e outro acompanhado de valor, data e intermediário.',
+      'Os documentos provam desvios, mas ainda não revelam quem controla a operação ou quem recebe os órgãos.',
+    ],
+  }),
+
+  livia_files_blood: createLiviaFileScene({
+    id: 'livia_files_blood',
+    title: 'Estoque Noturno',
+    flag: 'foundBloodTrafficLead',
+    narration: [
+      'As perdas de sangue seguem horários e rotas regulares demais para serem furtos ocasionais.',
+      'Funcionários diferentes autorizam as saídas, mas as placas incompletas apontam para o mesmo pequeno grupo de veículos.',
+      'Lívia suspeitava de compradores que não aparecem em qualquer registro hospitalar.',
+    ],
+  }),
+
+  livia_files_people: createLiviaFileScene({
+    id: 'livia_files_people',
+    title: 'Nomes Ausentes',
+    flag: 'foundMissingPeopleLead',
+    narration: [
+      'Pessoas desaparecidas reaparecem como números em clínicas, transportadoras e alojamentos clandestinos.',
+      'Algumas foram vistas pela última vez perto de casas noturnas; outras passaram por delegacias ou abrigos antes de sumir.',
+      'As conexões sugerem tráfico de pessoas, mas também existem casos estranhos que não se encaixam nesse padrão.',
+    ],
+  }),
+
+  livia_files_drugs: createLiviaFileScene({
+    id: 'livia_files_drugs',
+    title: 'Carga Desviada',
+    flag: 'foundDrugNetworkLead',
+    narration: [
+      'Relatórios policiais registram apreensões maiores do que as quantidades entregues aos depósitos.',
+      'Medicamentos hospitalares e drogas ilegais circulam por empresas de segurança, distribuidoras e casas noturnas.',
+      'Os intermediários mudam, mas alguns médicos e policiais aparecem repetidamente.',
+    ],
+  }),
+
+  livia_files_influence: createLiviaFileScene({
+    id: 'livia_files_influence',
+    title: 'A Rede',
+    flag: 'foundInfluenceNetworkLead',
+    narration: [
+      'Lívia conectou empresários, médicos, delegados, assessores e políticos fictícios por contratos, encontros e doações.',
+      'Não existe uma acusação central. Algumas pessoas parecem cúmplices; outras podem ser apenas úteis, coagidas ou comprometidas.',
+      'A rede não prova uma única conspiração. Prova que muita gente poderosa possui motivos para proteger as demais.',
+    ],
+  }),
+
+  livia_files_films: createLiviaFileScene({
+    id: 'livia_files_films',
+    title: 'Ninguém Atua Assim',
+    flag: 'foundMacabreFilmsLead',
+    narration: [
+      `Os fóruns tratam as gravações como lendas: filmes sem créditos que somem depois de poucas semanas. Alguns usuários insistem que são produções independentes; outros afirmam que não existe equipe, elenco ou produtora por trás delas.`,
+      `A imagem é ruim, o áudio quase incompreensível e ninguém identifica os atores. Algumas pessoas nas gravações, porém, parecem assustadas demais para estarem atuando.`,
+      `Lívia comparou imagens dos vídeos com fotografias de pessoas desaparecidas. Ao lado de duas delas, escreveu: “Possível correspondência.”`,
+      `Ela também relacionou cenários a um prédio abandonado de São Paulo. A postagem que indicava o endereço desapareceu, assim como a conta de quem a publicou.`,
+      `A figura desproporcional em um dos quadros pode ser efeito, fantasia ou algo que não deveria estar diante de uma câmera.`,
+      `Lívia não chegou a uma resposta. Sua última anotação diz apenas: “Não é efeito. Descobrir quem está fazendo esses filmes.”`,
+    ],
+  }),
+
+  livia_files_david_hatter: createLiviaFileScene({
+    id: 'livia_files_david_hatter',
+    title: 'Ele Sabe Demais',
+    flag: 'foundDavidHatterLead',
+    narration: [
+      `David Hatter. Humano. Gerente de hotel. Aspirante a roteirista. Não há qualquer indicação de que tenha produzido ou participado das gravações macabras.`,
+      `Trechos atribuídos a um roteiro escrito por ele circularam em um pequeno fórum de cinema independente. Você lê algumas páginas.`,
+      `Sociedades secretas de vampiros. Regras para permanecer escondidos entre humanos. Disputas territoriais. Criadores e suas crias. Uma criatura interior que precisa ser controlada.`,
+      `Você descobriu que vampiros existem há pouco tempo e já sabe que um humano não deveria escrever aquilo com tamanha precisão.`,
+      `Ao lado do nome de David, Lívia anotou: “Ele sabe demais.” Logo abaixo: “Quem contou?”`,
+      `Há outro nome ligado a ele: Julius. Nenhum sobrenome ou endereço confirmado, apenas referências a encontros e conversas sobre roteiros de vampiros.`,
+      `Os arquivos terminam aí. David pode ser um cúmplice, uma testemunha ou apenas um humano que não percebe o perigo do que aprendeu. Lívia morreu antes de descobrir.`,
+    ],
+  }),
+
+  livia_files_hunters: createLiviaFileScene({
+    id: 'livia_files_hunters',
+    title: 'Eles Estão Procurando',
+    flag: 'foundHunterSurveillanceLead',
+    narration: [
+      `A pasta contém fotografias de pessoas que aparecem repetidamente perto de clubes, bares e outros lugares marcados por Lívia em um mapa de São Paulo.`,
+      `Algumas parecem policiais à paisana. Outras não possuem qualquer identificação visível. Lívia anotou placas, horários e descrições.`,
+      `Em pelo menos três ocasiões, a mesma pessoa aparece observando estabelecimentos diferentes frequentados por vampiros.`,
+      `Os registros sugerem vigilância organizada, mas não revelam quantas pessoas estão envolvidas nem o que realmente sabem.`,
+      `Ao lado de uma das fotografias, Lívia escreveu: “Eles não estão procurando pessoas desaparecidas. Estão procurando a gente.”`,
+      `Não existe qualquer referência ligando diretamente esses observadores aos hospitais, aos filmes ou à rede de influência. Por enquanto, são apenas mais perguntas deixadas por Lívia.`,
+    ],
+  }),
 
   livia_hospital_clue: {
     id: 'livia_hospital_clue',
@@ -532,40 +1247,34 @@ const liviaApartmentScenes = {
     },
 
     narration: [
-      'Você cruza datas e nomes.',
+  `Você começa a cruzar os nomes e as datas dos documentos. No início, aquilo parece apenas uma coleção de prontuários roubados, registros hospitalares e informações reunidas sem qualquer ordem aparente.
 
-      'No começo parece apenas uma coleção de prontuários roubados.',
+Mas, conforme compara os arquivos, algumas coincidências começam a se repetir vezes demais para continuarem parecendo coincidências.`,
 
-      'Então surge um padrão.',
+  `Pacientes oficialmente declarados mortos aparecem novamente em registros posteriores. Bolsas de sangue desaparecem dos estoques sem justificativa, enquanto cadáveres são transferidos entre unidades sem que exista documentação completa sobre o destino deles.
 
-      'Pacientes oficialmente mortos aparecem em registros posteriores.',
+Alguns nomes aparecem associados a mais de um hospital. Lívia percebeu isso antes de você e marcou vários deles.`,
 
-      'Bolsas de sangue desaparecem dos estoques.',
+  `Entre as anotações, uma frase escrita por ela chama sua atenção:
 
-      'Cadáveres são transferidos sem documentação completa.',
+"Não é tráfico comum."
 
-      'Alguns nomes aparecem associados a mais de um hospital.',
+Logo abaixo, outra:
 
-      'Lívia marcou vários deles.',
+"Eles sabem o que somos."`,
 
-      'Uma anotação chama sua atenção:',
+  `Você continua lendo.
 
-      '"Não é tráfico comum."',
+Há endereços, horários, nomes incompletos e referências a diferentes hospitais de São Paulo. Algumas informações parecem desconexas, mas outras começam a formar os contornos de algo muito maior do que um único hospital ou um grupo isolado.`,
 
-      'Logo abaixo existe outra frase.',
+  `Lívia estava seguindo uma rede.
 
-      '"Eles sabem o que somos."',
+Você ainda não sabe quem faz parte dela, o que acontece com as pessoas registradas nesses documentos ou o que Lívia quis dizer quando escreveu que "eles" sabem o que vocês são.
 
-      'Você continua lendo.',
+Ela não conseguiu terminar a investigação.
 
-      'Há endereços, horários e nomes incompletos.',
-
-      'Lívia estava seguindo uma rede.',
-
-      'E morreu antes de descobrir até onde ela chegava.',
-
-      'Agora os arquivos estão com você.',
-    ],
+Agora os arquivos estão com você.`,
+],
 
     dialogue: {
       speaker: 'A Voz',

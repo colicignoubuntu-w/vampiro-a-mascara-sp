@@ -1,4 +1,51 @@
 const securityTests = {
+  'jack_lockpick_kit.pick_livia_lock': {
+    id: 'livia-apartment-lockpick',
+
+    label: 'Destreza + Segurança',
+
+    attributeGroup: 'physical',
+    attribute: 'dexterity',
+    attributeLabel: 'Destreza',
+
+    ability: 'security',
+    abilityLabel: 'Segurança',
+
+    difficulty: 6,
+
+    requiredItem: 'jack_lockpick_kit',
+    missingItemDifficultyModifier: 2,
+
+    outcomes: {
+      success: {
+        nextScene: 'livia_lockpick_success',
+        timeMinutes: 2,
+      },
+
+      failure: {
+        nextScene: 'livia_lockpick_failure',
+        timeMinutes: 2,
+      },
+
+      botch: {
+        nextScene: 'livia_lockpick_failure',
+        timeMinutes: 3,
+        flags: {
+          damagedLiviaApartmentLock: true,
+        },
+      },
+    },
+
+    successText:
+      'Você sente os pinos cederem e abre a fechadura sem chamar atenção.',
+
+    failureText:
+      'A fechadura resiste às suas tentativas.',
+
+    botchText:
+      'A ferramenta escapa dentro da fechadura e quase danifica o mecanismo.',
+  },
+
   'security_approaches.say_fight': {
     id: 'security-say-fight',
 
@@ -304,15 +351,53 @@ const securityTests = {
 
 export function getSecurityChoiceTest(
   sceneId,
-  choiceId
+  choiceId,
+  game = null
 ) {
   const key =
     `${sceneId}.${choiceId}`
 
-  return (
+  const test =
     securityTests[key] ??
     null
-  )
+
+  if (!test) {
+    return null
+  }
+
+  if (!test.requiredItem) {
+    return test
+  }
+
+  const hasRequiredItem =
+    game?.inventory?.some(
+      (item) =>
+        item.id ===
+          test.requiredItem &&
+        (item.quantity ?? 1) > 0
+    )
+
+  if (hasRequiredItem) {
+    return {
+      ...test,
+      hasRequiredItem: true,
+    }
+  }
+
+  return {
+    ...test,
+
+    label:
+      `${test.label} — improvisado`,
+
+    difficulty:
+      test.difficulty +
+      (test.missingItemDifficultyModifier ??
+        2),
+
+    hasRequiredItem: false,
+    usingImprovisedTool: true,
+  }
 }
 
 export default securityTests

@@ -55,6 +55,9 @@ const locations = {
     type:
       'special',
 
+    showOnMap:
+      false,
+
     coordinates: {
       x: 55,
       y: 53,
