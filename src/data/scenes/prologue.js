@@ -4295,7 +4295,7 @@ As vozes continuam conversando.`,
 ],
 
     dialogue: {
-    speaker: 'Jack',
+    speaker: 'Voz',
 
       text:
     'Vamos, não é o fim do mundo. Nossa primeira noite ainda nem começou.',

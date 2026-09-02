@@ -919,21 +919,17 @@ Pelo menos por enquanto.`,
         'São Paulo',
     },
 
-    narration: [
-      'Jack enfia as mãos nos bolsos do casaco.',
-
-      'A expressão dele fica um pouco mais séria.',
-
-      'Ele parece escolher as palavras antes de continuar.',
-    ],
+  narration: [
+  `Jack enfia as mãos nos bolsos do casaco e fica em silêncio por alguns instantes. A expressão descontraída de antes dá lugar a algo mais sério, como se estivesse escolhendo com cuidado o que dizer a seguir.`,
+],
 
     dialogue: {
       speaker:
         'Jack',
 
-      text:
-        'O apartamento dela ainda está lá. Computador, papéis, fotografias, o que quer que ela tenha deixado. Se eu fosse você, passava lá antes que alguém resolva limpar tudo.',
-    },
+       text:
+    'O apartamento dela ainda está lá. Computador, papéis, fotografias... o que quer que ela tenha deixado. E, até onde eu sei, aquilo agora é seu por direito. Não é exatamente uma bela herança, mas é o que você tem. Se eu fosse você, passava lá antes que alguém resolva limpar tudo.',
+},
 
     choices: [
       {
@@ -966,35 +962,6 @@ Pelo menos por enquanto.`,
         },
       },
 
-      {
-        id:
-          'go_free_roam_after_trial',
-
-        text:
-          'Dizer que irá depois.',
-
-        nextScene:
-          'free_roam',
-
-        timeMinutes: 2,
-
-        flags: {
-          survivedTrial:
-            true,
-
-          liviaDead:
-            true,
-
-          metJack:
-            true,
-
-          knowsLiviaLeftEvidence:
-            true,
-
-          liviaApartmentUnlocked:
-            true,
-        },
-      },
     ],
   },
 }
