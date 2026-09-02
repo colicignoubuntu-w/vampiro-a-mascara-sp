@@ -203,6 +203,12 @@ import {
 import {
   audioEngine,
 } from '../engine/audio/audioEngine'
+import {
+  getNpcVisual,
+} from '../data/visuals/npcVisualCatalog'
+import {
+  getLocationVisual,
+} from '../data/visuals/locationVisualCatalog'
 
 import './Game.css'
 
@@ -620,6 +626,38 @@ const [
 
   const scene =
     scenes[sceneId]
+
+  const baseSceneVisual =
+    scene?.visual ??
+    scene?.location?.visual ??
+    getLocationVisual(
+      scene?.location?.id
+    ) ??
+    null
+
+  const speakingCharacterVisual =
+    baseSceneVisual?.characters?.[
+      scene?.dialogue?.speaker
+    ] ??
+    getNpcVisual(
+      scene?.dialogue?.speaker
+    )
+
+  const sceneVisual =
+    baseSceneVisual ||
+    speakingCharacterVisual
+      ? {
+          ...(baseSceneVisual ?? {}),
+          ...(speakingCharacterVisual
+            ? {
+                character:
+                  speakingCharacterVisual.src,
+                characterAlt:
+                  speakingCharacterVisual.alt,
+              }
+            : {}),
+        }
+      : null
 
   useSceneAudio(
     sceneId,
@@ -7114,7 +7152,24 @@ window.alert(
 
   return (
     <main className="game-screen">
-      <div className="game-background" />
+      <div
+        className={[
+          'game-background',
+          sceneVisual?.background
+            ? 'has-scene-image'
+            : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        style={
+          sceneVisual?.background
+            ? {
+                '--scene-background':
+                  `url("${sceneVisual.background}")`,
+              }
+            : undefined
+        }
+      />
 
       <div className="game-dark-overlay" />
 
@@ -7705,8 +7760,32 @@ game.world?.location?.id ===
     }
   />
 ) : (
+    <>
+      {sceneVisual?.character && (
+        <img
+          key={sceneVisual.character}
+          className="game-scene-character"
+          src={sceneVisual.character}
+          alt={
+            sceneVisual.characterAlt ??
+            ''
+          }
+          onError={(event) => {
+            event.currentTarget.hidden =
+              true
+          }}
+        />
+      )}
+
       <section
-        className="game-story"
+        className={[
+          'game-story',
+          sceneVisual
+            ? 'game-story-visual'
+            : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         key={scene.id}
       >
         <div className="game-scene-header">
@@ -7905,6 +7984,7 @@ game.world?.location?.id ===
           )
         )}
       </section>
+    </>
 )}
       {/* ================================
           HUD

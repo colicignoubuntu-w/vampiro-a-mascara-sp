@@ -4,7 +4,15 @@
   com uma delas altera o contexto e o tom da conversa com a outra.
 */
 
-const asylum = { id: 'asylum', name: 'Asylum', district: 'Consolação' }
+const asylum = {
+  id: 'asylum',
+  name: 'Asylum',
+  district: 'Consolação',
+  visual: {
+    background:
+      '/images/asylum/asylum-interior.png',
+  },
+}
 const gallery = { id: 'gallery_noir', name: 'Galeria Noir', district: 'Jardins' }
 const oceanHouse = { id: 'ocean_house_sp', name: 'Ocean House Hotel', district: 'Santos' }
 const surfside = { id: 'surfside_diner', name: 'Surfside Diner', district: 'Santa Monica' }

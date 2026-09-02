@@ -31,6 +31,25 @@
     );
 }
 
+.game-background.has-scene-image {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(2, 2, 3, 0.96) 0%,
+      rgba(3, 2, 3, 0.82) 33%,
+      rgba(4, 2, 3, 0.28) 67%,
+      rgba(3, 2, 3, 0.5) 100%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(2, 2, 3, 0.72),
+      transparent 45%
+    ),
+    var(--scene-background)
+      center / cover
+      no-repeat;
+}
+
 .game-dark-overlay {
   position: fixed;
 
@@ -225,6 +244,32 @@
     gameSceneIn
     450ms
     ease;
+}
+
+.game-story.game-story-visual {
+  width:
+    min(
+      720px,
+      calc(55% - 52px)
+    );
+  margin-left:
+    clamp(32px, 6vw, 110px);
+  margin-right: auto;
+  text-shadow: 0 2px 14px #000;
+}
+
+.game-scene-character {
+  position: fixed;
+  z-index: 2;
+  right: clamp(1vw, 4vw, 70px);
+  bottom: 58px;
+  width: min(43vw, 660px);
+  max-height: calc(100vh - 92px);
+  object-fit: contain;
+  object-position: center bottom;
+  pointer-events: none;
+  filter:
+    drop-shadow(0 18px 35px rgba(0, 0, 0, 0.82));
 }
 
 .game-story::-webkit-scrollbar {
@@ -793,6 +838,23 @@
    MOBILE
 ========================================== */
 
+@media (max-width: 1050px) {
+  .game-story.game-story-visual {
+    width:
+      min(
+        680px,
+        calc(72% - 32px)
+      );
+    margin-left: 24px;
+  }
+
+  .game-scene-character {
+    right: -10vw;
+    width: 52vw;
+    opacity: 0.58;
+  }
+}
+
 @media (max-width: 700px) {
   .game-topbar {
     grid-template-columns:
@@ -827,6 +889,20 @@
       50px
       0
       150px;
+  }
+
+  .game-story.game-story-visual {
+    width:
+      calc(100% - 28px);
+    margin:
+      0 auto;
+  }
+
+  .game-scene-character {
+    right: -34vw;
+    bottom: 66px;
+    width: 94vw;
+    opacity: 0.2;
   }
 
   .game-narration p {

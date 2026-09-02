@@ -1,5 +1,13 @@
 const mercurioHome = { id: 'mercurio_apartment', name: 'Apartamento de Mercurio', district: 'Barra Funda' }
-const asylum = { id: 'asylum', name: 'Asylum', district: 'Consolação' }
+const asylum = {
+  id: 'asylum',
+  name: 'Asylum',
+  district: 'Consolação',
+  visual: {
+    background:
+      '/images/asylum/asylum-interior.png',
+  },
+}
 
 const cityNpcScenes = {
   mercurio_wounded: {

@@ -2,6 +2,10 @@ const vesuviusLocation = {
   id: 'vesuvius',
   name: 'Vesuvius',
   district: 'Bela Vista',
+  visual: {
+    background:
+      '/images/vesuvius/vesuvius-interior.png',
+  },
 }
 
 const backToClub = {
