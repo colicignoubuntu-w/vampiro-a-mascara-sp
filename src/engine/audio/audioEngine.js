@@ -82,6 +82,15 @@ class AudioEngine {
     this.unlocked = false
     this.listeners = new Set()
     this.lastPlayedAt = new Map()
+    this.playback = {
+      musicKey: null,
+      musicPaused: false,
+      musicStopped: true,
+    }
+    this.snapshot = {
+      ...this.settings,
+      playback: this.playback,
+    }
 
     subscribeToDiceRolls(() => {
       this.playSfx('dice_roll')
@@ -97,9 +106,16 @@ class AudioEngine {
     }
   }
 
-  getSnapshot = () => this.settings
+  getSnapshot = () => this.snapshot
 
   emit() {
+    this.snapshot = {
+      ...this.settings,
+      playback: {
+        ...this.playback,
+      },
+    }
+
     for (const listener of
       this.listeners) {
       listener()
@@ -339,6 +355,15 @@ class AudioEngine {
       ...entry,
     }
 
+    if (channel === 'music') {
+      this.playback = {
+        musicKey: key,
+        musicPaused: false,
+        musicStopped: false,
+      }
+      this.emit()
+    }
+
     if (previous?.sound) {
       const oldVolume =
         previous.sound.volume()
@@ -360,6 +385,14 @@ class AudioEngine {
       this.current[channel]
 
     if (!active?.sound) {
+      if (channel === 'music') {
+        this.playback = {
+          musicKey: null,
+          musicPaused: false,
+          musicStopped: true,
+        }
+        this.emit()
+      }
       return
     }
 
@@ -370,6 +403,97 @@ class AudioEngine {
       active.sound.stop()
     }, 550)
     this.current[channel] = null
+
+    if (channel === 'music') {
+      this.playback = {
+        musicKey: null,
+        musicPaused: false,
+        musicStopped: true,
+      }
+      this.emit()
+    }
+  }
+
+  async playNextMusic() {
+    await this.unlock()
+
+    const musicKeys = Object.keys(
+      AUDIO_CATALOG.music
+    )
+
+    if (musicKeys.length === 0) {
+      return
+    }
+
+    const currentKey =
+      this.current.music?.key ??
+      this.desired.music
+    const currentIndex =
+      musicKeys.indexOf(currentKey)
+
+    for (
+      let offset = 1;
+      offset <= musicKeys.length;
+      offset += 1
+    ) {
+      const nextIndex =
+        (currentIndex + offset) %
+        musicKeys.length
+      const nextKey =
+        musicKeys[nextIndex]
+
+      if (nextKey === currentKey) {
+        continue
+      }
+
+      const entry = await this.getSound(
+        'music',
+        nextKey
+      )
+
+      if (entry) {
+        await this.playLoop(
+          'music',
+          nextKey
+        )
+        return
+      }
+    }
+  }
+
+  toggleMusicPause() {
+    const active = this.current.music
+
+    if (!active?.sound) {
+      return
+    }
+
+    if (this.playback.musicPaused) {
+      active.sound.volume(
+        this.getVolume(
+          'music',
+          active.definition
+        )
+      )
+      active.sound.play()
+      this.playback = {
+        ...this.playback,
+        musicPaused: false,
+        musicStopped: false,
+      }
+    } else {
+      active.sound.pause()
+      this.playback = {
+        ...this.playback,
+        musicPaused: true,
+      }
+    }
+
+    this.emit()
+  }
+
+  stopMusic() {
+    this.stopChannel('music')
   }
 
   async playSfx(key) {

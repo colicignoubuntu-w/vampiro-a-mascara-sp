@@ -1,36 +1,42 @@
 export const AUDIO_CATALOG = {
   music: {
     main_menu: {
+      title: 'Menu Principal',
       src: '/audio/music/main-menu.mp3',
       volume: 0.5,
       loop: true,
       stream: true,
     },
     awakening: {
+      title: 'Despertar',
       src: '/audio/music/awakening.mp3',
       volume: 0.48,
       loop: true,
       stream: true,
     },
     judgment: {
+      title: 'Julgamento',
       src: '/audio/music/judgment.mp3',
       volume: 0.55,
       loop: true,
       stream: true,
     },
     investigation: {
+      title: 'Investigação',
       src: '/audio/music/investigation.mp3',
       volume: 0.45,
       loop: true,
       stream: true,
     },
     city_night: {
+      title: 'Noite na Cidade',
       src: '/audio/music/city-night.mp3',
       volume: 0.42,
       loop: true,
       stream: true,
     },
     police_tension: {
+      title: 'Tensão Policial',
       src: '/audio/music/police-tension.mp3',
       volume: 0.5,
       loop: true,

@@ -73,3 +73,54 @@
 .audio-controls-test:hover {
   background: #351820;
 }
+
+.audio-controls-player {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid #352126;
+  background: #0d090a;
+}
+
+.audio-controls-track-label {
+  color: #786d6f;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.audio-controls-player strong {
+  overflow: hidden;
+  color: #d7cccd;
+  font-size: 10px;
+  font-weight: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.audio-controls-player-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.audio-controls-player-actions button {
+  min-width: 0;
+  padding: 7px 3px;
+  border: 1px solid #4c2b32;
+  color: #c9bfc0;
+  background: #1a0e11;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.audio-controls-player-actions button:hover:not(:disabled) {
+  color: #fff;
+  background: #351820;
+}
+
+.audio-controls-player-actions button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}

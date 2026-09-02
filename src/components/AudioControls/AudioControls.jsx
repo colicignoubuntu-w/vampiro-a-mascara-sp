@@ -6,6 +6,9 @@ import {
 import {
   audioEngine,
 } from '../../engine/audio/audioEngine'
+import {
+  AUDIO_CATALOG,
+} from '../../data/audio/audioCatalog'
 
 import './AudioControls.css'
 
@@ -24,6 +27,10 @@ export default function AudioControls() {
       audioEngine.getSnapshot,
       audioEngine.getSnapshot
     )
+  const currentMusic =
+    AUDIO_CATALOG.music[
+      settings.playback.musicKey
+    ]
 
   return (
     <div className="audio-controls">
@@ -71,6 +78,57 @@ export default function AudioControls() {
           >
             Testar efeitos
           </button>
+
+          <div className="audio-controls-player">
+            <span className="audio-controls-track-label">
+              Faixa atual
+            </span>
+            <strong>
+              {currentMusic?.title ??
+                'Nenhuma música'}
+            </strong>
+
+            <div className="audio-controls-player-actions">
+              <button
+                type="button"
+                onClick={() =>
+                  audioEngine.playNextMusic()
+                }
+              >
+                Próxima
+              </button>
+
+              <button
+                type="button"
+                disabled={
+                  settings.playback
+                    .musicStopped
+                }
+                onClick={() =>
+                  audioEngine
+                    .toggleMusicPause()
+                }
+              >
+                {settings.playback
+                  .musicPaused
+                  ? 'Continuar'
+                  : 'Pausar'}
+              </button>
+
+              <button
+                type="button"
+                disabled={
+                  settings.playback
+                    .musicStopped
+                }
+                onClick={() =>
+                  audioEngine.stopMusic()
+                }
+              >
+                Parar
+              </button>
+            </div>
+          </div>
 
           {CHANNELS.map(
             ([channel, label]) => (
