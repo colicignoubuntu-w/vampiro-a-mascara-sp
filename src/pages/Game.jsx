@@ -47,6 +47,7 @@ import {
   formatGameTime,
   loadGame,
   saveGame,
+  isTransientPoliceLocation,
   updateSceneLocation,
 } from '../utils/gameState'
 
@@ -1870,6 +1871,15 @@ useEffect(() => {
     }
 
     const target = scenes[nextScene]
+    const enteringPoliceLocation =
+      isTransientPoliceLocation(
+        target.location
+      )
+
+    const currentWorldLocation =
+      currentGame.world
+        ?.location ??
+      null
     const currentHour = Number(currentGame.world?.hour ?? 0)
     const currentMinute = Number(currentGame.world?.minute ?? 0)
     const day = 24 * 60
@@ -1884,6 +1894,18 @@ useEffect(() => {
       ...currentGame,
       flags: {
         ...(currentGame.flags ?? {}),
+
+        ...(enteringPoliceLocation &&
+        !isTransientPoliceLocation(
+          currentWorldLocation
+        )
+          ? {
+              policeReturnLocation: {
+                ...currentWorldLocation,
+              },
+            }
+          : {}),
+
         ...flags,
       },
       story: {
@@ -1896,8 +1918,10 @@ useEffect(() => {
         hour: Math.floor(normalizedMinutes / 60),
         minute: normalizedMinutes % 60,
         location:
-          target.location ??
-          currentGame.world?.location,
+          enteringPoliceLocation
+            ? currentWorldLocation
+            : target.location ??
+              currentWorldLocation,
       },
       history: [
         ...(currentGame.history ?? []),

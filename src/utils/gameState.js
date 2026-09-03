@@ -21,6 +21,15 @@ import {
   addInventoryItem,
   hasInventoryItem,
 } from '../engine/inventoryEngine'
+import {
+  isTransientPoliceLocation,
+  recoverPoliceLocation,
+  resolveNarrativeLocation,
+} from './worldLocation'
+
+export {
+  isTransientPoliceLocation,
+} from './worldLocation'
 
 /*
   ========================================
@@ -78,11 +87,24 @@ export function loadGame() {
     day começam no Dia 1.
   */
 
+  const savedLocation =
+    game.world?.location
+
+  const recoveredLocation =
+    recoverPoliceLocation(
+      savedLocation,
+      game.flags
+        ?.policeReturnLocation
+    )
+
   return {
     ...game,
 
     world: {
       ...(game.world ?? {}),
+
+      location:
+        recoveredLocation,
 
       day:
         game.world
@@ -531,10 +553,11 @@ function applyNarrativeTransition(
       ...(game.world ?? {}),
 
       location:
-        scene.location ??
-        game.world
-          ?.location ??
-        null,
+        resolveNarrativeLocation(
+          game.world
+            ?.location,
+          scene.location
+        ),
     },
   }
 
@@ -752,6 +775,14 @@ export function updateSceneLocation(
   if (
     !game ||
     !scene?.location
+  ) {
+    return game
+  }
+
+  if (
+    isTransientPoliceLocation(
+      scene.location
+    )
   ) {
     return game
   }
