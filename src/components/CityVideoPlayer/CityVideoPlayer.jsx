@@ -69,8 +69,10 @@ export default function CityVideoPlayer({
           videoId: video.id,
           playerVars: {
             autoplay: 1,
+            cc_load_policy: 0,
             controls: 1,
             disablekb: 0,
+            iv_load_policy: 3,
             loop: 1,
             playlist: video.id,
             playsinline: 1,
@@ -82,6 +84,9 @@ export default function CityVideoPlayer({
             onReady: (event) => {
               event.target.mute()
               event.target.setVolume(0)
+              event.target.unloadModule?.(
+                'captions'
+              )
               event.target.playVideo()
               playerRef.current = event.target
               youtubeEngine.connect(
