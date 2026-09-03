@@ -75,6 +75,8 @@ export default function CityVideoPlayer({
             playlist: video.id,
             playsinline: 1,
             rel: 0,
+            start:
+              video.startSeconds ?? 0,
           },
           events: {
             onReady: (event) => {

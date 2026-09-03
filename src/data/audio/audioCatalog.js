@@ -73,8 +73,16 @@ export const AUDIO_CATALOG = {
       stream: true,
     },
     city_night: {
-      src: '/audio/ambience/ambience.mp3',
-      volume: 0.3,
+      src:
+        '/audio/ambience/Andando%20no%20Centro%20de%20S%C3%A3o%20Paulo%20de%20Noite%20%EF%BD%9C%20Walking%20at%20Night%20in%20the%20Fourth%20Largest%20City%20in%20the%20World%20%5BQLkgVstakDM%5D.mp3',
+      volume: 0.55,
+      loop: true,
+      stream: true,
+    },
+    crowded_street: {
+      src:
+        '/audio/ambience/AUGUSTA%20STREET%20-%20S%C3%A3o%20Paulo%20Nightlife.mp3',
+      volume: 0.5,
       loop: true,
       stream: true,
     },
@@ -120,7 +128,8 @@ export const SCENE_AUDIO = {
 
 export function getSceneAudio(
   sceneId,
-  scene
+  scene,
+  worldLocation = null
 ) {
   if (scene?.audio) {
     return scene.audio
@@ -131,7 +140,31 @@ export function getSceneAudio(
   }
 
   const locationId =
-    scene?.location?.id ?? ''
+    scene?.location?.id ??
+    worldLocation?.id ??
+    ''
+
+  const hasCrowdData =
+    worldLocation?.crowdLevel !==
+      undefined ||
+    worldLocation?.exposure
+      ?.crowdLevel !== undefined
+
+  const crowdLevel = Number(
+    worldLocation?.crowdLevel ??
+    worldLocation?.exposure?.crowdLevel ??
+    0
+  )
+
+  const augustaLocations = new Set([
+    'asylum',
+    'bela_vista',
+    'liberdade',
+    'paulista',
+    'pinheiros',
+    'vesuvius',
+    'vila_madalena',
+  ])
 
   if (
     locationId.includes('hospital') ||
@@ -157,13 +190,19 @@ export function getSceneAudio(
   if (
     locationId.includes('vesuvius')
   ) {
-    return { music: 'vesuvius' }
+    return {
+      music: 'vesuvius',
+      ambience: 'crowded_street',
+    }
   }
 
   if (
     locationId.includes('asylum')
   ) {
-    return { music: 'the_asylum' }
+    return {
+      music: 'the_asylum',
+      ambience: 'crowded_street',
+    }
   }
 
   if (
@@ -171,14 +210,22 @@ export function getSceneAudio(
   ) {
     return {
       music: 'chinatown_theme',
-      ambience: 'city_night',
+      ambience: 'crowded_street',
     }
   }
 
   if (scene) {
     return {
       music: 'downtown_theme',
-      ambience: 'city_night',
+      ambience:
+        augustaLocations.has(
+          locationId
+        ) || crowdLevel >= 0.8
+          ? 'crowded_street'
+          : crowdLevel >= 0.3 ||
+              !hasCrowdData
+            ? 'city_night'
+            : null,
     }
   }
 

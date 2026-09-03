@@ -157,6 +157,67 @@ const locations = {
     },
   },
 
+  estacao_da_luz: {
+    id: 'estacao_da_luz',
+
+    name:
+      'Estação da Luz',
+
+    district:
+      'Luz — Bom Retiro',
+
+    description:
+      'A Estação da Luz ocupa uma parte do Centro onde passageiros, comércio popular e edifícios históricos dividem o mesmo espaço. Sob a torre do relógio, os acessos recebem quem chega pelas linhas da CPTM e do metrô; gente apressada atravessa as plataformas, espera diante das catracas ou segue pela Praça da Luz em direção ao Bom Retiro. Do lado de fora, a iluminação alcança a fachada de tijolos, os pontos de ônibus e parte do Jardim da Luz, enquanto a Pinacoteca permanece do outro lado da avenida. À medida que a noite avança, o movimento diminui sem desaparecer por completo: trens ainda despejam pequenos grupos nas calçadas, vendedores recolhem o que restou do dia e algumas pessoas permanecem sob as marquises, observando quem entra e quem sai da estação.',
+
+    type:
+      'district',
+
+    coordinates: {
+      x: 55,
+      y: 46,
+    },
+
+    danger:
+      0.65,
+
+    policePresence:
+      0.7,
+
+    crowdLevel:
+      0.75,
+
+    exposure: {
+      publicAccess:
+        true,
+
+      crowdLevel:
+        0.75,
+
+      policePresence:
+        0.7,
+
+      soundIsolation:
+        0.05,
+
+      hostilePresence:
+        0.05,
+    },
+
+    hunting: {
+      enabled:
+        true,
+
+      preyLocation:
+        'centro_street',
+
+      baseDifficulty:
+        7,
+
+      description:
+        'Passageiros atrasados, trabalhadores em trânsito e pessoas que deixam a estação pelas ruas menos movimentadas da Luz.',
+    },
+  },
+
   /*
     ========================================
     REFÚGIO
@@ -1424,6 +1485,68 @@ const locations = {
 
       description:
         'Terminais, casas de eventos, bares e ruas movimentadas criam oportunidades durante a noite.',
+    },
+  },
+
+  avenida_sumare: {
+    id:
+      'avenida_sumare',
+
+    name:
+      'Avenida Sumaré',
+
+    district:
+      'Perdizes — Sumaré',
+
+    description:
+      'A Avenida Sumaré atravessa Perdizes sob árvores antigas e a iluminação regular do canteiro central. À noite, os carros descem em direção à Barra Funda ou sobem para os bairros da zona oeste, passando por edifícios residenciais, academias, farmácias e restaurantes que fecham em horários diferentes. Corredores, pessoas passeando com cães e passageiros nos pontos de ônibus ainda ocupam alguns trechos; perto das ruas laterais, porém, o movimento diminui e o som do trânsito passa a chegar entre muros, portarias e fachadas quase todas apagadas.',
+
+    type:
+      'district',
+
+    coordinates: {
+      x: 36,
+      y: 38,
+    },
+
+    danger:
+      0.3,
+
+    policePresence:
+      0.5,
+
+    crowdLevel:
+      0.55,
+
+    exposure: {
+      publicAccess:
+        true,
+
+      crowdLevel:
+        0.55,
+
+      policePresence:
+        0.5,
+
+      soundIsolation:
+        0.05,
+
+      hostilePresence:
+        0.0,
+    },
+
+    hunting: {
+      enabled:
+        true,
+
+      preyLocation:
+        'centro_street',
+
+      baseDifficulty:
+        7,
+
+      description:
+        'Pontos de ônibus, restaurantes e ruas residenciais oferecem oportunidades, mas o movimento é disperso e as portarias observam a avenida.',
     },
   },
 

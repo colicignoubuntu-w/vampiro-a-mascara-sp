@@ -666,7 +666,13 @@ const [
   const explorationVisual =
     scene?.id === 'free_roam'
       ? getLocationVisual(
-          game?.world?.location?.id
+          game?.world?.location?.id,
+          game?.history?.filter(
+            (item) =>
+              item?.locationId ===
+              game?.world?.location?.id
+          ).length ?? 0,
+          game?.world
         )
       : null
 
@@ -677,7 +683,8 @@ const [
 
   useSceneAudio(
     sceneId,
-    scene
+    scene,
+    game?.world?.location
   )
      /*
     ========================================

@@ -11,18 +11,20 @@ import {
 
 export function useSceneAudio(
   sceneId,
-  scene
+  scene,
+  worldLocation = null
 ) {
   useEffect(() => {
     audioEngine.applySceneAudio(
       getSceneAudio(
         sceneId,
-        scene
+        scene,
+        worldLocation
       )
     )
   }, [
     sceneId,
     scene,
+    worldLocation,
   ])
 }
-
