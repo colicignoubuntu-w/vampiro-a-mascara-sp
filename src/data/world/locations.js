@@ -106,14 +106,14 @@ const locations = {
       'Centro',
 
     description:
-      'O coração histórico e político de São Paulo. Durante a noite, suas ruas assumem uma atmosfera completamente diferente.',
+      'Você caminha entre a Praça da República, o Vale do Anhangabaú e as avenidas São João e Ipiranga. Bares, lanchonetes e hotéis ainda mantêm algumas portas abertas, enquanto quarteirões comerciais já estão vazios e protegidos por grades. A população muda de uma rua para outra: trabalhadores esperando o último ônibus, gente saindo para beber, vendedores recolhendo mercadoria e pessoas procurando abrigo sob as marquises.',
 
     type:
       'district',
 
     coordinates: {
       x: 52,
-      y: 44,
+      y: 55,
     },
 
     danger:
@@ -174,14 +174,14 @@ const locations = {
       'Centro',
 
     description:
-      'O antigo apartamento de Lívia. Depois de sua morte, o imóvel ficou para você. Agora este é seu refúgio na cidade.',
+      'O antigo apartamento de Lívia ocupa um prédio envelhecido do Centro, numa rua onde o movimento diminui depois que o comércio fecha. O corredor conserva o cheiro de umidade e produto de limpeza, e os ruídos da avenida chegam abafados pelas janelas. Desde a morte dela, o lugar funciona como seu refúgio, embora objetos esquecidos pelos cômodos ainda façam parecer que a verdadeira moradora pode voltar a qualquer momento.',
 
     type:
       'haven',
 
     coordinates: {
-      x: 58,
-      y: 39,
+      x: 50,
+      y: 51,
     },
 
     danger:
@@ -244,14 +244,14 @@ const locations = {
       'Bela Vista',
 
     description:
-      'Uma das regiões mais movimentadas da cidade, cercada por empresas, bancos, museus, bares e vida noturna.',
+      'A Avenida Paulista continua iluminada muito depois do expediente. Prédios de bancos e escritórios dividem espaço com hospitais, centros culturais, restaurantes e acessos do metrô; nas calçadas largas passam estudantes, funcionários, turistas, entregadores e grupos que saem dos bares. Viaturas e seguranças particulares aparecem com frequência, e a claridade das fachadas deixa pouca coisa realmente escondida.',
 
     type:
       'district',
 
     coordinates: {
-      x: 48,
-      y: 49,
+      x: 45,
+      y: 57,
     },
 
     danger:
@@ -303,13 +303,13 @@ const locations = {
     district: 'Bela Vista',
 
     description:
-      'Um clube de striptease na região da Augusta. Veludo vermelho, luz baixa e música alta escondem uma discreta corte da noite paulistana.',
+      'O Vesuvius ocupa um imóvel discreto perto da Rua Augusta, entre restaurantes recentes, bares antigos e edifícios residenciais que mudaram o perfil da região. Dentro do clube, veludo vermelho, corredores estreitos e música alta isolam os clientes do movimento da rua. A casa parece apenas mais um negócio da noite, mas a equipe controla com cuidado quem atravessa suas áreas reservadas.',
 
     type: 'club',
 
     coordinates: {
-      x: 40,
-      y: 57,
+      x: 46,
+      y: 54,
     },
 
     danger: 0.4,
@@ -334,9 +334,9 @@ const locations = {
     name: 'Asylum',
     district: 'Consolação',
     description:
-      'Uma boate gótica instalada num antigo teatro da Rua Augusta, administrada pelas irmãs Jeanette e Therese Voerman.',
+      'O Asylum funciona num antigo teatro da Consolação, próximo ao trecho da Augusta onde bares, casas noturnas, restaurantes e pequenos comércios disputam a mesma calçada. A fachada preservada esconde uma boate gótica de salões escuros e música constante. O público é variado, mas a administração das irmãs Voerman transforma certas portas e camarotes em fronteiras que os frequentadores comuns aprendem a não atravessar.',
     type: 'club',
-    coordinates: { x: 68, y: 61 },
+    coordinates: { x: 44, y: 50 },
     danger: 0.5,
     policePresence: 0.5,
     crowdLevel: 0.9,
@@ -355,9 +355,9 @@ const locations = {
     name: 'Apartamento de Mercurio',
     district: 'Barra Funda',
     description:
-      'Um apartamento discreto usado por Mercurio como residência, depósito e ponto de contatos clandestinos.',
+      'Mercurio mora num edifício comum da Barra Funda, próximo o bastante das linhas de trem para que a passagem das composições faça vibrar as janelas. O apartamento tem poucos móveis e muitas caixas, algumas com etiquetas arrancadas. Para os vizinhos, ele é apenas um morador reservado; para seus contatos, o endereço funciona como residência, depósito e ponto de entrega de mercadorias que não devem passar por registros oficiais.',
     type: 'contact',
-    coordinates: { x: 34, y: 36 },
+    coordinates: { x: 42, y: 29 },
     danger: 0.4,
     policePresence: 0.3,
     crowdLevel: 0.1,
@@ -373,40 +373,40 @@ const locations = {
 
   lucky_star_motel: {
     id: 'lucky_star_motel', name: 'Motel Estrela da Sorte', district: 'Centro',
-    description: 'O motel administrado por David Hatter, onde ele escreve seus roteiros de terror durante a madrugada.',
-    type: 'investigation', coordinates: { x: 62, y: 36 }, danger: 0.3, policePresence: 0.5, crowdLevel: 0.3,
+    description: 'O Estrela da Sorte ocupa um prédio estreito do Centro, entre uma lanchonete aberta a noite inteira e uma fileira de lojas fechadas. A recepção protegida por vidro observa um corredor de iluminação cansada, frequentado por casais, viajantes e hóspedes que preferem não fornecer muitos dados. David Hatter administra o lugar do balcão e aproveita as horas vazias para escrever roteiros de terror.',
+    type: 'investigation', coordinates: { x: 56, y: 50 }, danger: 0.3, policePresence: 0.5, crowdLevel: 0.3,
     exposure: { publicAccess: true, crowdLevel: 0.3, policePresence: 0.5, soundIsolation: 0.45, hostilePresence: 0 },
     requiresFlag: 'luckyStarUnlocked', arrivalScene: 'vesuvius_david_meeting',
   },
 
   dennis_warehouse: {
     id: 'dennis_warehouse', name: 'Galpão de Dennis', district: 'Limão',
-    description: 'Um galpão clandestino próximo à Marginal Tietê, identificado pelas pistas encontradas nas roupas de Mercurio.',
-    type: 'investigation', coordinates: { x: 22, y: 24 }, danger: 0.8, policePresence: 0.2, crowdLevel: 0.1,
+    description: 'O galpão fica no Limão, num trecho industrial próximo à Marginal Tietê onde transportadoras, oficinas e depósitos ocupam quadras inteiras. Durante a madrugada há poucos pedestres, mas caminhões continuam passando e vigias acompanham veículos desconhecidos. As pistas encontradas nas roupas de Mercurio conduzem até um portão sem identificação, protegido da rua por chapas metálicas e câmeras improvisadas.',
+    type: 'investigation', coordinates: { x: 35, y: 20 }, danger: 0.8, policePresence: 0.2, crowdLevel: 0.1,
     exposure: { publicAccess: false, crowdLevel: 0.1, policePresence: 0.2, soundIsolation: 0.7, hostilePresence: 0.8 },
     requiresFlag: 'dennisWarehouseUnlocked', arrivalScene: 'mercurio_warehouse',
   },
 
   gallery_noir: {
     id: 'gallery_noir', name: 'Galeria Noir', district: 'Jardins',
-    description: 'Uma galeria de arte contemporânea que recebe uma inauguração beneficente frequentada pela elite paulistana.',
-    type: 'investigation', coordinates: { x: 73, y: 48 }, danger: 0.55, policePresence: 0.55, crowdLevel: 0.85,
+    description: 'A Galeria Noir ocupa um imóvel reformado nos Jardins, cercado por restaurantes caros, lojas de fachada discreta e edifícios com porteiros atentos. Nesta noite, carros deixam convidados diante da entrada de uma inauguração beneficente, onde taças e conversas cuidadosas circulam entre obras contemporâneas. A equipe controla os nomes na porta, e a aparência informal de quem passa chama mais atenção do que chamaria em outros bairros.',
+    type: 'investigation', coordinates: { x: 40, y: 59 }, danger: 0.55, policePresence: 0.55, crowdLevel: 0.85,
     exposure: { publicAccess: true, crowdLevel: 0.85, policePresence: 0.55, soundIsolation: 0.35, hostilePresence: 0.15 },
     requiresFlag: 'galleryNoirUnlocked', arrivalScene: 'gallery_noir_infiltration',
   },
 
   ocean_house_sp: {
     id: 'ocean_house_sp', name: 'Ocean House Hotel', district: 'Santos',
-    description: 'Um hotel incendiado e abandonado no litoral, agora assombrado por uma presença que impede os planos imobiliários de Therese.',
-    type: 'investigation', coordinates: { x: 80, y: 78 }, danger: 0.7, policePresence: 0.1, crowdLevel: 0,
+    description: 'O Ocean House está afastado da parte mais movimentada da orla de Santos. Tapumes e marcas do incêndio escondem o antigo acesso, mas ainda é possível reconhecer a estrutura de um hotel que recebeu hóspedes durante décadas. O interior conserva corredores chamuscados, móveis abandonados e áreas comprometidas pelo fogo; operários enviados para avaliar o imóvel se recusaram a voltar, impedindo os planos imobiliários de Therese.',
+    type: 'investigation', coordinates: { x: 84, y: 92 }, danger: 0.7, policePresence: 0.1, crowdLevel: 0,
     exposure: { publicAccess: false, crowdLevel: 0, policePresence: 0.1, soundIsolation: 0.8, hostilePresence: 0.5 },
     requiresFlag: 'oceanHouseUnlocked', arrivalScene: 'ocean_house_investigation',
   },
 
   surfside_diner: {
-    id: 'surfside_diner', name: 'Surfside Diner', district: 'Santa Monica',
-    description: 'Uma lanchonete quase vazia perto da orla. A cabine dos fundos fica ao lado dos telefones públicos.',
-    type: 'contact', coordinates: { x: 77, y: 72 }, danger: 0.3, policePresence: 0.3, crowdLevel: 0.35,
+    id: 'surfside_diner', name: 'Surfside Diner', district: 'Santos — Gonzaga',
+    description: 'A lanchonete permanece aberta perto da orla de Santos, recebendo taxistas, trabalhadores noturnos e clientes que procuram café depois que os restaurantes fecham. Ventiladores giram sobre mesas de fórmica e o cheiro da chapa se mistura ao ar úmido trazido da praia. A cabine dos fundos, ao lado dos telefones públicos, oferece distância suficiente do balcão para uma conversa discreta.',
+    type: 'contact', coordinates: { x: 80, y: 88 }, danger: 0.3, policePresence: 0.3, crowdLevel: 0.35,
     exposure: { publicAccess: true, crowdLevel: 0.35, policePresence: 0.3, soundIsolation: 0.4, hostilePresence: 0.05 },
     requiresFlag: 'surfsideMeetingUnlocked', arrivalScene: 'surfside_wait_jeanette',
   },
@@ -428,14 +428,14 @@ const locations = {
       'Liberdade',
 
     description:
-      'Um bairro marcado por comércio, restaurantes, cultura e uma intensa movimentação noturna.',
+      'As lanternas e placas orientais tornam a Liberdade reconhecível antes mesmo de você chegar à praça. Restaurantes encerram o serviço enquanto mercados, lojas de conveniência e karaokês prolongam o movimento pelas ruas laterais. Perto do metrô ainda há grupos conversando e entregadores esperando pedidos; alguns quarteirões abaixo, em direção ao Glicério, a iluminação piora, as lojas fecham e a circulação se torna bem mais dispersa.',
 
     type:
       'district',
 
     coordinates: {
       x: 55,
-      y: 46,
+      y: 59,
     },
 
     danger:
@@ -496,14 +496,14 @@ const locations = {
       'Bela Vista',
 
     description:
-      'Região próxima à Paulista, com bares, teatros, restaurantes e ruas residenciais.',
+      'A Bela Vista muda conforme você desce da Paulista em direção ao Centro. Na parte alta da Augusta predominam restaurantes, novos edifícios e um público com mais dinheiro; adiante aparecem teatros, bares pequenos, casas noturnas, vendedores e filas ocupando a calçada. A região continua viva, mas antigos estabelecimentos cedem espaço a prédios e negócios mais caros, misturando a memória boêmia do bairro com uma transformação que ainda está em andamento.',
 
     type:
       'district',
 
     coordinates: {
-      x: 44,
-      y: 52,
+      x: 48,
+      y: 57,
     },
 
     danger:
@@ -564,14 +564,14 @@ const locations = {
       'Pinheiros',
 
     description:
-      'Região boêmia e movimentada, com bares, restaurantes, casas noturnas e uma população diversificada.',
+      'Pinheiros reúne ruas residenciais arborizadas, edifícios novos, escritórios e corredores comerciais que permanecem ativos à noite. Nos arredores da Teodoro Sampaio e da estação Fradique Coutinho, restaurantes e bares mantêm as calçadas ocupadas; mais perto da Faria Lima, fachadas envidraçadas e segurança privada anunciam outra escala de dinheiro. A multidão é menos concentrada que no Centro, espalhando-se entre estações, esquinas e carros de aplicativo.',
 
     type:
       'district',
 
     coordinates: {
-      x: 39,
-      y: 48,
+      x: 31,
+      y: 64,
     },
 
     danger:
@@ -632,14 +632,14 @@ const locations = {
       'Vila Madalena',
 
     description:
-      'Bairro conhecido pela vida noturna, arte urbana, bares e intensa atividade cultural.',
+      'Na Vila Madalena, o movimento se concentra em poucas ruas tomadas por bares, restaurantes e mesas na calçada. Muros pintados e fachadas coloridas permanecem visíveis sob a iluminação dos estabelecimentos, enquanto grupos circulam entre o Beco do Batman e as ladeiras do bairro. Fora desse núcleo, o barulho cai depressa e surgem casas, pequenos prédios e ruas residenciais onde os moradores convivem com o trânsito e a festa dos fins de semana.',
 
     type:
       'district',
 
     coordinates: {
-      x: 36,
-      y: 46,
+      x: 28,
+      y: 45,
     },
 
     danger:
@@ -700,14 +700,14 @@ const locations = {
       'Santana',
 
     description:
-      'Região da Zona Norte com forte circulação de moradores, comércio e acesso ao metrô.',
+      'Santana se organiza ao redor de avenidas largas, comércio de bairro e estações que ligam a Zona Norte ao Centro. Perto do metrô e do terminal ainda há passageiros, ambulantes e ônibus chegando em intervalos curtos; algumas quadras depois predominam edifícios residenciais, padarias fechando e ruas mais tranquilas. O fluxo muda bastante ao longo da noite, deixando bolsões movimentados cercados por trechos quase vazios.',
 
     type:
       'district',
 
     coordinates: {
-      x: 50,
-      y: 29,
+      x: 53,
+      y: 9,
     },
 
     danger:
@@ -768,14 +768,14 @@ const locations = {
       'Zona Norte',
 
     description:
-      'Uma região de mata e áreas residenciais afastadas do centro urbano.',
+      'A subida para a Serra da Cantareira afasta você do trânsito contínuo das áreas centrais. As construções ficam mais espaçadas, os muros mais longos e a iluminação pública irregular; entre condomínios e ruas estreitas surgem terrenos cobertos por mata. À noite, há poucos pedestres e quase nenhum comércio aberto, de modo que motores, cães e movimentos entre as árvores se destacam no silêncio.',
 
     type:
       'district',
 
     coordinates: {
-      x: 52,
-      y: 17,
+      x: 46,
+      y: 4,
     },
 
     danger:
@@ -832,14 +832,14 @@ const locations = {
       'Mooca',
 
     description:
-      'Bairro tradicional da Zona Leste, com áreas residenciais, comércio e antigas construções.',
+      'A Mooca conserva casas geminadas, galpões e antigas instalações industriais entre condomínios mais recentes. Pizzarias, padarias e bares de bairro sustentam algum movimento depois que o comércio comum fecha, principalmente perto das avenidas e estações. Nas ruas internas, famílias voltam para casa e conversas escapam de janelas abertas, dando à região um ritmo noturno mais residencial que o encontrado no Centro.',
 
     type:
       'district',
 
     coordinates: {
-      x: 65,
-      y: 48,
+      x: 71,
+      y: 55,
     },
 
     danger:
@@ -900,14 +900,14 @@ const locations = {
       'Tatuapé',
 
     description:
-      'Região movimentada da Zona Leste, com comércio, bares e áreas residenciais.',
+      'No Tatuapé, o movimento se distribui entre o metrô, os shoppings, os bares e os edifícios residenciais que cercam as avenidas principais. Restaurantes permanecem cheios até mais tarde e carros de aplicativo param continuamente diante das entradas. Longe desses eixos, as calçadas esvaziam e o bairro assume um caráter residencial, com portarias iluminadas e vigilância privada acompanhando quem passa.',
 
     type:
       'district',
 
     coordinates: {
-      x: 72,
-      y: 44,
+      x: 87,
+      y: 48,
     },
 
     danger:
@@ -968,14 +968,14 @@ const locations = {
       'Ipiranga',
 
     description:
-      'Região histórica de São Paulo, com áreas residenciais e importantes pontos culturais.',
+      'O Ipiranga alterna avenidas de passagem, comércio local e ruas residenciais que descem em direção ao vale. A presença do Museu e do Parque da Independência marca a região, mas à noite são as padarias, postos, bares e pontos de ônibus que concentram as pessoas. Entre casarões antigos e prédios recentes, há longos trechos silenciosos onde o movimento de um único carro pode ser acompanhado por vários quarteirões.',
 
     type:
       'district',
 
     coordinates: {
-      x: 58,
-      y: 58,
+      x: 63,
+      y: 69,
     },
 
     danger:
@@ -1036,14 +1036,14 @@ const locations = {
       'Vila Mariana',
 
     description:
-      'Região residencial e universitária próxima ao centro expandido.',
+      'A Vila Mariana permanece ativa ao redor do metrô, das faculdades, dos hospitais e dos restaurantes próximos à Domingos de Morais. Estudantes dividem as calçadas com profissionais saindo de plantões e moradores levando cães para a última volta. Nas ruas internas aparecem casas antigas, edifícios médios e pequenos comércios já fechados; o bairro é bem servido e iluminado, mas fica rapidamente mais quieto quando você se afasta das avenidas.',
 
     type:
       'district',
 
     coordinates: {
-      x: 49,
-      y: 60,
+      x: 39,
+      y: 73,
     },
 
     danger:
@@ -1104,14 +1104,14 @@ const locations = {
       'Saúde',
 
     description:
-      'Bairro da Zona Sul conectado ao restante da cidade por metrô e grandes avenidas.',
+      'A Saúde acompanha o eixo do metrô e da Avenida Jabaquara, onde ônibus, farmácias, mercados e restaurantes mantêm alguma circulação até tarde. Atrás desse corredor, o terreno inclinado conduz a ruas residenciais de casas e edifícios baixos. O ruído do trânsito continua presente, embora haja poucas pessoas caminhando depois que as estações começam a esvaziar.',
 
     type:
       'district',
 
     coordinates: {
-      x: 49,
-      y: 67,
+      x: 51,
+      y: 87,
     },
 
     danger:
@@ -1172,14 +1172,14 @@ const locations = {
       'Santo Amaro',
 
     description:
-      'Importante região da Zona Sul, com comércio, transporte e áreas empresariais.',
+      'Santo Amaro funciona como um centro próprio dentro da Zona Sul. Terminais, estações e ruas comerciais reúnem passageiros vindos de bairros distantes, enquanto escritórios e lojas baixam as portas ao redor do Largo Treze. Mesmo à noite há ônibus, vendedores e trabalhadores atravessando a região, mas o movimento se concentra nos corredores de transporte e abandona depressa as ruas laterais.',
 
     type:
       'district',
 
     coordinates: {
-      x: 37,
-      y: 69,
+      x: 38,
+      y: 92,
     },
 
     danger:
@@ -1240,14 +1240,14 @@ const locations = {
       'Zona Sul',
 
     description:
-      'Região extensa e densamente povoada da Zona Sul.',
+      'O Capão Redondo se espalha por avenidas movimentadas, ladeiras e ruas residenciais densamente ocupadas. O metrô e os corredores de ônibus concentram trabalhadores retornando para casa, comércio popular e vendedores que prolongam o expediente. Conforme a noite avança, bares de bairro e pontos de transporte permanecem ativos, enquanto trajetos fora das vias principais exigem conhecer bem as entradas, escadarias e mudanças do terreno.',
 
     type:
       'district',
 
     coordinates: {
-      x: 24,
-      y: 75,
+      x: 22,
+      y: 94,
     },
 
     danger:
@@ -1308,14 +1308,14 @@ const locations = {
       'Morumbi',
 
     description:
-      'Região de grandes avenidas, áreas residenciais e contrastes sociais marcantes.',
+      'No Morumbi, grandes avenidas ligam condomínios fechados, hospitais, clubes e centros comerciais separados por longos muros. Ruas com mansões e jardins bem cuidados contam com câmeras, guaritas e pouca presença de pedestres; a poucos minutos dali, o relevo revela comunidades densas e trajetos onde ônibus e trabalhadores ainda circulam. As distâncias são maiores do que parecem, e quase toda movimentação depende de carro.',
 
     type:
       'district',
 
     coordinates: {
-      x: 30,
-      y: 59,
+      x: 29,
+      y: 84,
     },
 
     danger:
@@ -1376,14 +1376,14 @@ const locations = {
       'Barra Funda',
 
     description:
-      'Importante área de transporte, eventos, comércio e acesso à Zona Oeste.',
+      'A Barra Funda é atravessada por linhas de trem, corredores de ônibus, viadutos e acessos à Marginal Tietê. Nos dias de evento, o terminal, o Allianz Parque e as casas de espetáculo espalham multidões pelas avenidas; depois que o público vai embora, restam estacionamentos, galpões, oficinas e extensos quarteirões silenciosos. Perto da Marechal Deodoro, o fluxo de passageiros convive com hotéis baratos, pessoas sem abrigo e policiamento mais atento.',
 
     type:
       'district',
 
     coordinates: {
-      x: 42,
-      y: 39,
+      x: 43,
+      y: 28,
     },
 
     danger:
@@ -1444,14 +1444,14 @@ const locations = {
       'Vila Mariana',
 
     description:
-      'Hospital particular que aparece repetidamente nos arquivos deixados por Lívia. Durante a madrugada, parte de sua movimentação não corresponde aos registros oficiais.',
+      'O Hospital Victor ocupa um quarteirão bem iluminado da Vila Mariana, cercado por farmácias, estacionamentos e restaurantes que atendem familiares e funcionários de plantão. Ambulâncias entram pelos fundos enquanto visitantes atravessam a recepção principal a qualquer hora. Nos arquivos de Lívia, porém, entregas noturnas e acessos a uma ala restrita aparecem em horários que não correspondem aos registros oficiais.',
 
     type:
       'hospital',
 
     coordinates: {
-      x: 55,
-      y: 65,
+      x: 40,
+      y: 72,
     },
 
     danger:
@@ -1504,14 +1504,14 @@ const locations = {
       'Lapa',
 
     description:
-      'Região tradicional da Zona Oeste, com comércio e importantes conexões de transporte.',
+      'A Lapa cresceu ao redor das linhas ferroviárias e ainda conserva um centro comercial movimentado junto ao mercado, ao terminal e às ruas de lojas populares. Depois que as portas de aço descem, passageiros continuam atravessando as passarelas e esperando ônibus sob a iluminação dos corredores principais. Mais longe dos trilhos, oficinas, bares antigos, casas e edifícios residenciais formam ruas menos movimentadas e mais escuras.',
 
     type:
       'district',
 
     coordinates: {
-      x: 32,
-      y: 40,
+      x: 34,
+      y: 21,
     },
 
     danger:

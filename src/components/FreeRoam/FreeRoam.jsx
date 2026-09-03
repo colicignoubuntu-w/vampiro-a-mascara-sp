@@ -774,6 +774,14 @@ export default function FreeRoam({
     )
   }
 
+  function cancelHunt() {
+    resetFeedingState()
+
+    setMessage(
+      'Você decide abandonar a caça e volta a observar a cidade.'
+    )
+  }
+
   /*
     ========================================
     HUMANIDADE
@@ -1485,9 +1493,21 @@ export default function FreeRoam({
           {prey &&
             !shelteredDuringDay && (
             <section className="hunting-panel">
-              <span className="hunting-kicker">
-                PRESA
-              </span>
+              <div className="hunting-panel-header">
+                <span className="hunting-kicker">
+                  PRESA
+                </span>
+
+                {!huntingRoll && (
+                  <button
+                    type="button"
+                    className="hunting-cancel"
+                    onClick={cancelHunt}
+                  >
+                    Cancelar caça
+                  </button>
+                )}
+              </div>
 
               <h2>
                 {prey.name}

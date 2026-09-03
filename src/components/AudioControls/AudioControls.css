@@ -3,6 +3,11 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.audio-controls-buttons {
+  display: flex;
+  gap: 6px;
+}
+
 .audio-controls-toggle {
   display: inline-flex;
   align-items: center;
@@ -20,6 +25,26 @@
 .audio-controls-toggle:hover {
   color: #f0e7e5;
   border-color: #77303c;
+}
+
+.audio-controls-music-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid #4f2931;
+  color: #c2afb2;
+  background: #13090c;
+  font-size: 9px;
+  letter-spacing: 0.13em;
+  cursor: pointer;
+}
+
+.audio-controls-music-button:hover {
+  color: #fff;
+  border-color: #8d3441;
+  background: #241116;
 }
 
 .audio-controls-panel {

@@ -2342,21 +2342,29 @@ outside_hospital: {
 
 Você sai.
 
-São Paulo está diante de você. Prédios iluminados se erguem ao longe, faróis atravessam as ruas e ônibus passam em meio ao movimento que ainda ocupa a cidade àquela hora.`,
+São Paulo não se apresenta de uma vez. Primeiro vêm os reflexos: faróis correndo pelo asfalto, vitrines ainda acesas, letreiros de bares tingindo as calçadas. Depois, o resto da cidade se organiza ao redor deles — edifícios antigos com as fachadas iluminadas, prédios de escritórios quase apagados e janelas acesas muito acima da rua.`,
 
-  `Por alguns instantes, tudo parece intenso demais.
+  `O movimento também não é uniforme.
 
-As luzes dos postes e dos carros incomodam seus olhos. O ruído dos motores parece mais alto do que deveria, misturado a buzinas, vozes e passos vindos de diferentes pontos da rua.
+Em uma esquina, mesas ocupam a faixa junto aos prédios e grupos conversam com copos nas mãos, prolongando a noite depois do expediente. Na seguinte, as portas de aço estão baixadas e a calçada se esvazia. Um entregador prende a mochila nas costas. Duas pessoas consultam o celular sob a luz de uma farmácia. Um homem dorme sob a marquise de uma loja fechada.
 
-Pessoas passam pela calçada sem prestar atenção em você. Algumas conversam. Outras olham para o celular ou simplesmente seguem seu caminho.`,
+Tudo existe perto demais. Festa, trabalho, pressa, abandono.`,
 
-  `Aos poucos, você começa a separar aquilo que importa do restante. Os sons continuam ali, as luzes continuam fortes, mas deixam de exigir sua atenção o tempo inteiro.
+  `Por alguns instantes, seus sentidos tentam receber a cidade inteira.
 
-São Paulo continua funcionando diante de você.
+O ronco grave de um ônibus. Uma motocicleta cortando entre os carros. Música escapando de um bar e perdendo a disputa para uma sirene distante. Conversas que você não deveria alcançar. Solas raspando o calçadão. O sinal sonoro de um semáforo do outro lado da avenida.
 
-E ninguém parece perceber que alguma coisa mudou.`,
+Cada ruído chega separado, limpo e invasivo.`,
 
-  `Você olha para as pessoas passando pela rua.
+  `As luzes incomodam ainda mais. O vermelho dos freios permanece em sua visão depois que os carros avançam. Faróis obrigam você a estreitar os olhos. Até a iluminação branca de uma loja de conveniência parece agressiva demais.
+
+Então, pouco a pouco, sua atenção aprende a escolher.
+
+A cidade não fica mais silenciosa. Você é que começa a empurrar parte dela para o fundo.`,
+
+  `Pessoas passam sem prestar atenção em você. Algumas voltam para casa. Outras apenas começaram a noite. Nenhuma percebe o esforço necessário para que você fique parado enquanto elas se aproximam e se afastam pela calçada.
+
+São Paulo continua funcionando.
 
 Elas também não percebem que você morreu.`,
 ],
@@ -2419,21 +2427,19 @@ street_hunger: {
     },
 
   narration: [
-    'Você observa as pessoas.',
+    `Você observa as pessoas.
 
-    'Um homem passa olhando o celular.',
+Um homem passa olhando o celular, alheio à rua. Uma mulher espera um carro de aplicativo sob uma marquise. Três jovens dividem uma mesa de plástico na porta de um bar, obrigando quem passa a contornar as cadeiras. Perto da esquina, um casal discute sem baixar a voz.`,
 
-    'Uma mulher espera um carro de aplicativo.',
+    `Durante alguns segundos, você percebe apenas a multidão dispersa.
 
-    'Um casal discute perto de uma esquina.',
+Então começa a distinguir os ritmos.
 
-    'Você consegue ouvir batimentos.',
+Um pulso acelerado quando a motocicleta passa perto demais. Outro, tranquilo, atrás do balcão de uma lanchonete. O coração da mulher sob a marquise muda quando um carro diminui a velocidade diante dela.`,
 
-    'Talvez não de todos.',
+    `Talvez você não esteja realmente ouvindo todos eles. Talvez sua mente esteja completando o que os olhos veem: a pulsação no pescoço, o sangue aquecendo um rosto, uma artéria escondida sob a pele.
 
-    'Talvez sua mente esteja inventando alguns.',
-
-    'Mas a fome não parece se importar com a diferença.',
+Mas a fome não se importa com a diferença.`,
   ],
 
     dialogue: {
@@ -2472,19 +2478,15 @@ jack_car: {
     },
 
   narration: [
-    'Jack destranca um carro velho estacionado próximo ao hospital.',
+    `Jack destranca um carro velho estacionado próximo ao hospital. A lataria carrega riscos, uma das lanternas está presa com fita transparente e há papéis de estacionamento acumulados no console.
 
-    'Você entra no banco do passageiro.',
+Você entra no banco do passageiro. O cheiro de tecido gasto, poeira e gasolina cobre por alguns instantes o sangue das pessoas na calçada.`,
 
-    'O motor demora duas tentativas para pegar.',
+    `O motor demora duas tentativas para pegar.
 
-    'Jack bate no painel.',
+Jack bate no painel. O rádio desperta no meio de uma música antiga, chia quando ele gira o botão e acaba abandonado num volume baixo.
 
-    'O rádio liga sozinho por alguns segundos.',
-
-    'Uma música antiga toca baixo.',
-
-    'Ele sai para a avenida.',
+Ele arranca junto ao fluxo da avenida. Um ônibus fecha parte da passagem; Jack espera apenas o espaço necessário e enfia o carro entre ele e uma fileira de motocicletas.`,
   ],
 
     dialogue: {
@@ -2735,13 +2737,27 @@ city_drive: {
     },
 
  narration: [
-  `São Paulo passa do lado de fora da janela.
+  `São Paulo passa do lado de fora da janela em fragmentos.
 
-As luzes incomodam. Faróis, letreiros, semáforos e vitrines parecem fortes demais e, quando um carro cruza no sentido contrário, você estreita os olhos quase por reflexo. Os sons também parecem mais altos do que deveriam: o motor do carro, as buzinas, uma motocicleta passando ao lado, o ruído constante dos pneus contra o asfalto.`,
+Uma avenida larga e ainda congestionada. Uma rua estreita onde quase todo o comércio já desceu as portas de aço. Bares reunidos num único quarteirão, com mesas encostadas às fachadas e música vazando para o calçadão. Depois outro trecho escuro, silencioso o bastante para parecer pertencer a uma cidade diferente.`,
 
-  `No começo, tudo parece excessivo. Mas, à medida que Jack avança pela avenida, você se acostuma.
+  `Os prédios mudam sem que a cidade permita uma transição limpa. Fachadas restauradas dividem a quadra com concreto manchado, janelas quebradas e andares inteiros sem luz. Sob marquises antigas, algumas pessoas aguardam ônibus; outras arrumam um lugar para passar a noite. Acima delas, apartamentos reformados brilham por trás de vidros novos.
 
-Os sons continuam ali e as luzes continuam fortes. Você simplesmente começa a ignorar aquilo que não importa e, pouco a pouco, a cidade volta a parecer suportável.`,
+São Paulo empilha épocas e vidas sem se preocupar em fazê-las combinar.`,
+
+  `Ao longe, o contorno iluminado de um edifício histórico aparece entre torres mais recentes e desaparece quando Jack dobra outra esquina. Ele cruza corredores de ônibus, passa por obras que estreitam a pista e segue por ruas onde as pedras antigas deram lugar a trechos de calçadão novo.
+
+Você tenta guardar o caminho, mas a cidade parece mudar de forma a cada conversão.`,
+
+  `As luzes ainda incomodam. Faróis, letreiros, semáforos e vitrines deixam rastros em sua visão. Quando um carro cruza no sentido contrário, você estreita os olhos por reflexo.
+
+Os sons chegam em camadas: o motor cansado do carro de Jack, pneus contra emendas do asfalto, o freio pneumático de um ônibus, uma buzina sustentada por tempo demais, vozes na saída de um bar e uma motocicleta que surge ao lado da janela antes que você perceba sua aproximação.`,
+
+  `No começo, tudo exige atenção.
+
+Depois você aprende a descartar. O ônibus vira apenas um ruído grave. As conversas se dissolvem numa massa indistinta. Os faróis deixam de parecer golpes dirigidos aos seus olhos.
+
+A cidade não diminui para receber você. É você que começa a se ajustar ao volume dela.`,
 
   `Você relaxa no banco e então percebe outra coisa.
 
@@ -4273,7 +4289,13 @@ Agora restam apenas cinzas.`,
 
   `Do lado de fora, São Paulo continua exatamente como sempre esteve.
 
-A cidade onde você nasceu. Onde cresceu, conheceu pessoas e perdeu outras. A cidade onde tantas vezes sua vida pareceu não dar certo.`,
+As luzes do Teatro Municipal recortam a fachada contra a noite. Do outro lado, as janelas do antigo edifício do Shopping Light permanecem acesas. Mais adiante, o Viaduto do Chá atravessa o vale enquanto ônibus e carros passam em intervalos irregulares.
+
+Na Praça Ramos, alguém apressa o passo em direção ao ponto. Um trabalhador recolhe as últimas coisas de um carrinho. Perto de uma porta fechada, duas pessoas dividem um cigarro. Nenhuma olha para as janelas do teatro. Nenhuma imagina o que acabou de acontecer lá dentro.`,
+
+  `Esta é a cidade onde você nasceu. Onde cresceu, conheceu pessoas e perdeu outras. A cidade onde tantas vezes sua vida pareceu não dar certo.
+
+Agora você percebe outra geografia sob a primeira. Os mesmos edifícios, viadutos, hotéis, bares e estações; caminhos diferentes entre eles.`,
 
   `Existe uma cidade escondida dentro daquela que você conhecia.
 

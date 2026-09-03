@@ -84,6 +84,14 @@
   font-weight: 400;
 }
 
+.city-map-header p {
+  margin: 4px 0 0;
+
+  color: #766b6d;
+
+  font-size: 10px;
+}
+
 .city-map-header button {
   padding:
     8px
@@ -136,7 +144,7 @@
       rgba(9, 7, 8, 0.58)
     ),
     url('/images/mapa-sao-paulo.png')
-      center / cover
+      center / 100% 100%
       no-repeat;
 }
 

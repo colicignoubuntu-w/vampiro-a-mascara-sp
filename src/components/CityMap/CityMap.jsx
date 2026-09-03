@@ -15,6 +15,16 @@ import {
 
 import './CityMap.css'
 
+function formatLevel(value) {
+  const numericValue = Number(value ?? 0)
+
+  return Math.round(
+    (numericValue <= 1
+      ? numericValue * 10
+      : numericValue)
+  )
+}
+
 export default function CityMap({
   game,
   onClose,
@@ -84,6 +94,10 @@ export default function CityMap({
             <h2>
               Mapa da Cidade
             </h2>
+
+            <p>
+              Selecione um destino para planejar a viagem
+            </p>
           </div>
 
           <button
@@ -190,8 +204,10 @@ export default function CityMap({
                     <span>
                       Perigo:{' '}
                       {
-                        selectedLocation
-                          .danger
+                        formatLevel(
+                          selectedLocation
+                            .danger
+                        )
                       }
                       /10
                     </span>
@@ -199,8 +215,10 @@ export default function CityMap({
                     <span>
                       Polícia:{' '}
                       {
-                        selectedLocation
-                          .policePresence
+                        formatLevel(
+                          selectedLocation
+                            .policePresence
+                        )
                       }
                       /10
                     </span>

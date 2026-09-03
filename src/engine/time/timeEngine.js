@@ -121,6 +121,66 @@ export function formatClock(
 
 /*
   ========================================
+  FORMATAR DATA DO CALENDÁRIO
+  ========================================
+
+  O primeiro dia da crônica acontece em
+  11 de outubro de 2026. world.day conta
+  quantos dias transcorreram desde então.
+*/
+
+const GAME_START_DATE =
+  Date.UTC(2026, 9, 11)
+
+const WEEKDAYS = [
+  'Domingo',
+  'Segunda-feira',
+  'Terça-feira',
+  'Quarta-feira',
+  'Quinta-feira',
+  'Sexta-feira',
+  'Sábado',
+]
+
+const MONTHS = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+]
+
+export function formatCalendarDate(
+  world
+) {
+  const elapsedDays =
+    Math.max(
+      0,
+      Math.floor(
+        safeNumber(
+          world?.day,
+          1
+        )
+      ) - 1
+    )
+
+  const date = new Date(
+    GAME_START_DATE +
+      elapsedDays * 24 * 60 * 60 * 1000
+  )
+
+  return `${WEEKDAYS[date.getUTCDay()]} • ${date.getUTCDate()} de ${MONTHS[date.getUTCMonth()]} de ${date.getUTCFullYear()}`
+}
+
+/*
+  ========================================
   NASCER DO SOL
   ========================================
 */

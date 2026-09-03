@@ -43,6 +43,7 @@ import {
 import {
   applyChoice,
   applyTestOutcome,
+  formatGameDate,
   formatGameTime,
   loadGame,
   saveGame,
@@ -197,6 +198,7 @@ import MasqueradePanel from '../components/MasqueradePanel/MasqueradePanel'
 import DisciplineChoicePanel from '../components/DisciplineChoicePanel/DisciplineChoicePanel'
 import DisciplineTestPanel from '../components/DisciplineTestPanel/DisciplineTestPanel'
 import AudioControls from '../components/AudioControls/AudioControls'
+import CityVideoPlayer from '../components/CityVideoPlayer/CityVideoPlayer'
 import {
   useSceneAudio,
 } from '../engine/audio/useSceneAudio'
@@ -224,6 +226,8 @@ export default function Game({
   onMenu,
   onOpenSheet,
 }) {
+  const [videoMode, setVideoMode] =
+    useState(false)
   /*
     ========================================
     SAVE PRINCIPAL
@@ -658,6 +662,18 @@ const [
             : {}),
         }
       : null
+
+  const explorationVisual =
+    scene?.id === 'free_roam'
+      ? getLocationVisual(
+          game?.world?.location?.id
+        )
+      : null
+
+  const activeVideo =
+    explorationVisual?.video ??
+    sceneVisual?.video ??
+    null
 
   useSceneAudio(
     sceneId,
@@ -1722,6 +1738,11 @@ useEffect(() => {
 
   const time =
     formatGameTime(
+      game.world
+    )
+
+  const calendarDate =
+    formatGameDate(
       game.world
     )
 
@@ -7151,12 +7172,23 @@ window.alert(
   */
 
   return (
-    <main className="game-screen">
+    <main className={[
+      'game-screen',
+      videoMode ? 'is-video-mode' : '',
+      activeVideo ? 'has-city-video' : '',
+    ].filter(Boolean).join(' ')}>
+      <CityVideoPlayer
+        video={activeVideo}
+        onModeChange={setVideoMode}
+      />
       <div
         className={[
           'game-background',
           sceneVisual?.background
             ? 'has-scene-image'
+            : '',
+          activeVideo
+            ? 'has-city-video'
             : '',
         ]
           .filter(Boolean)
@@ -7196,6 +7228,10 @@ window.alert(
           <strong>
             {time}
           </strong>
+
+          <span className="game-calendar-date">
+            {calendarDate}
+          </span>
         </div>
 
         <div className="game-topbar-actions">
@@ -7215,19 +7251,6 @@ window.alert(
               DEV
             </button>
           )}
-
-          <button
-              type="button"
-              onClick={handleOpenTravel}
-              disabled={Boolean(
-                pendingTest ||
-                interactionBlocked ||
-                game?.flags
-                  ?.policeChase
-              )}
-            >
-              Viajar
-            </button>
 
           {availableDisciplineChoices.length > 0 && (
             <button type="button" onClick={handleOpenDisciplines} disabled={interactionBlocked}>

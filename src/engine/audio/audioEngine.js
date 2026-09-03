@@ -14,12 +14,12 @@ import {
 const STORAGE_KEY =
   'vampiro-sp:audio-settings'
 
-const SETTINGS_VERSION = 3
+const SETTINGS_VERSION = 4
 
 const DEFAULT_SETTINGS = {
   muted: false,
-  music: 0.05,
-  ambience: 0.5,
+  music: 0.6,
+  ambience: 0.25,
   sfx: 1,
 }
 
@@ -74,6 +74,10 @@ class AudioEngine {
     this.current = {
       music: null,
       ambience: null,
+    }
+    this.mixGains = {
+      music: 1,
+      ambience: 1,
     }
     this.desired = {
       music: null,
@@ -135,19 +139,19 @@ class AudioEngine {
   }
 
   unlock = async () => {
-    if (this.unlocked) {
-      return
-    }
-
-    this.unlocked = true
-    Howler.mute(this.settings.muted)
-
     if (
       Howler.ctx?.state ===
       'suspended'
     ) {
       await Howler.ctx.resume()
     }
+
+    if (this.unlocked) {
+      return
+    }
+
+    this.unlocked = true
+    Howler.mute(this.settings.muted)
 
     if (this.pendingSceneAudio) {
       const pending =
@@ -204,10 +208,39 @@ class AudioEngine {
     this.emit()
   }
 
+  setExternalMix({
+    music = 1,
+    ambience = 1,
+  } = {}) {
+    this.mixGains = {
+      music: clamp(music),
+      ambience: clamp(ambience),
+    }
+
+    for (const channel of [
+      'music',
+      'ambience',
+    ]) {
+      const active = this.current[channel]
+
+      if (active?.sound) {
+        active.sound.fade(
+          active.sound.volume(),
+          this.getVolume(
+            channel,
+            active.definition
+          ),
+          650
+        )
+      }
+    }
+  }
+
   getVolume(channel, definition) {
     return clamp(
       this.settings[channel] *
-      (definition.volume ?? 1)
+      (definition.volume ?? 1) *
+      (this.mixGains[channel] ?? 1)
     )
   }
 
@@ -281,6 +314,14 @@ class AudioEngine {
       },
       onplayerror: () => {
         this.unlocked = false
+        if (channel === 'music') {
+          this.playback = {
+            ...this.playback,
+            musicPaused: true,
+            musicStopped: false,
+          }
+          this.emit()
+        }
       },
       onend: () => {
         if (
@@ -315,6 +356,17 @@ class AudioEngine {
       this.current[channel]?.key ===
       key
     ) {
+      const active =
+        this.current[channel]
+
+      if (
+        channel === 'music' &&
+        !active.sound.playing() &&
+        !this.playback.musicPaused &&
+        !this.playback.musicStopped
+      ) {
+        await this.resumeMusic()
+      }
       return
     }
 
@@ -464,7 +516,10 @@ class AudioEngine {
       return
     }
 
-    if (this.playback.musicPaused) {
+    if (
+      this.playback.musicPaused ||
+      !active.sound.playing()
+    ) {
       active.sound.volume(
         this.getVolume(
           'music',
@@ -486,6 +541,44 @@ class AudioEngine {
     }
 
     this.emit()
+  }
+
+  async resumeMusic() {
+    await this.unlock()
+
+    const active = this.current.music
+
+    if (active?.sound) {
+      if (!active.sound.playing()) {
+        active.sound.volume(
+          this.getVolume(
+            'music',
+            active.definition
+          )
+        )
+        active.sound.play()
+      }
+
+      this.playback = {
+        musicKey: active.key,
+        musicPaused: false,
+        musicStopped: false,
+      }
+      this.emit()
+      return
+    }
+
+    const key =
+      this.desired.music ??
+      this.pendingSceneAudio?.music ??
+      MUSIC_PLAYLIST[0]
+
+    if (key) {
+      await this.playLoop(
+        'music',
+        key
+      )
+    }
   }
 
   stopMusic() {

@@ -7,6 +7,7 @@ import {
   advanceGameTime,
   advanceWorldTime,
   crossesSunrise,
+  formatCalendarDate,
   formatClock,
   isDaytime,
   minutesUntilSunrise,
@@ -160,6 +161,14 @@ export function formatGameTime(
   world
 ) {
   return formatClock(
+    world
+  )
+}
+
+export function formatGameDate(
+  world
+) {
+  return formatCalendarDate(
     world
   )
 }

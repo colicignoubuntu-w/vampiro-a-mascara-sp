@@ -130,5 +130,57 @@ export function getSceneAudio(
     return SCENE_AUDIO[sceneId]
   }
 
+  const locationId =
+    scene?.location?.id ?? ''
+
+  if (
+    locationId.includes('hospital') ||
+    sceneId === 'awakening'
+  ) {
+    return {
+      music: 'creepy_ambience_1',
+      ambience: 'hospital',
+    }
+  }
+
+  if (
+    locationId.includes('court') ||
+    sceneId?.startsWith('judgment_') ||
+    sceneId?.startsWith('court_')
+  ) {
+    return {
+      music: 'prince_dream',
+      ambience: 'court',
+    }
+  }
+
+  if (
+    locationId.includes('vesuvius')
+  ) {
+    return { music: 'vesuvius' }
+  }
+
+  if (
+    locationId.includes('asylum')
+  ) {
+    return { music: 'the_asylum' }
+  }
+
+  if (
+    locationId.includes('liberdade')
+  ) {
+    return {
+      music: 'chinatown_theme',
+      ambience: 'city_night',
+    }
+  }
+
+  if (scene) {
+    return {
+      music: 'downtown_theme',
+      ambience: 'city_night',
+    }
+  }
+
   return null
 }

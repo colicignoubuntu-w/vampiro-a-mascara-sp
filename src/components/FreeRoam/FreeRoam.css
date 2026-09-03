@@ -271,6 +271,38 @@
     1px solid #432b31;
 }
 
+.hunting-panel-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 16px;
+}
+
+.hunting-cancel {
+  padding: 7px 10px;
+
+  color: #a99d9d;
+
+  background: rgba(13, 9, 10, 0.8);
+
+  border: 1px solid #4b3439;
+
+  cursor: pointer;
+
+  font-size: 10px;
+}
+
+.hunting-cancel:hover {
+  color: #eee4e2;
+
+  background: #271317;
+
+  border-color: #8b3b48;
+}
+
 .hunting-kicker {
   color: #a53e4d;
 

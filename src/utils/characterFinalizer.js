@@ -229,6 +229,8 @@ export function buildFinalCharacter({
     history: [],
 
     world: {
+      day: 1,
+
       night: 1,
 
       hour: 23,

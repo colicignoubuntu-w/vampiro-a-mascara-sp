@@ -10,6 +10,30 @@
   background: #050506;
 }
 
+.game-screen.is-video-mode > :not(.city-video):not(.city-video-actions) {
+  opacity: 0.08;
+  pointer-events: none;
+  transition: opacity 350ms ease;
+}
+
+.game-screen.has-city-video .free-roam-screen {
+  background: transparent;
+}
+
+.game-screen.has-city-video .free-roam-background {
+  background:
+    radial-gradient(
+      circle at 60% 25%,
+      rgba(95, 30, 43, 0.16),
+      transparent 35%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(18, 11, 13, 0.42),
+      rgba(5, 4, 5, 0.28)
+    );
+}
+
 .game-background {
   position: fixed;
 
@@ -48,6 +72,22 @@
     var(--scene-background)
       center / cover
       no-repeat;
+}
+
+.game-background.has-city-video {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(2, 2, 3, 0.68) 0%,
+      rgba(3, 2, 3, 0.38) 42%,
+      rgba(3, 2, 3, 0.12) 100%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(2, 2, 3, 0.42),
+      transparent 55%
+    );
+  pointer-events: none;
 }
 
 .game-dark-overlay {
@@ -160,6 +200,21 @@
     serif;
 
   font-size: 21px;
+}
+
+.game-calendar-date {
+  color: #9a8d8e;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  font-size: 9px;
+
+  letter-spacing: 0.04em;
+
+  white-space: nowrap;
 }
 
 .game-topbar-actions {
