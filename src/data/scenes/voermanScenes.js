@@ -3,14 +3,18 @@
   Jeanette e Therese dividem a mesma cadeia: cada decisão tomada
   com uma delas altera o contexto e o tom da conversa com a outra.
 */
-
 const asylum = {
   id: 'asylum',
   name: 'Asylum',
   district: 'Consolação',
+
   visual: {
-    background:
-      '/images/asylum/asylum-interior.png',
+    backgroundVideo: {
+      provider: 'youtube',
+      id: '0Bj3wmjsVLg',
+      title: 'Asylum',
+      startSeconds: 0,
+    },
   },
 }
 const gallery = { id: 'gallery_noir', name: 'Galeria Noir', district: 'Jardins' }
@@ -52,10 +56,49 @@ const voermanScenes = {
     choices: [{ id: 'janette_hostile_name', text: '"Só diga seu nome."', nextScene: 'janette_hostile', timeMinutes: 2, flags: { annoyedJanette: true } }, { id: 'bertram_after_cold', text: '"Preciso encontrar Bertram Tung."', nextScene: 'janette_bertram', timeMinutes: 2 }],
   },
   janette_flirt: {
-    id: 'janette_flirt', chapter: 'ASYLUM', title: 'Curiosidade', location: asylum,
-    narration: ['Jeanette reduz a distância entre vocês até que a conversa pareça íntima e perigosamente pública.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Você não está nem um pouquinho curioso sobre mim? Vamos, não seja tímido. Diga a coisa certa e talvez eu abra minha alma para você. Ou alguma outra coisa.' },
-    choices: [{ id: 'ask_club_after_flirt', text: '"Esse lugar é seu?"', nextScene: 'janette_club', timeMinutes: 2 }, { id: 'ask_bertram_after_flirt', text: '"Preciso encontrar Bertram Tung."', nextScene: 'janette_bertram', timeMinutes: 2 }, { id: 'ask_therese_after_flirt', text: 'Perguntar por Therese', nextScene: 'janette_therese_tease', timeMinutes: 2 }],
+    id: 'janette_flirt',
+    chapter: 'ASYLUM',
+    title: 'Curiosidade',
+    location: asylum,
+
+    visual: {
+      characters: {
+        'Jeanette Voerman': {
+          src: '/images/npcs/janette-voerman/seductive.png',
+          alt: 'Jeanette Voerman',
+        },
+      },
+    },
+
+    narration: [
+      'Jeanette reduz a distância entre vocês até que a conversa pareça íntima e perigosamente pública.',
+    ],
+
+    dialogue: {
+      speaker: 'Jeanette Voerman',
+      text: 'Você não está nem um pouquinho curioso sobre mim? Vamos, não seja tímido. Diga a coisa certa e talvez eu abra minha alma para você. Ou alguma outra coisa.',
+    },
+
+    choices: [
+      {
+        id: 'ask_club_after_flirt',
+        text: '"Esse lugar é seu?"',
+        nextScene: 'janette_club',
+        timeMinutes: 2,
+      },
+      {
+        id: 'ask_bertram_after_flirt',
+        text: '"Preciso encontrar Bertram Tung."',
+        nextScene: 'janette_bertram',
+        timeMinutes: 2,
+      },
+      {
+        id: 'ask_therese_after_flirt',
+        text: 'Perguntar por Therese',
+        nextScene: 'janette_therese_tease',
+        timeMinutes: 2,
+      },
+    ],
   },
   janette_hostile: {
     id: 'janette_hostile', chapter: 'ASYLUM', title: 'Dentes Atrás do Sorriso', location: asylum,

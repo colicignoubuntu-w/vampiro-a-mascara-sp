@@ -631,13 +631,26 @@ const [
   const scene =
     scenes[sceneId]
 
-  const baseSceneVisual =
-    scene?.visual ??
-    scene?.location?.visual ??
-    getLocationVisual(
-      scene?.location?.id
-    ) ??
-    null
+ const locationVisual =
+  scene?.location?.visual ??
+  getLocationVisual(
+    scene?.location?.id
+  ) ??
+  null
+
+const baseSceneVisual =
+  locationVisual ||
+  scene?.visual
+    ? {
+        ...(locationVisual ?? {}),
+        ...(scene?.visual ?? {}),
+
+        characters: {
+          ...(locationVisual?.characters ?? {}),
+          ...(scene?.visual?.characters ?? {}),
+        },
+      }
+    : null
 
   const speakingCharacterVisual =
     baseSceneVisual?.characters?.[
@@ -677,9 +690,10 @@ const [
       : null
 
   const activeVideo =
-    explorationVisual?.video ??
-    sceneVisual?.video ??
-    null
+  sceneVisual?.backgroundVideo ??
+  explorationVisual?.video ??
+  sceneVisual?.video ??
+  null
 
   useSceneAudio(
     sceneId,
