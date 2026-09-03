@@ -56,6 +56,12 @@ import {
   isDaytime,
 } from '../../engine/time/timeEngine'
 import {
+  sleepThroughDay,
+} from '../../engine/vampire/daySleepEngine'
+import {
+  describeDayShelter,
+} from '../../data/world/dayShelters'
+import {
   audioEngine,
 } from '../../engine/audio/audioEngine'
 
@@ -454,10 +460,21 @@ export default function FreeRoam({
     }
 
     let updatedGame =
-      advanceTime(
-        game,
-        minutesToSunset,
-        'Esperando protegido até o anoitecer'
+      sleepThroughDay(
+        game
+      )
+
+    const shelterSuccesses =
+      Number(
+        game.flags
+          ?.sunlightShelterSuccesses ??
+        0
+      )
+
+    const shelterDescription =
+      describeDayShelter(
+        locationId,
+        shelterSuccesses
       )
 
     updatedGame = {
@@ -490,6 +507,8 @@ export default function FreeRoam({
           minutes:
             minutesToSunset,
 
+          shelterSuccesses,
+
           day:
             updatedGame.world
               ?.day ?? 1,
@@ -516,7 +535,10 @@ export default function FreeRoam({
     )
 
     setMessage(
-      'Você permanece escondido durante o dia. As horas passam lentamente. Quando o Sol finalmente desaparece, você pode voltar às ruas.'
+      updatedGame.vampireState
+        ?.torpor
+        ? `${shelterDescription} A noite chega, mas seu sangue esgotado não consegue despertá-lo. Você permanece imóvel em Torpor.`
+        : `${shelterDescription} Quando o Sol finalmente desaparece, um ponto de sangue é consumido para que seu corpo morto volte a se mover.`
     )
 
     onGameChange(

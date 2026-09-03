@@ -4106,6 +4106,14 @@ function handleTravelEventTestContinue() {
             ?.location
             ?.id ??
           null,
+
+        sunlightShelterSuccesses:
+          hazard.shelterSuccesses ??
+          0,
+
+        sunlightShelterAction:
+          hazard.shelterAction ??
+          null,
       },
 
       history: [
@@ -7767,6 +7775,10 @@ game.world?.location?.id ===
 
   onComputer={
     handleHavenComputer
+  }
+
+  onSleep={
+    handleHavenDaySleep
   }
 />
 ) : scene.id === 'free_roam' ? (

@@ -21,6 +21,7 @@ export default function Haven({
   onTravel,
   onComputer,
   onInvestigateDisappearances,
+  onSleep,
 }) {
   const [
     mapOpen,
@@ -321,6 +322,13 @@ export default function Haven({
               (+20 min)
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={onSleep}
+          >
+            Dormir até a próxima noite
+          </button>
 
           <button
             type="button"

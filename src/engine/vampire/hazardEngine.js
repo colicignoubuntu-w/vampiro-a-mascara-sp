@@ -111,6 +111,10 @@ export function createHazardState(
 
     escaped: false,
 
+    shelterSuccesses: 0,
+
+    shelterAction: null,
+
     destroyed: false,
 
     damagePerTurn:
@@ -423,6 +427,12 @@ export function performHazardAction({
         escaped:
           true,
 
+        shelterSuccesses:
+          result.roll.successes,
+
+        shelterAction:
+          'escape',
+
         log: [
           ...(hazard.log ??
             []),
@@ -488,6 +498,12 @@ export function performHazardAction({
 
         escaped:
           true,
+
+        shelterSuccesses:
+          result.roll.successes,
+
+        shelterAction:
+          'cover',
 
         log: [
           ...(hazard.log ??
