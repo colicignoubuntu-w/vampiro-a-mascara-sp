@@ -4,6 +4,11 @@
   z-index: 0;
   overflow: hidden;
   background: #020203;
+  isolation: isolate;
+}
+
+.city-video-frame {
+  z-index: 0;
 }
 
 .city-video-frame,
@@ -79,3 +84,36 @@
     display: none;
   }
 }
+
+/* ==========================================
+   VIDEO DE FUNDO — CAMADA VISUAL
+   ========================================== */
+
+.game-screen.has-city-video > .city-video {
+  z-index: 0;
+  background: transparent;
+}
+
+.game-screen.has-city-video > .city-video .city-video-frame {
+  opacity: 0.82;
+  filter: saturate(0.9) contrast(1.04);
+}
+
+.game-screen.has-city-video > .city-video .city-video-frame iframe {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ==========================================================
+   CITY VIDEO · ACIMA DO FUNDO / ATRÁS DA INTERFACE
+   ========================================================== */
+
+.game-screen.has-city-video > .city-video {
+  z-index: 1 !important;
+}
+
+.game-screen.has-city-video > .city-video .city-video-frame {
+  opacity: 0.72;
+}
+

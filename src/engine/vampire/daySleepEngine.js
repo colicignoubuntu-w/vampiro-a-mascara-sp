@@ -1,5 +1,8 @@
 import {
   resolveDayHealing,
+  healBashing,
+  healLethal,
+  getHealingState,
 } from './healingEngine'
 
 import {
@@ -278,6 +281,78 @@ export function sleepThroughDay(
       game
     )
 
+  // Tentativa automática de curar ferimentos leves/letais usando vitae
+  // durante o sono. Se não for possível curar tudo, o personagem entra
+  // em Torpor por ferimentos (salvo exceção de Humanidade 10).
+  try {
+    let healState = getHealingState(updatedGame)
+
+    // apenas se havia dano ao começar o sono
+    const hadDamage = healState.total > 0
+
+    // tenta curar enquanto houver sangue e ferimentos curáveis
+    while ((healState.canHealLethal || healState.canHealBashing) && healState.blood > 0) {
+      if (healState.canHealLethal) {
+        const res = healLethal(updatedGame)
+
+        if (res?.success) {
+          updatedGame = res.game
+        } else {
+          break
+        }
+      } else if (healState.canHealBashing) {
+        const res = healBashing(updatedGame)
+
+        if (res?.success) {
+          updatedGame = res.game
+        } else {
+          break
+        }
+      }
+
+      healState = getHealingState(updatedGame)
+    }
+
+    // se começou ferido e ainda resta dano após usar sangue, entra em Torpor
+    const stillDamaged = healState.total > 0
+
+    if (hadDamage && stillDamaged) {
+      const humanityLevel = Number(game?.humanity?.current ?? game?.humanity ?? 0)
+
+      // Para Humanidade 10 permitimos tentar gastar sangue extra para curar
+      // durante o despertar (já tentamos acima). Para Humanidade < 10,
+      // o personagem entra em Torpor por ferimentos.
+      // Marcamos também o período mínimo de repouso em noites.
+      const restNights = Math.max(0, 10 - humanityLevel)
+
+      updatedGame = {
+        ...updatedGame,
+
+        vampireState: {
+          ...(updatedGame.vampireState ?? {}),
+
+          torpor: true,
+
+          torporReason: 'wounds',
+
+          torporStartedNight:
+            (updatedGame.world?.night ?? 1) + 1,
+
+          torporRestRequiredNights: restNights,
+        },
+
+        flags: {
+          ...(updatedGame.flags ?? {}),
+
+          inTorpor: true,
+        },
+      }
+    }
+  } catch (err) {
+    // não falhar o sono por causa de um erro de cura
+    console.error('Erro ao aplicar cura automática durante o sono:', err)
+  }
+
   const currentNight =
     updatedGame.world
       ?.night ?? 1
@@ -383,22 +458,22 @@ export function sleepThroughDay(
     */
 
     vampireState: {
-      ...(updatedGame
-        .vampireState ??
-        {}),
+      ...(updatedGame.vampireState ?? {}),
 
+      // combina torpor por fome e por ferimentos tratados anteriormente
       torpor:
-        enteredTorpor,
+        Boolean(
+          (updatedGame.vampireState && updatedGame.vampireState.torpor) ||
+            enteredTorpor
+        ),
 
       torporReason:
-        enteredTorpor
-          ? 'blood_depletion'
-          : null,
+        (updatedGame.vampireState && updatedGame.vampireState.torporReason) ||
+        (enteredTorpor ? 'blood_depletion' : null),
 
       torporStartedNight:
-        enteredTorpor
-          ? currentNight + 1
-          : null,
+        (updatedGame.vampireState && updatedGame.vampireState.torporStartedNight) ||
+        (enteredTorpor ? currentNight + 1 : null),
     },
 
     world: {

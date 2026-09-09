@@ -102,6 +102,11 @@ const abilityGroups = {
   },
 }
 
+import {
+  canHealWithBlood,
+  healWithBlood,
+} from '../../engine/vampire/bloodHealingEngine'
+
 const defaultVirtues = {
   conscience: 1,
   selfControl: 1,
@@ -444,6 +449,210 @@ export default function CharacterSheetView({
         ? save.experience
         : 0
 
+  // DOWNLOAD_CHARACTER_SHEET_TXT_V5
+  function downloadCharacterSheetTxt() {
+    const dots = (value, max = 5) => {
+      const amount = Math.max(0, Math.min(max, Number(value) || 0))
+      return '●'.repeat(amount) + '○'.repeat(Math.max(0, max - amount))
+    }
+
+    const pad = (value, width) => {
+      const stringValue = String(value ?? '')
+      if (stringValue.length >= width) return stringValue.slice(0, width)
+      return stringValue + ' '.repeat(width - stringValue.length)
+    }
+
+    const field = (value, width) => {
+      const stringValue = String(value ?? '').trim()
+      return stringValue ? pad(stringValue, width) : '_'.repeat(width)
+    }
+
+    const divider = '═'.repeat(79)
+    const lines = []
+
+    lines.push(divider)
+    lines.push(`Nome: ${field(identity.name, 23)}      Natureza: ${field(identity.nature, 14)}  Geração: ${field(identity.generation, 6)}`)
+    lines.push(`Jogador: ${field(identity.player, 18)}      Comportamento: ${field(identity.demeanor, 9)}  Refúgio: ${field(identity.refuge, 6)}`)
+    lines.push(`Crônica: ${field(identity.chronicle || 'São Paulo', 18)}      Clã: ${field(identity.clan, 19)}  Conceito: ${field(identity.concept, 5)}`)
+    lines.push(divider)
+    lines.push('')
+    lines.push('                        ATRIBUTOS')
+    lines.push('')
+
+    const attributeEntries = Object.entries(attributeGroups)
+    const physical = attributeEntries[0]
+    const social = attributeEntries[1]
+    const mental = attributeEntries[2]
+
+    lines.push(`${pad(physical?.[1]?.label?.toUpperCase() || 'FÍSICOS', 29)}${pad(social?.[1]?.label?.toUpperCase() || 'SOCIAIS', 28)}${mental?.[1]?.label?.toUpperCase() || 'MENTAIS'}`)
+
+    const physicalItems = Object.entries(physical?.[1]?.items || {})
+    const socialItems = Object.entries(social?.[1]?.items || {})
+    const mentalItems = Object.entries(mental?.[1]?.items || {})
+
+    const attributeCell = (group, item) => {
+      if (!item) return ''
+      const [key, label] = item
+      const value = attributes[group?.[0]]?.[key] ?? 1
+      const dottedLabel = `${label}${'.'.repeat(Math.max(1, 13 - String(label).length))}`
+      return `${pad(dottedLabel, 14)} ${dots(value)}`
+    }
+
+    for (let index = 0; index < Math.max(physicalItems.length, socialItems.length, mentalItems.length); index += 1) {
+      lines.push(`${pad(attributeCell(physical, physicalItems[index]), 29)}${pad(attributeCell(social, socialItems[index]), 28)}${attributeCell(mental, mentalItems[index])}`)
+    }
+
+    lines.push('')
+    lines.push(divider)
+    lines.push('')
+    lines.push('                       HABILIDADES')
+    lines.push('')
+
+    const abilityEntries = Object.entries(abilityGroups)
+    const talents = abilityEntries[0]
+    const skills = abilityEntries[1]
+    const knowledges = abilityEntries[2]
+
+    lines.push(`${pad(talents?.[1]?.label?.toUpperCase() || 'TALENTOS', 29)}${pad(skills?.[1]?.label?.toUpperCase() || 'PERÍCIAS', 28)}${knowledges?.[1]?.label?.toUpperCase() || 'CONHECIMENTOS'}`)
+
+    const talentItems = Object.entries(talents?.[1]?.items || {})
+    const skillItems = Object.entries(skills?.[1]?.items || {})
+    const knowledgeItems = Object.entries(knowledges?.[1]?.items || {})
+
+    const abilityCell = (item) => {
+      if (!item) return ''
+      const [key, label] = item
+      const value = abilities[key] ?? 0
+      const dottedLabel = `${label}${'.'.repeat(Math.max(1, 13 - String(label).length))}`
+      return `${pad(dottedLabel, 14)} ${dots(value)}`
+    }
+
+    for (let index = 0; index < Math.max(talentItems.length, skillItems.length, knowledgeItems.length); index += 1) {
+      lines.push(`${pad(abilityCell(talentItems[index]), 29)}${pad(abilityCell(skillItems[index]), 28)}${abilityCell(knowledgeItems[index])}`)
+    }
+
+    lines.push('')
+    lines.push(divider)
+    lines.push('')
+    lines.push('                     VANTAGENS')
+    lines.push('')
+    lines.push(`${pad('ANTECEDENTES', 29)}${pad('DISCIPLINAS', 28)}VIRTUDES`)
+
+    const backgroundEntries = Object.entries(backgroundLabels)
+      .map(([key, label]) => ({ label, value: backgrounds[key] ?? 0 }))
+      .filter(item => item.value > 0)
+
+    const disciplineEntries = Object.entries(disciplines)
+      .map(([label, value]) => ({ label, value: Number(value) || 0 }))
+      .filter(item => item.value > 0)
+
+    const virtueRows = [
+      ['Consciência', virtues.conscience ?? 1],
+      ['Autocontrole', virtues.selfControl ?? 1],
+      ['Coragem', virtues.courage ?? 1],
+    ]
+
+    for (let index = 0; index < 6; index += 1) {
+      const background = backgroundEntries[index]
+      const discipline = disciplineEntries[index]
+      const virtue = virtueRows[index]
+
+      const backgroundText = background
+        ? `${pad(background.label, 15)} ${dots(background.value)}`
+        : `${'_'.repeat(15)} ${dots(0)}`
+
+      const disciplineText = discipline
+        ? `${pad(discipline.label, 14)} ${dots(discipline.value)}`
+        : `${'_'.repeat(14)} ${dots(0)}`
+
+      const virtueText = virtue
+        ? `${virtue[0]}${'.'.repeat(Math.max(1, 14 - virtue[0].length))} ${dots(virtue[1])}`
+        : ''
+
+      lines.push(`${pad(backgroundText, 29)}${pad(disciplineText, 28)}${virtueText}`)
+    }
+
+    lines.push('')
+    lines.push(divider)
+    lines.push('')
+    lines.push('Qualidades/Defeitos:')
+
+    const qualities = save.qualities || save.merits || save.meritsFlaws || ''
+
+    if (Array.isArray(qualities) && qualities.length) {
+      lines.push(
+        qualities
+          .map(item => typeof item === 'string' ? item : item?.name || item?.label || '')
+          .filter(Boolean)
+          .join(', ')
+      )
+    } else if (typeof qualities === 'string' && qualities.trim()) {
+      lines.push(qualities.trim())
+    } else {
+      lines.push('_'.repeat(62))
+    }
+
+    lines.push('')
+    lines.push(`Humanidade/Trilha:   ${dots(humanityCurrent, 10)}`)
+    lines.push('')
+    lines.push(`Força de Vontade:    ${dots(willpowerCurrent, 10)}`)
+    lines.push('')
+    lines.push('Pontos de Sangue:')
+
+    const bloodBoxes = Array.from(
+      { length: bloodMaximum },
+      (_, index) => index < bloodCurrent ? '■' : '☐'
+    )
+
+    lines.push(bloodBoxes.slice(0, 10).join(' '))
+    const secondBloodLine = bloodBoxes.slice(10).join(' ')
+    if (secondBloodLine) lines.push(secondBloodLine)
+
+    lines.push('')
+    lines.push('Vitalidade:')
+
+    const healthText = healthLevels.map((level, index) => {
+      const damaged = Boolean(level.damaged) || currentHealthLevel > index
+      const box = damaged ? '■' : '☐'
+      const penalty = getPenaltyText(level.penalty)
+      return `${box} ${level.label}${penalty || ''}`
+    })
+
+    lines.push(healthText.slice(0, 4).join('  '))
+    if (healthText.length > 4) {
+      lines.push(healthText.slice(4).join('  '))
+    }
+
+    lines.push('')
+    lines.push(`Experiência: ${experienceCurrent > 0 ? experienceCurrent : '__________'}`)
+
+    const content = lines.join('\n') + '\n'
+
+    const blob = new Blob(
+      [content],
+      { type: 'text/plain;charset=utf-8' }
+    )
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+
+    const safeName = String(identity.name || 'personagem')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9_-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .toLowerCase() || 'personagem'
+
+    link.href = url
+    link.download = `ficha-${safeName}.txt`
+
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <main className="character-sheet-view">
       {/* =========================
@@ -459,6 +668,16 @@ export default function CharacterSheetView({
           }
         >
           ← Voltar
+        </button>
+
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={
+            downloadCharacterSheetTxt
+          }
+        >
+          Baixar ficha (.txt)
         </button>
 
         <div>
@@ -973,7 +1192,45 @@ export default function CharacterSheetView({
                     (
                       currentHealthLevel >
                       index
+                    );
+
+              <div style={{ marginTop: 10 }}>
+                {(() => {
+                  // load current save and check permission
+                  const saved = safeParse(localStorage.getItem(GAME_SAVE_KEY))
+                  const permission = canHealWithBlood(saved)
+
+                  if (!permission.allowed) {
+                    return (
+                      <button disabled className="btn" title={permission.reason}>
+                        Gastar 1 sangue para curar (indisponível)
+                      </button>
                     )
+                  }
+
+                  return (
+                    <button
+                      className="btn"
+                      onClick={() => {
+                        const gameSave = safeParse(localStorage.getItem(GAME_SAVE_KEY))
+
+                        if (!gameSave) return
+
+                        const result = healWithBlood(gameSave)
+
+                        if (result?.success) {
+                          localStorage.setItem(GAME_SAVE_KEY, JSON.stringify(result.game))
+                          window.location.reload()
+                        } else {
+                          alert(result?.reason ?? 'Cura falhou')
+                        }
+                      }}
+                    >
+                      Gastar 1 sangue para curar 1 nível
+                    </button>
+                  )
+                })()}
+              </div>
 
                   return (
                     <span

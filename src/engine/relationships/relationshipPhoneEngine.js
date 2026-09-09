@@ -1211,34 +1211,45 @@ export function reconcileRelationshipPhone(
       .relationshipAppointments ??
     []
 
-  let next = {
-    ...game,
-
-    relationshipAppointments:
-      appointments.map(
-        appointment => {
-          if (
-            appointment.status ===
-              'scheduled' &&
-            now >
-              appointment.end
-          ) {
-            return {
-              ...appointment,
-              status:
-                'missed',
-            }
+  const updatedAppointments =
+    appointments.map(
+      appointment => {
+        if (
+          appointment.status ===
+            'scheduled' &&
+          now >
+            appointment.end
+        ) {
+          return {
+            ...appointment,
+            status: 'missed',
           }
-
-          return appointment
         }
-      ),
+
+        return appointment
+      }
+    )
+
+  const anyChanged =
+    updatedAppointments.some(
+      (a, i) => a !== appointments[i]
+    )
+
+  let next = game
+
+  if (anyChanged) {
+    next = {
+      ...game,
+
+      relationshipAppointments:
+        updatedAppointments,
+    }
   }
 
   // Mensagem automática apenas uma vez quando um encontro é perdido.
   for (
     const appointment
-    of next.relationshipAppointments
+    of (next.relationshipAppointments ?? [])
   ) {
     if (
       appointment.status !==

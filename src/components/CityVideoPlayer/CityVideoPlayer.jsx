@@ -82,17 +82,57 @@ export default function CityVideoPlayer({
           },
           events: {
             onReady: (event) => {
-              event.target.mute()
-              event.target.setVolume(0)
+              const preferredVolume =
+                Number(video.preferredVolume ?? 0)
+
               event.target.unloadModule?.(
                 'captions'
               )
-              event.target.playVideo()
+
               playerRef.current = event.target
+
               youtubeEngine.connect(
                 event.target,
                 video.title
               )
+
+              // Autoplay confiável: começa mudo.
+              event.target.mute()
+              event.target.setVolume(0)
+              event.target.playVideo()
+
+              if (
+                video.startUnmuted &&
+                preferredVolume > 0
+              ) {
+                const enableRequestedAudio = () => {
+                  youtubeEngine.setVolume(
+                    preferredVolume
+                  )
+                  event.target.unMute?.()
+                  event.target.setVolume?.(
+                    preferredVolume
+                  )
+                  event.target.playVideo?.()
+                }
+
+                // Tenta imediatamente. Alguns navegadores
+                // permitem se o usuário já interagiu antes.
+                enableRequestedAudio()
+
+                // Se o navegador bloquear áudio de autoplay,
+                // o primeiro clique/toque libera o som.
+                window.addEventListener(
+                  'pointerdown',
+                  enableRequestedAudio,
+                  { once: true }
+                )
+                window.addEventListener(
+                  'keydown',
+                  enableRequestedAudio,
+                  { once: true }
+                )
+              }
             },
             onStateChange: (event) => {
               youtubeEngine.setPlaying(
@@ -113,7 +153,12 @@ export default function CityVideoPlayer({
       player?.destroy?.()
       playerRef.current = null
     }
-  }, [video?.id, video?.title])
+  }, [
+    video?.id,
+    video?.title,
+    video?.preferredVolume,
+    video?.startUnmuted,
+  ])
 
   if (!video?.id) return null
 

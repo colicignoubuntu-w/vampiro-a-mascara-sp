@@ -932,23 +932,23 @@
 
   right:
     clamp(
-      18px,
-      5vw,
-      88px
+      22px,
+      4.2vw,
+      80px
     );
 
   bottom: 0;
 
   width:
     min(
-      42vw,
-      620px
+      39vw,
+      560px
     );
 
   height:
     calc(
       100dvh -
-      58px
+      52px
     );
 
   object-fit: contain;
@@ -959,20 +959,22 @@
   pointer-events: none;
   user-select: none;
 
+  opacity: 0.98;
+
   filter:
     drop-shadow(
-      -18px
+      -22px
       18px
-      38px
+      34px
       rgba(
         0,
         0,
         0,
-        0.72
+        0.75
       )
     )
-    saturate(0.92)
-    brightness(0.95);
+    saturate(1)
+    brightness(0.96);
 }
 
 .relationship-place-scene-content {
@@ -982,8 +984,8 @@
 
   width:
     min(
-      61vw,
-      900px
+      60vw,
+      860px
     );
 
   height: 100%;
@@ -999,12 +1001,12 @@
       10vh,
       116px
     )
-    0
+    18px
     70px
     clamp(
-      38px,
-      7vw,
-      118px
+      32px,
+      6vw,
+      110px
     );
 
   overflow-y: auto;
@@ -1042,14 +1044,14 @@
   display: grid;
   gap: 5px;
 
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 
 .relationship-place-scene-heading > span {
-  color: #a94454;
+  color: #b16572;
 
   font-size: 8px;
-  font-weight: 600;
+  font-weight: 700;
 
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -1060,7 +1062,7 @@
 
   max-width: 760px;
 
-  color: #f0e5e0;
+  color: #f4ebea;
 
   font-family:
     Georgia,
@@ -1069,19 +1071,30 @@
 
   font-size:
     clamp(
-      33px,
-      4.3vw,
-      61px
+      34px,
+      4.4vw,
+      62px
     );
 
   font-weight: 400;
   line-height: 1.04;
+
+  text-shadow:
+    0
+    1px
+    0
+    rgba(
+      0,
+      0,
+      0,
+      0.28
+    );
 }
 
 .relationship-place-scene-text {
   width:
     min(
-      760px,
+      720px,
       100%
     );
 
@@ -1425,6 +1438,586 @@
 }
 
 .relationship-place-scene-text .game-dialogue {
+  max-width: 700px;
+
   margin-top: 18px;
   margin-bottom: 24px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(31, 15, 17, 0.92),
+      rgba(17, 12, 13, 0.74)
+    );
+
+  border-left:
+    2px solid
+    #b85460;
+
+  box-shadow:
+    inset
+    0
+    1px
+    0
+    rgba(
+      255,
+      255,
+      255,
+      0.02
+    );
+}
+
+.relationship-place-scene-text .game-dialogue-speaker {
+  color: #d67b84;
+}
+
+/* ==========================================================
+   RELACIONAMENTOS · VIDEO VISIVEL AO FUNDO
+   ========================================================== */
+
+.game-screen.has-city-video
+.relationships-dialog.relationship-place.relationship-place-story-mode {
+  background: transparent !important;
+}
+
+.game-screen.has-city-video
+.relationships-dialog.relationship-place.relationship-place-story-mode::backdrop {
+  background: rgba(3, 2, 3, 0.28) !important;
+}
+
+.game-screen.has-city-video
+.relationship-place-scene {
+  background: transparent !important;
+}
+
+.game-screen.has-city-video
+.relationship-place-scene-background {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+.game-screen.has-city-video
+.relationship-place-scene-overlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(4, 3, 3, 0.72) 0%,
+      rgba(5, 4, 4, 0.48) 38%,
+      rgba(5, 4, 4, 0.20) 68%,
+      rgba(4, 3, 3, 0.05) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(3, 2, 3, 0.24),
+      transparent 50%
+    ) !important;
+}
+
+
+/* ==========================================================
+   RELACIONAMENTOS · YOUTUBE VISÍVEL ATRÁS DA CENA
+   ========================================================== */
+
+/* O próprio dialog não pode pintar a tela de preto. */
+.game-screen.has-city-video
+.relationships-dialog.relationship-place.relationship-place-story-mode {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* O backdrop do <dialog> fica na top layer do navegador. */
+.game-screen.has-city-video
+.relationships-dialog.relationship-place.relationship-place-story-mode::backdrop {
+  background: rgba(2, 1, 2, 0.18) !important;
+}
+
+/* A cena também tinha #050404 e escondia o vídeo. */
+.game-screen.has-city-video
+.relationships-dialog.relationship-place.relationship-place-story-mode
+.relationship-place-scene {
+  background: transparent !important;
+}
+
+/* Não usar imagem/fundo próprio enquanto existe vídeo. */
+.game-screen.has-city-video
+.relationships-dialog.relationship-place.relationship-place-story-mode
+.relationship-place-scene-background {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/*
+ * Mantém uma sombra leve na esquerda para leitura,
+ * mas deixa a maior parte do vídeo visível.
+ */
+.game-screen.has-city-video
+.relationships-dialog.relationship-place.relationship-place-story-mode
+.relationship-place-scene-overlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(3, 2, 3, 0.74) 0%,
+      rgba(3, 2, 3, 0.56) 32%,
+      rgba(3, 2, 3, 0.24) 54%,
+      rgba(3, 2, 3, 0.08) 72%,
+      transparent 100%
+    ) !important;
+}
+
+/* O conteúdo continua acima do vídeo. */
+.game-screen.has-city-video
+.relationships-dialog.relationship-place.relationship-place-story-mode
+.relationship-place-scene-content,
+.game-screen.has-city-video
+.relationships-dialog.relationship-place.relationship-place-story-mode
+.relationship-place-scene-top,
+.game-screen.has-city-video
+.relationships-dialog.relationship-place.relationship-place-story-mode
+.relationship-place-scene-character {
+  position: relative;
+  z-index: 4;
+}
+
+/* As caixas de diálogo continuam legíveis. */
+.game-screen.has-city-video
+.relationships-dialog.relationship-place.relationship-place-story-mode
+.relationship-place-scene-text .game-dialogue {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(31, 15, 17, 0.90),
+      rgba(17, 12, 13, 0.72)
+    ) !important;
+}
+
+/* ==========================================================
+   RELACIONAMENTOS + CITY VIDEO
+   O dialog usa createPortal(document.body), portanto não é
+   descendente de .game-screen.
+   ========================================================== */
+
+body:has(.game-screen.has-city-video)
+.relationships-dialog.relationship-place.relationship-place-story-mode {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body:has(.game-screen.has-city-video)
+.relationships-dialog.relationship-place.relationship-place-story-mode::backdrop {
+  background: rgba(0, 0, 0, 0.08) !important;
+}
+
+body:has(.game-screen.has-city-video)
+.relationships-dialog.relationship-place.relationship-place-story-mode
+.relationship-place-scene {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+body:has(.game-screen.has-city-video)
+.relationships-dialog.relationship-place.relationship-place-story-mode
+.relationship-place-scene-background {
+  background: transparent !important;
+  background-image: none !important;
+  filter: none !important;
+}
+
+body:has(.game-screen.has-city-video)
+.relationships-dialog.relationship-place.relationship-place-story-mode
+.relationship-place-scene-overlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(3, 2, 3, 0.76) 0%,
+      rgba(3, 2, 3, 0.55) 30%,
+      rgba(3, 2, 3, 0.25) 50%,
+      rgba(3, 2, 3, 0.08) 68%,
+      transparent 85%
+    ) !important;
+}
+
+
+/* ==========================================================
+   RELATIONSHIP SCENES · LEGIBILIDADE E PROPORÇÃO V1
+   Ajuste visual apenas. Não altera vídeo, lógica ou mecânicas.
+   ========================================================== */
+
+@media (min-width: 1100px) {
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-content {
+    width: min(58vw, 980px);
+    padding-left: clamp(52px, 6vw, 110px);
+    padding-right: clamp(34px, 3vw, 58px);
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-character {
+    right: clamp(12px, 2vw, 42px);
+    width: min(39vw, 650px);
+    max-height: 91vh;
+    object-fit: contain;
+    object-position: center bottom;
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text {
+    width: min(800px, 100%);
+    gap: 17px;
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text p {
+    font-size: clamp(16px, 1.02vw, 19px);
+    line-height: 1.72;
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-heading > span {
+    font-size: 10px;
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-heading h1 {
+    font-size: clamp(42px, 3.25vw, 62px);
+    line-height: 1.04;
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-narration {
+    margin-bottom: 25px;
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-dialogue {
+    max-width: 780px;
+    margin-top: 20px;
+    margin-bottom: 26px;
+    padding: 19px 24px;
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-dialogue-speaker {
+    font-size: 10px;
+    letter-spacing: 0.13em;
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-choices,
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-choice-list {
+    width: min(800px, 100%);
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-choices button,
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-choice-button,
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-discipline-button {
+    min-height: 58px;
+    padding: 15px 18px;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+}
+
+/* Telas médias: preserva espaço para personagem sem esmagar texto. */
+@media (min-width: 721px) and (max-width: 1099px) {
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-content {
+    width: 68vw;
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text p {
+    font-size: 15px;
+    line-height: 1.68;
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-character {
+    width: min(44vw, 520px);
+    right: -35px;
+  }
+}
+
+/* Mobile: texto em primeiro plano; personagem vira composição de fundo. */
+@media (max-width: 720px) {
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text p {
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-heading > span {
+    font-size: 9px;
+  }
+
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-choices button,
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-choice-button,
+  .relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-discipline-button {
+    min-height: 54px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+
+/* ==========================================================
+   CENAS DE RELACIONAMENTO · AJUSTE FORTE V2
+   Regras finais com prioridade alta para ficar VISÍVEL.
+   ========================================================== */
+
+@media (min-width: 1100px) {
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-content {
+    width: 64vw !important;
+    max-width: 1120px !important;
+    padding-left: clamp(70px, 6vw, 120px) !important;
+    padding-right: clamp(42px, 4vw, 78px) !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-character {
+    width: min(34vw, 580px) !important;
+    max-width: 580px !important;
+    max-height: 88vh !important;
+    right: clamp(8px, 1.5vw, 28px) !important;
+    bottom: 0 !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-heading {
+    margin-bottom: 28px !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-heading > span {
+    font-size: 11px !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-heading h1 {
+    font-size: clamp(52px, 4vw, 72px) !important;
+    line-height: 1 !important;
+    max-width: 900px !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text {
+    width: min(880px, 100%) !important;
+    max-width: 880px !important;
+    gap: 20px !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text p {
+    font-size: clamp(18px, 1.18vw, 22px) !important;
+    line-height: 1.72 !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-narration {
+    margin-bottom: 28px !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-dialogue {
+    width: 100% !important;
+    max-width: 850px !important;
+    padding: 22px 26px !important;
+    margin-top: 22px !important;
+    margin-bottom: 30px !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-dialogue-speaker {
+    font-size: 11px !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-choice-list,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-choices {
+    width: min(880px, 100%) !important;
+    max-width: 880px !important;
+    gap: 12px !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-choice-button,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-discipline-button,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-choices button {
+    min-height: 66px !important;
+    padding: 18px 20px !important;
+    font-size: 16px !important;
+    line-height: 1.45 !important;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1099px) {
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-content {
+    width: 76vw !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text p {
+    font-size: 17px !important;
+    line-height: 1.68 !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-character {
+    width: 40vw !important;
+    right: -45px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text p {
+    font-size: 16px !important;
+    line-height: 1.65 !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-choice-button,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-discipline-button,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-choices button {
+    font-size: 15px !important;
+    min-height: 58px !important;
+  }
+}
+
+/* ==========================================================
+   ESCOLHAS · FONTE GRANDE V3
+   ========================================================== */
+
+dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+.game-choice-list {
+  gap: 14px !important;
+}
+
+dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+.game-choice-button,
+dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+.game-discipline-button,
+dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+.relationship-place-scene-choices button {
+  font-size: 21px !important;
+  line-height: 1.4 !important;
+  font-weight: 500 !important;
+  min-height: 74px !important;
+  padding: 20px 24px !important;
+  letter-spacing: 0 !important;
+}
+
+dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+.game-choice-button *,
+dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+.game-discipline-button *,
+dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+.relationship-place-scene-choices button * {
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+@media (max-width: 980px) {
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-choice-button,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-discipline-button,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-choices button {
+    font-size: 18px !important;
+    min-height: 66px !important;
+    padding: 18px 20px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-choice-button,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .game-discipline-button,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-choices button {
+    font-size: 17px !important;
+    min-height: 62px !important;
+    padding: 16px 18px !important;
+  }
+}
+
+/* ==========================================================
+   CENAS DE RELACIONAMENTO · TEXTOS MAIORES V4
+   Narrativa + diálogos. Escolhas continuam com a V3.
+   ========================================================== */
+
+@media (min-width: 1100px) {
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text p,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-narration,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-dialogue p {
+    font-size: 21px !important;
+    line-height: 1.72 !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-dialogue-speaker {
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+    letter-spacing: 0.13em !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-heading > span {
+    font-size: 12px !important;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1099px) {
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text p,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-narration,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-dialogue p {
+    font-size: 19px !important;
+    line-height: 1.68 !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-dialogue-speaker {
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text p,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-narration,
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-dialogue p {
+    font-size: 17px !important;
+    line-height: 1.65 !important;
+  }
+
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode
+  .relationship-place-scene-text .game-dialogue-speaker {
+    font-size: 11px !important;
+  }
 }

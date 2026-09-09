@@ -48,6 +48,100 @@ import {
 
 import scenes from '../data/scenes'
 
+const CLARA_WAR_PIGS_VIDEO_NODES =
+  new Set([
+  'second_night',
+  'second2_clara_flirt_reply',
+  'second2_read_rafael_low',
+  'second2_read_rafael_high',
+  'second2_read_rafael_fail',
+  'second2_read_rafael_botch',
+  'second2_clara_introduces_tense',
+  'second2_clara_introduces',
+  'second2_rafael_backpedals',
+  'second2_rafael_joke_reply',
+  'second2_work_argument',
+  'second2_work_argument_tense',
+  'second2_work_notice_success',
+  'second2_rafael_direct',
+  'second2_livia_returns',
+  'second2_livia_returns_tense',
+  'second2_livia_lie_clean',
+  'second2_livia_lie_soft',
+  'second2_livia_lie_fail',
+  'second2_livia_lie_botch',
+  'second2_livia_lie_overexplained',
+  'second2_livia_evade_reply',
+  'second2_livia_confess_setup',
+  'second2_confess_not_ready_reply',
+  'second2_confess_death_lie',
+  'second2_confess_stop_reply',
+  'second2_livia_deflect',
+  'second2_show_rafael_question',
+  'second2_rafael_livia_long_reply',
+  'second2_rafael_question_reply',
+  'second2_rafael_why_reply',
+  'second2_rafael_worried_success',
+  'second2_rafael_worried_fail',
+  'second2_rafael_provoked',
+  'second2_rafael_camera_complaint',
+  'second2_rafael_disappears',
+  'second2_follow_success',
+  'second2_follow_fail',
+  'second2_follow_botch',
+  'second2_ask_clara_rafael',
+  'second2_rafael_returns_observe',
+  'second2_drug_read_low',
+  'second2_drug_read_high',
+  'second2_rafael_returns_tense',
+  'second2_rafael_returns',
+  'second2_touch_scene',
+  'second2_touch_scene_2',
+  'second2_touch_controlled',
+  'second2_touch_failure',
+  'second2_touch_botch',
+  'second2_touch_clara_handles',
+  'second2_confront_boundary',
+  'second2_boundary_respected',
+  'second2_boundary_explain_reply',
+  'second2_boundary_possessive',
+  'second2_intimidation_success',
+  'second2_intimidation_fail',
+  'second2_intimidation_botch',
+  'second2_confront_macho',
+  'second2_macho_near_fight',
+  'second2_beast_controlled',
+  'second2_beast_failure',
+  'second2_beast_botch',
+  'second2_check_clara',
+  'second2_check_clara_read_success',
+  'second2_clara_ok_reply_v2',
+  'second2_clara_pattern_reply_v2',
+  'second2_clara_photos_reply_v2',
+  'second2_check_clara_opens',
+  'second2_check_read_success',
+  'second2_check_clara_defensive',
+  'second2_check_clara_defensive_soft',
+  'second2_check_breakup_bad',
+  'second2_later_camera_argument',
+  'second2_argument_overheard_v2',
+  'second2_argument_obfuscate_v2',
+  'second2_argument_body_success_v2',
+  'second2_argument_stealth_fail_v2',
+  'second2_argument_stealth_botch_v2',
+  'second2_later_camera_argument_tense',
+  'second2_after_argument_clara',
+  ])
+
+const CLARA_WAR_PIGS_VIDEO = {
+  provider: 'youtube',
+  id: 'OKdnAQm2DoI',
+  title: 'Black Sabbath — War Pigs',
+  preferredVolume: 90,
+  startUnmuted: true,
+}
+
+
 
 import {
   getChoiceTest,
@@ -707,7 +801,21 @@ const baseSceneVisual =
         )
       : null
 
+  const claraRelationshipNode =
+    game?.relationships?.clara?.node
+
+  const claraWarPigsVideo =
+    game?.world?.location?.id ===
+      'ultimo_gole' &&
+    (
+      claraRelationshipNode === 'second_night' ||
+      String(claraRelationshipNode ?? '').startsWith('second2_')
+    )
+      ? CLARA_WAR_PIGS_VIDEO
+      : null
+
   const activeVideo =
+  claraWarPigsVideo ??
   sceneVisual?.backgroundVideo ??
   explorationVisual?.video ??
   sceneVisual?.video ??

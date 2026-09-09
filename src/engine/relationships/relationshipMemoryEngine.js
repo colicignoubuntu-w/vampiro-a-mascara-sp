@@ -1187,12 +1187,7 @@ export function reconcileRelationshipMemories(
   if (
     elapsedDays < 0.25
   ) {
-    return {
-      ...input,
-      relationshipMemoryClock:
-        input.relationshipMemoryClock ??
-        now,
-    }
+    return input
   }
 
   let game =

@@ -318,6 +318,241 @@ function VenueOverview({
   )
 }
 
+
+const RELATIONSHIP_DIALOGUE_DEFAULT_SPEAKERS = {
+  second_night: 'Clara',
+  second2_clara_flirt_reply: 'Clara',
+  second2_rafael_direct: 'Rafael',
+  second2_livia_returns: 'Clara',
+  second2_livia_returns_tense: 'Clara',
+  second2_livia_lie_clean: 'Clara',
+  second2_livia_lie_soft: 'Clara',
+  second2_livia_lie_fail: 'Clara',
+  second2_livia_lie_botch: 'Clara',
+  second2_livia_lie_overexplained: 'Clara',
+  second2_livia_evade_reply: 'Clara',
+  second2_livia_confess_setup: 'Clara',
+  second2_confess_not_ready_reply: 'Clara',
+  second2_confess_death_lie: 'Clara',
+  second2_confess_stop_reply: 'Clara',
+  second2_livia_deflect: 'Clara',
+  second2_rafael_livia_long_reply: 'Rafael',
+  second2_rafael_why_reply: 'Rafael',
+  second2_rafael_worried_success: 'Rafael',
+  second2_rafael_worried_fail: 'Rafael',
+  second2_rafael_provoked: 'Rafael',
+  second2_rafael_camera_complaint: 'Rafael',
+  second2_follow_botch: 'Rafael',
+  second2_ask_clara_rafael: 'Clara',
+  second2_boundary_respected: 'Clara',
+  second2_boundary_explain_reply: 'Clara',
+  second2_boundary_possessive: 'Clara',
+  second2_intimidation_success: 'Clara',
+  second2_intimidation_botch: 'Clara',
+  second2_confront_macho: 'Clara',
+  second2_check_clara_opens: 'Clara',
+  second2_check_clara_defensive: 'Clara',
+  second2_check_clara_defensive_soft: 'Clara',
+  second2_check_breakup_bad: 'Clara',
+  second2_later_camera_argument_tense: 'Clara',
+  second2_after_argument_clara: 'Clara',
+  second2_bar_closing_tense: 'Clara',
+  second2_uber_reply: 'Clara',
+  second2_offer_clara_only: 'Clara',
+  second2_goodbye_tense: 'Clara',
+  second_clara_invites: 'Clara',
+  second_work_talk: 'Clara',
+  second_rafael: 'Clara',
+  second_safety_seed: 'Clara',
+  second_personal: 'Clara',
+  second_connection: 'Clara',
+}
+
+const RELATIONSHIP_DIALOGUE_SPEAKER_ORDER = {
+  second2_clara_introduces_tense: ['Clara', 'Clara', 'Rafael'],
+  second2_clara_introduces: ['Clara', 'Clara', 'Rafael', 'Rafael'],
+  second2_rafael_backpedals: ['Rafael', 'Clara', 'Rafael'],
+  second2_rafael_joke_reply: ['Rafael', 'Clara', 'Clara'],
+  second2_work_argument: ['Clara', 'Rafael', 'Clara', 'Rafael', 'Clara'],
+  second2_work_argument_tense: ['Clara', 'Rafael', 'Clara'],
+  second2_confront_boundary: ['Rafael', 'Clara', 'Rafael', 'Clara'],
+  second2_intimidation_fail: ['Rafael', 'Clara'],
+  second2_macho_near_fight: ['Clara', 'Rafael', 'Clara'],
+  second2_argument_overheard_v2: ['Rafael', 'Clara', 'Rafael', 'Clara', 'Rafael', 'Clara', 'Rafael', 'Clara'],
+  second2_argument_obfuscate_v2: ['Rafael', 'Clara', 'Rafael', 'Clara', 'Rafael', 'Clara'],
+  second2_clara_takes_keys: ['Clara', 'Rafael', 'Clara'],
+  second2_uber_both: ['Protagonista', 'Clara'],
+}
+
+const RELATIONSHIP_DIALOGUE_NAMES = [
+  'Clara',
+  'Rafael',
+  'Caroline',
+  'Íris',
+  'Iris',
+  'Caio',
+  'Duda',
+]
+
+function relationshipDialogueSpeakerFromContext(before, after) {
+  const beforeText = String(before ?? '')
+  const afterText = String(after ?? '')
+
+  let best = null
+  let bestIndex = -1
+
+  for (const name of RELATIONSHIP_DIALOGUE_NAMES) {
+    const index = beforeText.lastIndexOf(name)
+
+    if (index > bestIndex) {
+      best = name === 'Iris' ? 'Íris' : name
+      bestIndex = index
+    }
+  }
+
+  if (best) {
+    return best
+  }
+
+  for (const name of RELATIONSHIP_DIALOGUE_NAMES) {
+    if (afterText.trimStart().startsWith(name)) {
+      return name === 'Iris' ? 'Íris' : name
+    }
+  }
+
+  return null
+}
+
+function relationshipLegacyTextBlocks(texts, node) {
+  const fallbackOrder =
+    RELATIONSHIP_DIALOGUE_SPEAKER_ORDER[node] ?? []
+
+  const defaultSpeaker =
+    RELATIONSHIP_DIALOGUE_DEFAULT_SPEAKERS[node] ??
+    (
+      String(node ?? '').startsWith('first_')
+        ? 'Clara'
+        : null
+    )
+
+  let quoteIndex = 0
+  const blocks = []
+
+  for (const raw of texts ?? []) {
+    const text = String(raw ?? '')
+    const matches = [...text.matchAll(/“([^”]+)”/g)]
+
+    if (!matches.length) {
+      blocks.push({
+        type: 'narration',
+        text,
+      })
+      continue
+    }
+
+    let cursor = 0
+    let convertedAny = false
+
+    for (const match of matches) {
+      const matchIndex = match.index ?? 0
+      const before = text.slice(cursor, matchIndex)
+      const after = text.slice(matchIndex + match[0].length)
+
+      const contextualSpeaker =
+        relationshipDialogueSpeakerFromContext(
+          text.slice(0, matchIndex),
+          after
+        )
+
+      const speaker =
+        contextualSpeaker ??
+        fallbackOrder[quoteIndex] ??
+        defaultSpeaker
+
+      quoteIndex += 1
+
+      if (!speaker) {
+        continue
+      }
+
+      if (before.trim()) {
+        blocks.push({
+          type: 'narration',
+          text: before.trim(),
+        })
+      }
+
+      blocks.push({
+        type: 'dialogue',
+        speaker,
+        text: match[1],
+      })
+
+      cursor = matchIndex + match[0].length
+      convertedAny = true
+    }
+
+    if (!convertedAny) {
+      blocks.push({
+        type: 'narration',
+        text,
+      })
+      continue
+    }
+
+    const tail = text.slice(cursor).trim()
+
+    if (tail) {
+      blocks.push({
+        type: 'narration',
+        text: tail,
+      })
+    }
+  }
+
+  return blocks
+}
+
+function relationshipScenePresentationBlocks(scene, node) {
+  if (Array.isArray(scene?.blocks)) {
+    return scene.blocks
+  }
+
+  const texts =
+    scene?.narration ??
+    scene?.text ??
+    []
+
+  const blocks =
+    relationshipLegacyTextBlocks(texts, node)
+
+  if (scene?.dialogue) {
+    const dialogueSpeaker =
+      String(scene.dialogue.speaker ?? '').trim()
+
+    const dialogueText =
+      String(scene.dialogue.text ?? '').trim()
+
+    const alreadyPresent =
+      blocks.some(
+        block =>
+          block?.type === 'dialogue' &&
+          String(block.speaker ?? '').trim() === dialogueSpeaker &&
+          String(block.text ?? '').trim() === dialogueText
+      )
+
+    if (!alreadyPresent && dialogueText) {
+      blocks.push({
+        type: 'dialogue',
+        speaker: dialogueSpeaker,
+        text: dialogueText,
+      })
+    }
+  }
+
+  return blocks
+}
+
 function VenueScene({
   game,
   venue,
@@ -342,37 +577,222 @@ function VenueScene({
       scene
     )
 
-  const storyBlocks = Array.isArray(scene.blocks)
-    ? scene.blocks
-    : [
-        ...(scene.narration ?? scene.text ?? []).map(text => ({
-          type: 'narration',
-          text,
-        })),
-        ...(scene.dialogue
-          ? [{
-              type: 'dialogue',
-              speaker: scene.dialogue.speaker,
-              text: scene.dialogue.text,
-            }]
-          : []),
-      ]
+  const sceneBlocks =
+    relationshipScenePresentationBlocks(
+      scene,
+      state?.node
+    )
 
-  const dialogueSpeakers = storyBlocks
-    .filter(block => block?.type === 'dialogue')
-    .map(block => String(block.speaker ?? '').trim())
+  const dialogueSpeakers = [
+    ...new Set(
+      sceneBlocks
+        .filter(
+          block =>
+            block?.type ===
+            'dialogue'
+        )
+        .map(
+          block =>
+            block.speaker
+        )
+        .filter(Boolean)
+    ),
+  ]
 
-  const hasOtherSpeaker = dialogueSpeakers.some(
-    speaker =>
-      speaker &&
-      speaker !== 'Clara' &&
-      speaker !== 'Clara Azevedo' &&
-      speaker !== npc.name
-  )
+  // CLARA_DYNAMIC_PORTRAIT_V1
+  const claraPortraits = {
+    normal: '/images/npcs/clara/portrait.jpg',
+    serious: '/images/npcs/clara/clara-seria.png',
+    angry: '/images/npcs/clara/clara-brava.png',
+    jealousy: '/images/npcs/clara/clara-ciumes.png',
+    sad: '/images/npcs/clara/clara-chorando.png',
+    fear: '/images/npcs/clara/clara-medo.png',
+    disgust: '/images/npcs/clara/clara-nojo.png',
+    smiling: '/images/npcs/clara/clara-sorrindo.png',
+    argument: '/images/npcs/clara/clara-discussao.png',
+  }
 
+  const claraMoodAliases = {
+    normal: 'normal',
+    neutral: 'normal',
+    serious: 'serious',
+    seria: 'serious',
+    angry: 'angry',
+    brava: 'angry',
+    anger: 'angry',
+    jealousy: 'jealousy',
+    jealous: 'jealousy',
+    ciumes: 'jealousy',
+    ciúmes: 'jealousy',
+    sad: 'sad',
+    triste: 'sad',
+    crying: 'sad',
+    chorando: 'sad',
+    fear: 'fear',
+    medo: 'fear',
+    disgust: 'disgust',
+    nojo: 'disgust',
+    smiling: 'smiling',
+    smile: 'smiling',
+    sorrindo: 'smiling',
+    argument: 'argument',
+    discussao: 'argument',
+    discussão: 'argument',
+  }
+
+  const explicitClaraMood =
+    claraMoodAliases[
+      String(
+        scene?.portraitMood ??
+        ''
+      )
+        .trim()
+        .toLowerCase()
+    ]
+
+  const explicitScenePortrait =
+    String(
+      scene?.portrait ??
+      ''
+    )
+
+  const emotionalScenePortrait =
+    npc?.id === 'clara' &&
+    /\/clara-(?:seria|brava|ciumes|chorando|medo|nojo|sorrindo|discussao)(?:-sem-fundo)?\.png$/i
+      .test(
+        explicitScenePortrait
+      )
+      ? explicitScenePortrait
+      : null
+
+  const legacyRelationship =
+    state?.metrics ??
+    {}
+
+  const relationshipEmotion =
+    state?.relationshipMetrics ??
+    {}
+
+  const claraFlags =
+    state?.flags ??
+    {}
+
+  const legacyTrust =
+    Number(
+      legacyRelationship.trust ??
+      0
+    )
+
+  const legacyRespect =
+    Number(
+      legacyRelationship.respect ??
+      0
+    )
+
+  const modernTrust =
+    Number(
+      relationshipEmotion.trust ??
+      0
+    )
+
+  const happiness =
+    Number(
+      relationshipEmotion.happiness ??
+      0
+    )
+
+  const anger =
+    Number(
+      relationshipEmotion.anger ??
+      0
+    )
+
+  const fear =
+    Number(
+      relationshipEmotion.fear ??
+      0
+    )
+
+  const badRelationshipStatus =
+    state?.status === 'hostile' ||
+    state?.status === 'enemy'
+
+  const hasSeriousClaraFlag =
+    Boolean(
+      claraFlags.disrespectedClaraBoundary ||
+      claraFlags.pushedFirstBoundary ||
+      claraFlags.promisedViolence ||
+      claraFlags.possessive ||
+      claraFlags.guardedWithClara
+    )
+
+  let automaticClaraMood =
+    'normal'
+
+  if (
+    fear >= 55
+  ) {
+    automaticClaraMood =
+      'fear'
+  } else if (
+    anger >= 60
+  ) {
+    automaticClaraMood =
+      'angry'
+  } else if (
+    happiness <= -50
+  ) {
+    automaticClaraMood =
+      'sad'
+  } else if (
+    badRelationshipStatus ||
+    legacyTrust <= -2 ||
+    legacyRespect <= -2 ||
+    modernTrust <= -20 ||
+    anger >= 25 ||
+    fear >= 25 ||
+    happiness <= -20
+  ) {
+    automaticClaraMood =
+      'serious'
+  } else if (
+    happiness >= 45 &&
+    modernTrust >= 30 &&
+    legacyTrust >= 2
+  ) {
+    automaticClaraMood =
+      'smiling'
+  }
+
+  const claraPortrait =
+    explicitClaraMood
+      ? claraPortraits[
+          explicitClaraMood
+        ]
+      : emotionalScenePortrait ??
+        claraPortraits[
+          automaticClaraMood
+        ]
+
+  const effectiveScenePortrait =
+    npc?.id === 'clara'
+      ? claraPortrait
+      : (
+          scene?.portrait ??
+          npc?.portrait
+        )
+
+
+  // CLARA_ALWAYS_VISIBLE_V4
+  // Se esta é uma cena da Clara, o retrato dela permanece na tela
+  // mesmo quando Rafael, Íris, Caroline ou outro personagem fala.
   const showScenePortrait =
-    scene.showPortrait !== false &&
-    !hasOtherSpeaker
+    npc?.id === 'clara'
+      ? true
+      : (
+          scene.showPortrait !== false &&
+          dialogueSpeakers.length <= 1
+        )
 
   return (
     <section
@@ -416,17 +836,11 @@ function VenueScene({
         </button>
       </header>
 
-      {showScenePortrait && (scene.portrait ?? npc.portrait) && (
+      {showScenePortrait && effectiveScenePortrait && (
         <img
-          key={
-            scene.portrait ??
-            npc.portrait
-          }
+          key={effectiveScenePortrait}
           className="relationship-place-scene-character"
-          src={
-            scene.portrait ??
-            npc.portrait
-          }
+          src={effectiveScenePortrait}
           alt=""
           onError={event => {
             event.currentTarget.hidden =
@@ -447,35 +861,34 @@ function VenueScene({
         </div>
 
         <div className="relationship-place-scene-text">
-          {storyBlocks.map((block, index) => {
-            if (block?.type === 'dialogue') {
+          {sceneBlocks.map(
+            (block, index) => {
+              if (block?.type === 'dialogue') {
+                return (
+                  <div
+                    className="game-dialogue"
+                    key={`${state.node}:dialogue:${index}`}
+                  >
+                    <span className="game-dialogue-speaker">
+                      {block.speaker}
+                    </span>
+
+                    <p>
+                      {block.text}
+                    </p>
+                  </div>
+                )
+              }
+
               return (
-                <div
-                  className="game-dialogue"
-                  key={`${state.node}:dialogue:${index}`}
+                <p
+                  key={`${state.node}:narration:${index}`}
                 >
-                  <span className="game-dialogue-speaker">
-                    {block.speaker}
-                  </span>
-
-                  <p>
-                    {block.text}
-                  </p>
-                </div>
-              )
-            }
-
-            return (
-              <div
-                className="game-narration"
-                key={`${state.node}:narration:${index}`}
-              >
-                <p>
                   {block?.text ?? ''}
                 </p>
-              </div>
-            )
-          })}
+              )
+            }
+          )}
         </div>
 
         {pendingTest ? (
@@ -605,8 +1018,7 @@ export default function RelationshipPlaces({
     useRef(
       null
     )
-
-  const processedDevWarp =
+const processedDevWarp =
     useRef(
       null
     )
@@ -687,6 +1099,27 @@ export default function RelationshipPlaces({
       state &&
       scene
     )
+
+
+  // RELATIONSHIP_BODY_CLASS_MAIN_V4
+  useEffect(() => {
+    const shouldHideUnderlyingGame =
+      Boolean(visible && showScene)
+
+    document.body.classList.toggle(
+      'relationship-place-dialog-open',
+      shouldHideUnderlyingGame
+    )
+
+    return () => {
+      document.body.classList.remove(
+        'relationship-place-dialog-open'
+      )
+    }
+  }, [visible, showScene])
+
+
+  
 
   useEffect(
     () => {
@@ -785,12 +1218,6 @@ export default function RelationshipPlaces({
       visible,
     ]
   )
-
-  if (
-    !venues.length
-  ) {
-    return null
-  }
 
   useEffect(
     () => {
@@ -1062,6 +1489,12 @@ export default function RelationshipPlaces({
     setError(
       ''
     )
+  }
+
+  if (
+    !venues.length
+  ) {
+    return null
   }
 
   return (

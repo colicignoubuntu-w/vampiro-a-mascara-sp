@@ -847,7 +847,8 @@ export function performRelationshipChoice(
   input,
   npcId,
   nodeId,
-  choiceId
+  choiceId,
+  roll = null
 ) {
   let game =
     reconcileRelationships(
@@ -863,8 +864,31 @@ export function performRelationshipChoice(
     )
 
   if (choice.test) {
-    throw new Error(
-      'Esta escolha exige um teste.'
+    const prepared = prepareRelationshipTest(
+      input,
+      npcId,
+      nodeId,
+      choiceId
+    )
+
+    if (!prepared) {
+      throw new Error('Falha ao preparar o teste de relação.')
+    }
+
+    let resultRoll = null
+
+    if (typeof roll === 'function') {
+      resultRoll = roll(prepared)
+    } else if (roll && typeof roll === 'object') {
+      resultRoll = roll
+    } else {
+      resultRoll = rollRelationshipTest(game, prepared)
+    }
+
+    return resolveRelationshipTest(
+      input,
+      prepared,
+      resultRoll
     )
   }
 

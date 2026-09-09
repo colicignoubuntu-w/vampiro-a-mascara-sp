@@ -1,3 +1,4 @@
+// CLARA_RAFEL_MOODS_V1
 export default {
   id: 'clara',
   name: 'Clara Azevedo',
@@ -14,12 +15,19 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'O Último Gole está cheio, mas ainda não chegou ao ponto em que conversar exige gritar. A banda termina a passagem de som enquanto as mesas próximas ao palco começam a ocupar.',
-        'Uma garota ruiva circula entre o palco e a grade com uma câmera pendurada no pescoço. Você reconhece o rosto de outras noites, embora nunca tenha falado com ela.',
-        'Ela fotografa o baterista, confere a imagem no visor e atravessa até o balcão. Caroline olha a fotografia que ela mostra, comenta alguma coisa e as duas riem.',
-        'Pouco depois, a fotógrafa volta para perto do palco.',
+
+      narration: [
+        `O Último Gole já está cheio, embora ainda não tenha chegado ao ponto em que conversar exige gritar. Conversas se misturam ao som de copos no balcão, cadeiras arrastando pelo piso e aos últimos acordes da passagem de som. Perto do palco, técnicos recolhem cabos enquanto algumas pessoas disputam as mesas com melhor visão.`,
+
+        `Entre o palco e a grade, uma garota ruiva se movimenta com uma câmera pendurada no pescoço. Você reconhece o rosto. Já a viu aqui em outras noites, quase sempre trabalhando, embora nunca tenham trocado mais do que talvez um olhar perdido no meio da multidão.`,
+
+        `Ela se aproxima da lateral do palco, ergue a câmera e espera. O baterista testa alguma coisa; ela acompanha o movimento pelo visor e dispara algumas vezes. Só depois abaixa a câmera para conferir as fotografias, passando rapidamente pelas imagens com o polegar antes de escolher uma delas.`,
+
+        `Por alguns minutos, você a acompanha apenas de longe. Ela atravessa o salão até o balcão e mostra a fotografia para Caroline. A reação parece imediata: Caroline comenta alguma coisa que você não consegue ouvir, a fotógrafa responde e as duas riem. Logo depois, ela ajeita a câmera contra o corpo e volta para perto do palco.`,
+
+        `Agora você está perto o bastante para falar com ela.`
       ],
+
       choices: [
         {
           id: 'ask_band_time',
@@ -58,11 +66,17 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'Você deixa a fotógrafa trabalhar.',
-        'Depois de alguns minutos ela abaixa a câmera, encosta perto da lateral do palco e começa a conferir as últimas fotos no visor.',
-        'Agora existe uma pausa longa o bastante para falar sem precisar disputar sua atenção com o trabalho.',
+
+      narration: [
+        `Você decide não interrompê-la. Clara continua trabalhando como se o resto do salão existisse apenas nas margens do visor: acompanha a movimentação perto do palco, muda de posição duas ou três vezes e espera por pequenos instantes que só parecem importantes para ela.`,
+
+        `A passagem de som se arrasta por mais alguns minutos. Um guitarrista repete o mesmo trecho, alguém no palco pede mais retorno e, perto do balcão, uma nova rodada de copos ocupa as mãos de quem já desistiu de esperar pontualidade.`,
+
+        `Clara finalmente abaixa a câmera. Ela se afasta alguns passos da grade e encosta perto da lateral do palco, onde a luz é mais fraca. Com o polegar, começa a passar pelas fotografias no visor, apagando uma, ampliando outra, voltando para comparar duas imagens quase idênticas.`,
+
+        `Pela primeira vez desde que você a notou, ela não parece estar correndo para algum lugar. Há uma pausa real no trabalho, longa o bastante para você se aproximar sem disputar a atenção dela com a câmera, o palco ou alguém da produção.`
       ],
+
       choices: [
         {
           id: 'go',
@@ -81,13 +95,34 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'A fotógrafa olha para o palco antes de responder.',
-        '“Era pra começar às onze.”',
-        'Ela confere a hora.',
-        '“Então... meia-noite, provavelmente.”',
-        'O canto da boca dela sobe por um instante.',
-        '“Banda de bar.”',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'A fotógrafa olha para o palco antes de responder.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Era pra começar às onze.',
+        },
+        {
+          type: 'narration',
+          text: 'Ela confere a hora.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Então... meia-noite, provavelmente.',
+        },
+        {
+          type: 'narration',
+          text: 'O canto da boca dela sobe por um instante.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Banda de bar.',
+        },
       ],
       choices: [
         {
@@ -113,11 +148,25 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'Ela segura a câmera pelo corpo, afastando a alça do cabelo.',
-        '“Quase sempre que tem show.”',
-        'Ela olha rapidamente para o palco.',
-        '“Às vezes porque me pagam. Às vezes porque eu aceitei trabalhar por cerveja e más decisões.”',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Ela segura a câmera pelo corpo, afastando a alça do cabelo.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Quase sempre que tem show.',
+        },
+        {
+          type: 'narration',
+          text: 'Ela olha rapidamente para o palco.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Às vezes porque me pagam. Às vezes porque eu aceitei trabalhar por cerveja e más decisões.',
+        },
       ],
       choices: [
         {
@@ -136,11 +185,25 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'Ela olha melhor para você.',
-        '“Eu também acho.”',
-        'Por um instante, parece procurar a lembrança certa.',
-        '“Espera.”',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Ela olha melhor para você.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Eu também acho.',
+        },
+        {
+          type: 'narration',
+          text: 'Por um instante, parece procurar a lembrança certa.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Espera.',
+        },
       ],
       choices: [
         {
@@ -182,12 +245,29 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        '“Clara.”',
-        'Você diz seu nome.',
-        'Ela o repete uma vez.',
-        '“Prazer.”',
-        'Então volta a observá-lo por um instante, como se o nome tivesse ajudado a encaixar alguma lembrança.',
+      blocks: [
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Clara.',
+        },
+        {
+          type: 'narration',
+          text: 'Você diz seu nome.',
+        },
+        {
+          type: 'narration',
+          text: 'Ela o repete uma vez.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Prazer.',
+        },
+        {
+          type: 'narration',
+          text: 'Então volta a observar você por um instante, como se o nome tivesse ajudado a encaixar alguma lembrança.',
+        },
       ],
       choices: [
         {
@@ -206,12 +286,30 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        '“Você não é amigo da Lívia?”',
-        'Clara aponta discretamente para uma das mesas.',
-        '“Eu sabia que já tinha te visto. Vocês vinham juntos às vezes.”',
-        'Ela pensa um segundo.',
-        '“Eu achava que vocês namoravam.”',
+      blocks: [
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Você não é amigo da Lívia?',
+        },
+        {
+          type: 'narration',
+          text: 'Clara aponta discretamente para uma das mesas.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Eu sabia que já tinha te visto. Vocês vinham juntos às vezes.',
+        },
+        {
+          type: 'narration',
+          text: 'Ela pensa um segundo.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Eu achava que vocês namoravam.',
+        },
       ],
       choices: [
         {
@@ -245,10 +343,21 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'Clara dá de ombros.',
-        '“Sei lá. Vocês estavam sempre juntos quando eu via.”',
-        '“Foi só uma impressão.”',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Clara dá de ombros.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Sei lá. Vocês estavam sempre juntos quando eu via.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Foi só uma impressão.',
+        },
       ],
       choices: [
         {
@@ -267,11 +376,25 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'Clara sorri.',
-        '“Tá. Então eu inventei um namoro inteiro na minha cabeça.”',
-        'Ela deixa a brincadeira morrer sozinha.',
-        '“E ela? Não veio hoje?”',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Clara sorri.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Tá. Então eu inventei um namoro inteiro na minha cabeça.',
+        },
+        {
+          type: 'narration',
+          text: 'Ela deixa a brincadeira morrer sozinha.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'E ela? Não veio hoje?',
+        },
       ],
       choices: [
         {
@@ -290,10 +413,21 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        '“Ah.”',
-        'Clara aceita a correção sem fazer dela um assunto.',
-        '“E ela? Não veio hoje?”',
+      blocks: [
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Ah.',
+        },
+        {
+          type: 'narration',
+          text: 'Clara aceita a correção sem fazer dela um assunto.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'E ela? Não veio hoje?',
+        },
       ],
       choices: [
         {
@@ -312,9 +446,17 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        '“Ah é?”',
-        '“Pra onde?”',
+      blocks: [
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Ah é?',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Pra onde?',
+        },
       ],
       choices: [
         {
@@ -635,11 +777,23 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'O ruído do bar se separa em camadas.',
-        'A voz de Clara permanece próxima mesmo quando alguém testa a guitarra no palco.',
-        'Você percebe pequenas mudanças na respiração dela, o atrito dos dedos contra a câmera e pausas que antes desapareceriam no barulho.',
-        'Detalhes não são intenções.',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'O ruído do bar se separa em camadas.',
+        },
+        {
+          type: 'narration',
+          text: 'A voz de Clara permanece próxima mesmo quando alguém testa a guitarra no palco.',
+        },
+        {
+          type: 'narration',
+          text: 'Você percebe pequenas mudanças na respiração dela, o atrito dos dedos contra a câmera e pausas que antes desapareceriam no barulho.',
+        },
+        {
+          type: 'narration',
+          text: 'Detalhes não são intenções.',
+        },
       ],
       choices: [
         {
@@ -813,11 +967,23 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'Vocês falam do show, do atraso da banda e do Último Gole.',
-        'Clara comenta uma história curta sobre um vocalista que derrubou metade do pedestal de microfone tentando parecer mais dramático do que era.',
-        'Você ri. Ela também.',
-        'A conversa não precisa se transformar em confissão para funcionar.',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Vocês falam do show, do atraso da banda e do Último Gole.',
+        },
+        {
+          type: 'narration',
+          text: 'Clara comenta uma história curta sobre um vocalista que derrubou metade do pedestal de microfone tentando parecer mais dramático do que era.',
+        },
+        {
+          type: 'narration',
+          text: 'Você ri. Ela também.',
+        },
+        {
+          type: 'narration',
+          text: 'A conversa não precisa se transformar em confissão para funcionar.',
+        },
       ],
       choices: [
         {
@@ -844,10 +1010,20 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'Clara sustenta o olhar por um instante.',
-        '“Talvez tenha demorado.”',
-        'Ela diz isso num tom leve e não acrescenta mais nada.',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Clara sustenta o olhar por um instante.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Talvez tenha demorado.',
+        },
+        {
+          type: 'narration',
+          text: 'Ela diz isso num tom leve e não acrescenta mais nada.',
+        },
       ],
       choices: [
         {
@@ -874,12 +1050,30 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
-        'O sorriso desaparece.',
-        '“Olha...”',
-        '“Eu tenho namorado.”',
-        'Ela ajeita a câmera.',
-        '“Não tô dizendo que você não pode conversar comigo. Só tô deixando isso claro.”',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'O sorriso desaparece.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Olha...',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Eu tenho namorado.',
+        },
+        {
+          type: 'narration',
+          text: 'Ela ajeita a câmera.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Não tô dizendo que você não pode conversar comigo. Só tô deixando isso claro.',
+        },
       ],
       choices: [
         {
@@ -907,10 +1101,20 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'Clara observa você por um instante.',
-        '“Tudo bem.”',
-        'Ela não precisa repetir o limite.',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Clara observa você por um instante.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Tudo bem.',
+        },
+        {
+          type: 'narration',
+          text: 'Ela não precisa repetir o limite.',
+        },
       ],
       choices: [
         {
@@ -929,12 +1133,31 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
-        'A expressão de Clara fecha.',
-        '“Não.”',
-        '“Não é sobre ele saber.”',
-        '“Eu estou te falando.”',
-        '“Boa noite.”',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'A expressão de Clara fecha.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Não.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Não é sobre ele saber.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Eu estou te falando.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Boa noite.',
+        },
       ],
       choices: [
         {
@@ -960,13 +1183,33 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'Caroline passa perto de vocês carregando uma caixa pequena.',
-        '“Clara, depois me manda aquela foto.”',
-        '“Mando.”',
-        'Caroline segue para o balcão sem interromper a conversa.',
-        'Clara olha para o palco.',
-        'A banda finalmente parece pronta.',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Caroline passa perto de vocês carregando uma caixa pequena.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Caroline',
+          text: 'Clara, depois me manda aquela foto.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Mando.',
+        },
+        {
+          type: 'narration',
+          text: 'Caroline segue para o balcão sem interromper a conversa.',
+        },
+        {
+          type: 'narration',
+          text: 'Clara olha para o palco.',
+        },
+        {
+          type: 'narration',
+          text: 'A banda finalmente parece pronta.',
+        },
       ],
       choices: [
         {
@@ -985,13 +1228,35 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'Clara ergue a câmera.',
-        '“Eu preciso voltar. Se eu perder o começo, depois vão dizer que a culpa foi minha.”',
-        'Ela dá alguns passos e lembra de alguma coisa.',
-        '“Sábado que vem vai estar bem pior.”',
-        '“Vai ter cover de Black Sabbath.”',
-        '“Se vier, chega cedo.”',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Clara ergue a câmera.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Eu preciso voltar. Se eu perder o começo, depois vão dizer que a culpa foi minha.',
+        },
+        {
+          type: 'narration',
+          text: 'Ela dá alguns passos e lembra de alguma coisa.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Sábado que vem vai estar bem pior.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Vai ter cover de Black Sabbath.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Se vier, chega cedo.',
+        },
       ],
       choices: [
         {
@@ -1016,12 +1281,28 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        '“Então até sábado, talvez.”',
-        'Clara volta para perto do palco.',
-        'A câmera sobe até o rosto dela no instante em que as luzes diminuem.',
-        'Não houve telefone, promessa ou encontro marcado.',
-        'Só uma conversa.',
+      blocks: [
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Então até sábado, talvez.',
+        },
+        {
+          type: 'narration',
+          text: 'Clara volta para perto do palco.',
+        },
+        {
+          type: 'narration',
+          text: 'A câmera sobe até o rosto dela no instante em que as luzes diminuem.',
+        },
+        {
+          type: 'narration',
+          text: 'Não houve telefone, promessa ou encontro marcado.',
+        },
+        {
+          type: 'narration',
+          text: 'Só uma conversa.',
+        },
       ],
       choices: [
         {
@@ -1039,29 +1320,47 @@ export default {
         },
       ],
     },
-
     second_night: {
       title: 'War Pigs',
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-
-      narration: [
-        `O Último Gole está mais cheio do que na semana anterior. Cabos atravessam a lateral do palco enquanto a banda termina a passagem de som, e as conversas se misturam ao ruído dos amplificadores. Quando o guitarrista toca os primeiros acordes de Black Sabbath, algumas pessoas perto do balcão reconhecem a música imediatamente.`,
-
-        `Clara está onde disse que estaria, com a câmera pendurada no pescoço e a atenção dividida entre o palco e o visor. Ela se move pela lateral procurando ângulos, troca algumas palavras rápidas com alguém da produção e recua sempre que um músico ou um cabo invade o enquadramento. Há uma naturalidade na maneira como circula por ali que faz parecer que conhece aquele espaço melhor do que muita gente que veio apenas assistir ao show.`,
-
-        `Só depois de observá-la por alguns instantes você percebe que ela não está sozinha. Um homem alto, de cabelo desalinhado e camiseta escura, permanece encostado perto de uma das caixas de som com uma cerveja na mão. De vez em quando acompanha Clara com os olhos, sem a curiosidade de quem acabou de notá-la. A familiaridade aparece nos pequenos gestos: na maneira como espera por ela sem chamá-la e na certeza silenciosa de que, em algum momento, ela voltará.`,
-
-        `Clara percebe sua presença antes que o homem perceba. Quando os olhos dela encontram os seus do outro lado do salão, a concentração cede por um instante. Ela ergue as sobrancelhas e esboça um sorriso.`,
+      blocks: [
+        {
+          type: 'narration',
+          text: 'O Último Gole está mais cheio do que na semana anterior.',
+        },
+        {
+          type: 'narration',
+          text: 'Cabos atravessam a lateral do palco enquanto a banda termina a passagem de som. Quando o guitarrista toca os primeiros acordes de Black Sabbath, algumas pessoas perto do balcão reconhecem na mesma hora.',
+        },
+        {
+          type: 'narration',
+          text: 'Clara está onde disse que estaria.',
+        },
+        {
+          type: 'narration',
+          text: 'A câmera está pendurada no pescoço. Ela se move pela lateral do palco procurando ângulos, falando rapidamente com alguém da produção e conferindo o visor entre uma foto e outra.',
+        },
+        {
+          type: 'narration',
+          text: 'Ela não está sozinha.',
+        },
+        {
+          type: 'narration',
+          text: 'Um homem está encostado perto de uma das caixas de som, cerveja na mão. Alto, cabelo desalinhado, camiseta escura. Ele observa Clara com uma familiaridade que deixa claro que não é apenas alguém esperando para ser fotografado.',
+        },
+        {
+          type: 'narration',
+          text: 'Clara percebe você antes dele. Ela ergue as sobrancelhas.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Você veio.',
+        },
       ],
-
-      dialogue: {
-        speaker: 'Clara',
-        text: 'Você veio.',
-      },
-
       choices: [
         {
           id: 'second2_greet_band',
@@ -1135,18 +1434,12 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-
       narration: [
-        `Clara sustenta seu olhar por um instante, como se estivesse decidindo quanto da frase deve levar a sério. O sorriso que aparece é pequeno e rápido, mas não parece automático; ele permanece por tempo suficiente para ser percebido antes que ela volte a atenção para a câmera.`,
-
-        `O homem ao lado dela acompanha a troca sem dizer nada. Primeiro olha para você, depois para Clara.`,
+        'Clara segura seu olhar por um instante.',
+        '“Eu falei que estaria.”',
+        'Um meio sorriso aparece antes de ela voltar a atenção para a câmera.',
+        'O homem ao lado dela olha de você para Clara.',
       ],
-
-      dialogue: {
-        speaker: 'Clara',
-        text: 'Eu falei que estaria.',
-      },
-
       choices: [
         {
           id: 'second2_flirt_continue',
@@ -1172,11 +1465,10 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-
       narration: [
-        `O homem percebe que você chegou e mantém os olhos em você por alguns segundos antes de voltar à cerveja. É tempo suficiente para registrar sua presença, mas não o bastante para transformar o gesto em uma provocação clara. Com o bar cheio, o som alto e gente cruzando entre vocês, qualquer conclusão além disso seria cedo demais.`,
+        'O homem olha para você por tempo suficiente para deixar claro que percebeu sua presença.',
+        'Depois toma outro gole da cerveja.',
       ],
-
       choices: [
         {
           id: 'second2_read_low_continue',
@@ -1193,13 +1485,14 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-
       narration: [
-        `A mão que fazia a garrafa girar entre os dedos para assim que Clara reconhece você. O homem olha primeiro para seu rosto e depois para ela, demorando um pouco mais na segunda observação. Só então volta a beber.`,
-
-        `O detalhe não parece nascer de preocupação com quem você é. A atenção dele está em outra coisa: em descobrir quem Clara acredita que você seja e qual lugar sua presença ocupa naquela noite.`,
+        'A mão que girava a garrafa para.',
+        'Ele olha primeiro para você.',
+        'Depois para Clara.',
+        'Só então volta a beber.',
+        'Não parece preocupado com quem você é.',
+        'Parece preocupado com quem Clara acha que você é.',
       ],
-
       choices: [
         {
           id: 'second2_read_high_continue',
@@ -1228,11 +1521,9 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-
       narration: [
-        `Entre a passagem de som, as pessoas cruzando o salão e a luz irregular que vem do palco, a expressão do homem se perde no conjunto de pequenos movimentos ao redor. Você percebe que ele notou sua chegada, mas não consegue tirar daí nada que valha chamar de leitura.`,
+        'Entre a passagem de som, as pessoas atravessando o salão e a luz irregular do palco, você não consegue tirar nada útil da expressão dele.',
       ],
-
       choices: [
         {
           id: 'second2_read_fail_continue',
@@ -1249,11 +1540,10 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-
       narration: [
-        `A impressão vem depressa demais: bêbado, entediado, talvez apenas esperando o show começar. Nada no comportamento dele parece exigir atenção especial e, por alguns instantes, a possibilidade de existir qualquer tensão ali soa como excesso de interpretação da sua parte.`,
+        'Ele parece apenas bêbado e entediado.',
+        'Talvez você esteja procurando tensão onde não existe nenhuma.',
       ],
-
       choices: [
         {
           id: 'second2_read_botch_continue',
@@ -1269,22 +1559,30 @@ export default {
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      showPortrait: false,
-
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
       blocks: [
         {
           type: 'narration',
-          text: `Clara percebe a troca de olhares antes que qualquer um de vocês resolva transformá-la em outra coisa. Ela se aproxima meio passo e faz a apresentação num tom deliberadamente normal.`,
+          text: 'Clara percebe a troca de olhares.',
         },
         {
           type: 'dialogue',
           speaker: 'Clara',
-          text: 'Esse é o Rafael. Rafael, ele é o namorado da Lívia.',
+          text: 'Esse é o Rafael.',
         },
         {
           type: 'narration',
-          text: `Rafael estende a mão. O gesto é educado o bastante para não ser recusado sem motivo, embora o olhar continue avaliando você.`,
+          text: 'Ela olha para ele.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Rafael, ele é amigo da Lívia.',
+        },
+        {
+          type: 'narration',
+          text: 'Rafael estende a mão.',
         },
         {
           type: 'dialogue',
@@ -1292,7 +1590,6 @@ export default {
           text: 'Ah. Então você é o cara.',
         },
       ],
-
       choices: [
         {
           id: 'second2_tense_hand',
@@ -1324,29 +1621,44 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      showPortrait: false,
-
       blocks: [
         {
           type: 'narration',
-          text: `Clara olha de você para o homem ao lado e parece perceber que ainda não fez a apresentação. Ela ajeita a câmera contra o corpo e abre espaço entre os dois, transformando o encontro numa situação social comum antes que o silêncio tenha tempo de ficar estranho.`,
+          text: 'Clara faz um gesto entre vocês.',
         },
         {
           type: 'dialogue',
           speaker: 'Clara',
-          text: 'Esse é o Rafael. Rafael, ele é o namorado da Lívia.',
+          text: 'Esse é o Rafael.',
         },
         {
           type: 'narration',
-          text: `Rafael afasta a garrafa da mão direita e a estende para você. A expressão dele muda um pouco ao ouvir o nome de Lívia, como se alguma peça tivesse acabado de encontrar lugar.`,
+          text: 'Ela olha para ele.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Rafael, ele é amigo da Lívia.',
+        },
+        {
+          type: 'narration',
+          text: 'Rafael estende a mão.',
         },
         {
           type: 'dialogue',
           speaker: 'Rafael',
-          text: 'Ah. Então você é o cara.',
+          text: 'Ah.',
+        },
+        {
+          type: 'narration',
+          text: 'Ele olha outra vez para você.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Então você é o cara.',
         },
       ],
-
       choices: [
         {
           id: 'second2_handshake',
@@ -1383,8 +1695,9 @@ export default {
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
+      narration: [
         'Rafael dá de ombros.',
         '“Nada. Ela comentou que você vinha aqui.”',
         'Clara olha para ele.',
@@ -1416,7 +1729,8 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      portraitMood: 'serious',
+      narration: [
         'Rafael solta uma risada curta.',
         '“Depende.”',
         'Clara revira os olhos.',
@@ -1440,17 +1754,20 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      showPortrait: false,
-
+      portraitMood: 'argument',
       blocks: [
         {
           type: 'narration',
-          text: `A apresentação não dura muito. Clara confere uma informação no visor, olha para o palco e percebe que a banda já está quase pronta. Ela prende melhor a alça da câmera no ombro e começa a se afastar.`,
+          text: 'Clara confere a câmera e começa a se afastar.',
         },
         {
           type: 'dialogue',
           speaker: 'Clara',
           text: 'Eu vou trabalhar. A banda começa daqui a pouco.',
+        },
+        {
+          type: 'narration',
+          text: 'Rafael olha para ela.',
         },
         {
           type: 'dialogue',
@@ -1469,7 +1786,7 @@ export default {
         },
         {
           type: 'narration',
-          text: `Clara já está andando quando responde, sem parar para transformar aquilo numa discussão.`,
+          text: 'Clara já está andando.',
         },
         {
           type: 'dialogue',
@@ -1477,7 +1794,6 @@ export default {
           text: 'Porque é meu trabalho.',
         },
       ],
-
       choices: [
         {
           id: 'second2_work_watch_show',
@@ -1519,14 +1835,36 @@ export default {
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
-        'Antes que Rafael responda, Clara ergue a câmera.',
-        '“Eu vou trabalhar.”',
-        'Rafael olha para ela.',
-        '“Claro.”',
-        '“Não começa.”',
-        'Ela se afasta antes que a discussão continue.',
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'argument',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Antes que Rafael responda, Clara ergue a câmera.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Eu vou trabalhar.',
+        },
+        {
+          type: 'narration',
+          text: 'Rafael olha para ela.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Claro.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Não começa.',
+        },
+        {
+          type: 'narration',
+          text: 'Ela se afasta antes que a discussão continue.',
+        },
       ],
       choices: [
         {
@@ -1553,7 +1891,7 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Rafael acompanha Clara com os olhos.',
         'Não é apenas irritação por ela ter saído.',
         'Há alguma coisa mais antiga naquela expressão: o desconforto de quem já teve essa mesma discussão outras vezes.',
@@ -1573,13 +1911,32 @@ export default {
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
-        'Rafael bebe antes de responder.',
-        '“Nenhum.”',
-        'Ele sorri sem humor.',
-        '“Você é namorado da Lívia, não é?”',
-        '“Então tá tudo certo.”',
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Rafael bebe antes de responder.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Nenhum.',
+        },
+        {
+          type: 'narration',
+          text: 'Ele sorri sem humor.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Você é amigo da Lívia, não é?',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Então tá tudo certo.',
+        },
       ],
       choices: [
         {
@@ -1607,7 +1964,7 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'O show começa e o salão se comprime em direção ao palco.',
         'Algum tempo depois, Clara passa perto de você fotografando o público.',
         'Ela baixa a câmera por um instante.',
@@ -1687,8 +2044,8 @@ export default {
       place: 'Último Gole · Lateral do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Quando Clara cruza com você outra vez, Rafael está longe.',
         'Ela baixa a câmera.',
         '“Você e o Rafael já começaram bem.”',
@@ -1746,7 +2103,7 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         '“Entendi.”',
         'Clara aceita a resposta sem insistir.',
         '“Então manda um oi para ela quando vocês se falarem.”',
@@ -1768,7 +2125,7 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Clara faz um pequeno gesto com a cabeça.',
         '“Europa.”',
         '“Legal.”',
@@ -1789,8 +2146,8 @@ export default {
       place: 'Último Gole · Lateral do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         '“Europa?”',
         'Clara demora um pouco mais do que deveria antes de responder.',
         '“Que bom.”',
@@ -1821,8 +2178,8 @@ export default {
       place: 'Último Gole · Lateral do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'A explicação sai fácil demais.',
         'Um detalhe puxa outro.',
         'Clara para de olhar para o palco.',
@@ -1845,8 +2202,8 @@ export default {
       place: 'Último Gole · Lateral do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Clara escuta até o fim.',
         '“Você não precisava me explicar tudo isso.”',
         'Ela não parece irritada.',
@@ -1867,8 +2224,8 @@ export default {
       place: 'Último Gole · Lateral do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Clara observa seu rosto por um instante.',
         '“Tá.”',
         'Ela não insiste.',
@@ -1898,8 +2255,8 @@ export default {
       place: 'Último Gole · Lateral do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Clara baixa a câmera completamente.',
         '“Sobre ela estar viajando?”',
         'O bar continua se movendo ao redor de vocês.',
@@ -1940,8 +2297,8 @@ export default {
       place: 'Último Gole · Lateral do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Clara não responde imediatamente.',
         '“Tá.”',
         'Dessa vez a palavra soa diferente.',
@@ -1965,8 +2322,8 @@ export default {
       place: 'Último Gole · Lateral do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Clara fica imóvel por um instante.',
         '“Caralho.”',
         'Ela abaixa a voz.',
@@ -2003,7 +2360,7 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Clara olha para a multidão.',
         '“É.”',
         '“Talvez esse não seja exatamente o melhor lugar.”',
@@ -2025,7 +2382,7 @@ export default {
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Clara ri pelo nariz.',
         '“Justo.”',
         'Ela aponta a câmera na direção do palco.',
@@ -2154,7 +2511,7 @@ A pergunta vem no mesmo tom casual que poderia ser usado para perguntar de onde 
       title: 'Então é daí',
       place: 'Último Gole · Salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         '“Ah, então é daí.” Rafael parece encaixar uma informação que estava faltando. “Eu lembrava que a Clara tinha falado da Lívia alguma vez, mas não lembrava de você.”',
         'Um dos caras da roda pergunta se Lívia era a mulher que costumava aparecer de jaqueta de couro. Outro diz que lembra dela perto do palco numa noite em que faltou luz. Em poucos segundos a pergunta de Rafael vira uma conversa sobre gente que frequentava o bar e depois sumiu.',
         'Rafael participa dessa conversa também. Ele não fica olhando para você como interrogador. Quando Clara atravessa o salão com a câmera, porém, os olhos dele acompanham por um instante antes de voltarem para a roda.',
@@ -2215,7 +2572,7 @@ Por alguns minutos ele parece esquecer completamente a pergunta sobre Clara.`,
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         '“Nada.”',
         'Rafael sorri.',
         '“Só perguntei.”',
@@ -2246,7 +2603,7 @@ Por alguns minutos ele parece esquecer completamente a pergunta sobre Clara.`,
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'A pergunta acerta alguma coisa.',
         'Rafael sorri rápido demais.',
         '“Com você?”',
@@ -2277,8 +2634,8 @@ Por alguns minutos ele parece esquecer completamente a pergunta sobre Clara.`,
       place: 'Último Gole · Salão · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'O sorriso desaparece.',
         '“Não.”',
         'Rafael dá um passo um pouco mais perto.',
@@ -2308,14 +2665,35 @@ Por alguns minutos ele parece esquecer completamente a pergunta sobre Clara.`,
       place: 'Último Gole · Salão · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
-        'Rafael solta uma risada curta.',
-        '“Beleza.”',
-        'Ele levanta a garrafa em um brinde sem humor.',
-        '“Boa sorte com isso.”',
-        'A frase não faz muito sentido.',
-        'Talvez esse seja o objetivo.',
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'argument',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Rafael solta uma risada curta.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Beleza.',
+        },
+        {
+          type: 'narration',
+          text: 'Ele levanta a garrafa em um brinde sem humor.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Boa sorte com isso.',
+        },
+        {
+          type: 'narration',
+          text: 'A frase não faz muito sentido.',
+        },
+        {
+          type: 'narration',
+          text: 'Talvez esse seja o objetivo.',
+        },
       ],
       choices: [
         {
@@ -2342,11 +2720,26 @@ Por alguns minutos ele parece esquecer completamente a pergunta sobre Clara.`,
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'Rafael aponta com a garrafa na direção de Clara.',
-        '“Ela passa a noite inteira com essa câmera.”',
-        '“A gente sai e ela trabalha.”',
-        'A reclamação parece antiga demais para ter começado hoje.',
+      portraitMood: 'argument',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Rafael aponta com a garrafa na direção de Clara.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Ela passa a noite inteira com essa câmera.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'A gente sai e ela trabalha.',
+        },
+        {
+          type: 'narration',
+          text: 'A reclamação parece antiga demais para ter começado hoje.',
+        },
       ],
       choices: [
         {
@@ -2373,7 +2766,7 @@ Por alguns minutos ele parece esquecer completamente a pergunta sobre Clara.`,
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Em algum momento, Rafael desaparece no meio do salão.',
         'Clara continua trabalhando.',
         'A banda emenda outra música e a multidão fecha os espaços perto do palco.',
@@ -2429,7 +2822,7 @@ Por alguns minutos ele parece esquecer completamente a pergunta sobre Clara.`,
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Você mantém distância suficiente para não chamar atenção.',
         'Rafael atravessa o corredor e entra no banheiro.',
         'Ele permanece lá alguns minutos.',
@@ -2457,7 +2850,7 @@ Por alguns minutos ele parece esquecer completamente a pergunta sobre Clara.`,
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Duas pessoas atravessam na sua frente.',
         'Quando você consegue passar, Rafael já desapareceu.',
       ],
@@ -2476,8 +2869,8 @@ Por alguns minutos ele parece esquecer completamente a pergunta sobre Clara.`,
       place: 'Último Gole · Corredor · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Rafael para no corredor e olha para trás.',
         '“Tá me seguindo agora?”',
       ],
@@ -2530,7 +2923,8 @@ Por alguns minutos ele parece esquecer completamente a pergunta sobre Clara.`,
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      portraitMood: 'serious',
+      narration: [
         'Clara olha ao redor.',
         '“Sei lá.”',
         'Ela volta a mexer na câmera.',
@@ -2553,7 +2947,7 @@ Por alguns minutos ele parece esquecer completamente a pergunta sobre Clara.`,
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Rafael sai do banheiro alguns minutos depois.',
         'A embriaguez parece ter perdido parte da lentidão.',
       ],
@@ -2697,8 +3091,9 @@ Mas a hipótese deixa de parecer gratuita.`,
       place: 'Último Gole · Salão · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
+      narration: [
         'Rafael volta para o salão ainda mais agitado.',
         'Ele passa perto de você sem dizer nada.',
         'O olhar, porém, demora.',
@@ -2719,7 +3114,7 @@ Mas a hipótese deixa de parecer gratuita.`,
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Rafael volta algum tempo depois.',
         'Ele parece mais desperto do que antes.',
         'Clara continua trabalhando como se não tivesse percebido a ausência.',
@@ -2762,8 +3157,9 @@ Mas a hipótese deixa de parecer gratuita.`,
       place: 'Último Gole · Lateral do salão · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
+      portrait: '/images/npcs/clara/portrait.jpg',
 
+      portraitMood: 'angry',
       narration: [
         `Depois de mais algumas músicas, a mesma roda se forma perto da lateral do salão.
 
@@ -2811,98 +3207,9 @@ Ela não olha para ele de imediato. Tenta continuar a conversa como se bastasse 
       place: 'Último Gole · Lateral do salão · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
+      portrait: '/images/npcs/clara/portrait.jpg',
 
-      narration: [
-        `Rafael ri de alguma coisa que um dos conhecidos diz.
-
-Alguns segundos depois, olha para você.
-
-É rápido.
-
-Deliberado.`,
-
-        `Então faz de novo.
-
-A mão desce e aperta a bunda de Clara enquanto ele ainda olha na sua direção.`,
-
-        `Clara interrompe a frase no meio.
-
-Desta vez tira a mão dele com força e gira o corpo para ficar de frente para Rafael.
-
-A roda inteira percebe a mudança antes mesmo que ela fale.`,
-      ],
-
-      dialogue: {
-        speaker: 'Clara',
-        text:
-          'Rafael. Eu falei para parar.',
-      },
-
-      choices: [],
-
-      frenzyTrigger: {
-        id:
-          'clara_rafael_boundary_rage',
-        type:
-          'rage',
-        title:
-          'A mão dele nela',
-        description:
-          'A provocação, o desrespeito e o impulso territorial da Besta atravessam sua reação antes que você consiga decidir racionalmente o que fazer.',
-        difficulty:
-          6,
-
-        successScene:
-          'second2_touch_controlled',
-
-        failureOutcomes: [
-          {
-            id:
-              'clara_boundary_failure',
-            title:
-              'Você se move antes de decidir',
-            endScene:
-              'second2_touch_failure',
-
-            flags: {
-              beastJealousyTriggered:
-                true,
-              failedClaraRageControl:
-                true,
-            },
-          },
-        ],
-
-        criticalOutcomes: [
-          {
-            id:
-              'clara_boundary_botch',
-            title:
-              'Território',
-            endScene:
-              'second2_touch_botch',
-
-            flags: {
-              beastJealousyTriggered:
-                true,
-              failedClaraRageControl:
-                true,
-              botchedClaraRageControl:
-                true,
-            },
-          },
-        ],
-      },
-    },
-
-    second2_touch_scene_2: {
-      title: 'Eu falei para parar',
-      place: 'Último Gole · Lateral do salão · Pinheiros',
-      venueId: 'ultimo_gole',
-      locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-
+      portraitMood: 'angry',
       narration: [
         `Rafael ri de alguma coisa que um dos conhecidos diz.
 
@@ -2987,8 +3294,8 @@ A roda inteira percebe a mudança antes mesmo que ela fale.`,
     },
 
     second2_touch_controlled: {
-      title: 'O impulso e a escolha', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      title: 'O impulso e a escolha', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'A reação chega antes do pensamento: afasta, tira a mão dele, faz alguma coisa. Por um instante a Besta reduz toda a situação a Rafael, Clara e uma noção absurda de território.',
         'Seu corpo tensiona antes que você perceba, mas para ali. Clara não pertence a você. Rafael ter ultrapassado um limite não transforma você no dono da resposta.',
         'Rafael abre os braços como se a irritação dela fosse exagero. “Tá bom, porra.” Clara continua olhando diretamente para ele.',
@@ -3001,11 +3308,11 @@ A roda inteira percebe a mudança antes mesmo que ela fale.`,
     },
 
     second2_touch_failure: {
-      title: 'Antes de você decidir', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      title: 'Antes de você decidir', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Você já deu um passo em direção a Rafael quando percebe que se moveu. O gesto é pequeno, mas muda imediatamente a geometria da roda.',
         'Rafael percebe. “Qual foi?”',
-     '   Clara olha primeiro para ele, depois para você.”',
+        'Clara olha primeiro para ele, depois para você. “Não.” A palavra é para os dois. “Eu não preciso de vocês transformando isso numa disputa.”',
       ],
       choices: [
         { id: 'second2_failure_stop', text: 'Parar onde está e deixar Clara falar.', next: 'second2_touch_clara_handles', minutes: 4 },
@@ -3014,8 +3321,8 @@ A roda inteira percebe a mudança antes mesmo que ela fale.`,
     },
 
     second2_touch_botch: {
-      title: 'Território', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      title: 'Território', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Por um segundo, o contexto humano desaparece. Rafael vira obstáculo. A mão dele vira provocação. Clara vira território. A ideia é monstruosamente simples: tirar, afastar, quebrar.',
         'Você chega perto demais antes que a consciência alcance o impulso. Rafael solta a garrafa no balcão e vira o corpo para você. “Tá querendo o quê?”',
         'Clara entra de lado no espaço entre vocês. “Chega. Os dois.”',
@@ -3031,8 +3338,9 @@ A roda inteira percebe a mudança antes mesmo que ela fale.`,
       place: 'Último Gole · Lateral do salão · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
+      portrait: '/images/npcs/clara/portrait.jpg',
 
+      portraitMood: 'angry',
       narration: [
         `A conversa ao redor morre quase de uma vez.
 
@@ -3136,16 +3444,45 @@ Ninguém responde imediatamente.`,
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
-        'Rafael se vira para você.',
-        '“E você é o quê?”',
-        'Clara entra antes que a resposta venha.',
-        '“Rafael.”',
-        'Ele olha para ela.',
-        '“Eu estou falando com ele.”',
-        'Clara endurece a expressão.',
-        '“Não. Você está falando de mim.”',
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'angry',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Rafael se vira para você.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'E você é o quê?',
+        },
+        {
+          type: 'narration',
+          text: 'Clara entra antes que a resposta venha.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Rafael.',
+        },
+        {
+          type: 'narration',
+          text: 'Ele olha para ela.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Eu estou falando com ele.',
+        },
+        {
+          type: 'narration',
+          text: 'Clara endurece a expressão.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Não. Você está falando de mim.',
+        },
       ],
       choices: [
         {
@@ -3183,7 +3520,8 @@ Ninguém responde imediatamente.`,
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      portraitMood: 'serious',
+      narration: [
         'Clara olha para você por um instante.',
         'A tensão não desaparece, mas muda.',
         '“Obrigada.”',
@@ -3205,8 +3543,9 @@ Ninguém responde imediatamente.`,
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
+      narration: [
         'Clara responde sem levantar a voz.',
         '“Eu sei o que ele fez.”',
         'Ela não parece hostil.',
@@ -3230,8 +3569,9 @@ Ninguém responde imediatamente.`,
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'angry',
+      narration: [
         'Clara olha diretamente para você.',
         '“Não.”',
         '“Eu não preciso de outro namorado decidindo quem pode encostar em mim.”',
@@ -3266,8 +3606,9 @@ Ninguém responde imediatamente.`,
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
+      narration: [
         'Rafael mede você por um instante.',
         'O sorriso some.',
         'Antes que ele diga alguma coisa, Clara corta:',
@@ -3299,8 +3640,9 @@ Ninguém responde imediatamente.`,
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'argument',
+      narration: [
         'Rafael dá uma risada.',
         '“Tá falando comigo?”',
         'Ele dá meio passo para a frente.',
@@ -3331,8 +3673,9 @@ Ninguém responde imediatamente.`,
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'angry',
+      narration: [
         'A ameaça sai mais possessiva do que você pretendia.',
         'Clara percebe.',
         '“Sério?”',
@@ -3363,8 +3706,9 @@ Ninguém responde imediatamente.`,
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'argument',
+      narration: [
         'Por alguns segundos, a conversa deixa de ser sobre Clara.',
         'Rafael avança meio passo.',
         'Você não recua.',
@@ -3401,8 +3745,9 @@ Ninguém responde imediatamente.`,
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'angry',
+      narration: [
         'Rafael chega perto o suficiente para que uma briga seja uma escolha de um segundo.',
         'Clara entra de lado entre vocês, sem teatralidade.',
         '“Rafael, vai embora.”',
@@ -3434,8 +3779,8 @@ Ninguém responde imediatamente.`,
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Sua.',
         'A palavra não chega a ser um pensamento.',
         'É mais simples do que isso.',
@@ -3469,8 +3814,8 @@ Ninguém responde imediatamente.`,
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Você dá um passo em direção a Rafael antes mesmo de decidir fazê-lo.',
         'Tira a mão dele.',
         'A preocupação vem depois.',
@@ -3501,8 +3846,8 @@ Ninguém responde imediatamente.`,
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Por um instante, o bar inteiro perde importância.',
         'Rafael vira obstáculo.',
         'Clara vira território.',
@@ -3535,8 +3880,8 @@ Ninguém responde imediatamente.`,
     },
 
     second2_check_clara: {
-      title: 'Depois que ele se afasta', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      title: 'Depois que ele se afasta', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'A roda começa a conversar de novo. Clara mexe na câmera por alguns segundos antes de voltar a fotografar.',
         'Você não tem informação suficiente para decidir por ela como ela está. Pode perguntar, deixar o assunto quieto ou simplesmente continuar a noite.',
       ],
@@ -3552,7 +3897,7 @@ Ninguém responde imediatamente.`,
       place: 'Último Gole · Lateral do salão · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
+      portrait: '/images/npcs/clara/portrait.jpg',
 
       narration: [
         `Clara volta a mexer na câmera.
@@ -3600,7 +3945,8 @@ Só impede que silêncio seja confundido com tranquilidade.`,
             'second2_read_success_change',
           text:
             'Mudar de assunto e deixar Clara decidir se quer falar',
-          next: 'second2_clara_photos_reply_v2',
+          next:
+            'second2_clara_photos_reply_v2',
           minutes:
             5,
 
@@ -3623,8 +3969,8 @@ Só impede que silêncio seja confundido com tranquilidade.`,
     },
 
     second2_clara_ok_reply_v2: {
-      title: 'Estou', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      title: 'Estou', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         '“Estou.” Clara responde enquanto confere uma foto. A palavra não convida para interrogatório.',
         'Depois de alguns segundos, ela acrescenta por conta própria: “Só não gosto quando eu falo uma coisa e ele transforma em brincadeira.”',
       ],
@@ -3635,14 +3981,14 @@ Só impede que silêncio seja confundido com tranquilidade.`,
     },
 
     second2_clara_pattern_reply_v2: {
-      title: 'Hoje não', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/clara-seria.png',
-      text: [ 'Clara considera a pergunta. “Eu não quero fazer uma autópsia do meu namoro no meio do bar.”', 'O tom não é agressivo, mas o limite é claro. “Hoje não.”' ],
+      title: 'Hoje não', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [ 'Clara considera a pergunta. “Eu não quero fazer uma autópsia do meu namoro no meio do bar.”', 'O tom não é agressivo, mas o limite é claro. “Hoje não.”' ],
       choices: [ { id: 'second2_pattern_reply_respect', text: '“Tudo bem.”', next: 'second2_later_camera_argument', minutes: 6 } ],
     },
 
     second2_clara_photos_reply_v2: {
       title: 'As fotos', place: 'Último Gole · Lateral do salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
-      text: [ 'Clara aceita a mudança de assunto. Mostra uma foto em que o vocalista saiu borrado e reclama da iluminação.', '“Esse lugar é ótimo até você tentar fotografar alguém aqui.” A conversa volta para trabalho e música sem fingir que a situação anterior nunca aconteceu.' ],
+      narration: [ 'Clara aceita a mudança de assunto. Mostra uma foto em que o vocalista saiu borrado e reclama da iluminação.', '“Esse lugar é ótimo até você tentar fotografar alguém aqui.” A conversa volta para trabalho e música sem fingir que a situação anterior nunca aconteceu.' ],
       choices: [ { id: 'second2_photos_continue_v2', text: 'Deixar Clara voltar ao trabalho.', next: 'second2_later_camera_argument', minutes: 7 } ],
     },
 
@@ -3652,7 +3998,8 @@ Só impede que silêncio seja confundido com tranquilidade.`,
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      portraitMood: 'serious',
+      narration: [
         'Você não insiste.',
         'Clara mexe em alguma configuração da câmera.',
         '“Ele bebeu demais.”',
@@ -3684,8 +4031,8 @@ Só impede que silêncio seja confundido com tranquilidade.`,
       place: 'Último Gole · Lateral do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'O “estou” veio automático.',
         'A mão dela continua na câmera, mas não mexe em botão nenhum.',
         'Aquilo não parece uma situação nova.',
@@ -3714,8 +4061,9 @@ Só impede que silêncio seja confundido com tranquilidade.`,
       place: 'Último Gole · Lateral do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'angry',
+      narration: [
         'Clara ergue os olhos.',
         '“Você me conhece há uma semana.”',
         'Não há raiva na voz.',
@@ -3745,8 +4093,9 @@ Só impede que silêncio seja confundido com tranquilidade.`,
       place: 'Último Gole · Lateral do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
+      narration: [
         'Clara respira pelo nariz.',
         '“Não quero falar disso aqui.”',
         'Ela aponta discretamente para o salão.',
@@ -3770,8 +4119,8 @@ Só impede que silêncio seja confundido com tranquilidade.`,
       place: 'Último Gole · Lateral do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Clara olha para você como se estivesse confirmando que ouviu direito.',
         '“Você me conhece há uma semana.”',
         'Ela recoloca a câmera diante do rosto.',
@@ -3794,6 +4143,7 @@ Só impede que silêncio seja confundido com tranquilidade.`,
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
 
+      portraitMood: 'argument',
       narration: [
         `O show se aproxima do fim.
 
@@ -3941,38 +4291,127 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
     },
 
     second2_argument_overheard_v2: {
-      title: 'Perto o bastante para ouvir', place: 'Último Gole · Corredor lateral · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
-        'Você usa duas pessoas saindo da frente do palco como cobertura e para perto o bastante para separar as vozes da música.',
-        'Rafael aponta para a câmera. “Você vai passar a noite inteira nisso?”',
-        '“Eu vim para fotografar a banda.”',
-        '“Você falou que a gente ia sair.”',
-        'Clara olha para ele como se essa discussão já tivesse acontecido de outras formas. “A gente saiu. Você veio comigo para o lugar onde eu falei que ia trabalhar.”',
-        '“Eu só queria passar uma noite com você sem essa câmera no meio.”',
-        '“Então fala isso. Não passa a noite inteira me punindo até eu arrancar de você o que está errado.”',
-        'Rafael fica alguns segundos sem resposta. “Você também nunca desliga.”',
-        '“Talvez. Mas essa conversa é diferente da que você estava tentando ter cinco minutos atrás.”',
+      portraitMood: 'argument',
+      title: 'Perto o bastante para ouvir', place: 'Último Gole · Corredor lateral · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Você usa duas pessoas saindo da frente do palco como cobertura e para perto o bastante para separar as vozes da música.',
+        },
+        {
+          type: 'narration',
+          text: 'Rafael aponta para a câmera.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Você vai passar a noite inteira nisso?',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Eu vim para fotografar a banda.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Você falou que a gente ia sair.',
+        },
+        {
+          type: 'narration',
+          text: 'Clara olha para ele como se essa discussão já tivesse acontecido de outras formas.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'A gente saiu. Você veio comigo para o lugar onde eu falei que ia trabalhar.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Eu só queria passar uma noite com você sem essa câmera no meio.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Então fala isso. Não passa a noite inteira me punindo até eu arrancar de você o que está errado.',
+        },
+        {
+          type: 'narration',
+          text: 'Rafael fica alguns segundos sem resposta.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Você também nunca desliga.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Talvez. Mas essa conversa é diferente da que você estava tentando ter cinco minutos atrás.',
+        },
       ],
       choices: [ { id: 'second2_overheard_leave_v2', text: 'Afastar-se antes que percebam você.', next: 'second2_after_show_table', minutes: 12 } ],
     },
 
     second2_argument_obfuscate_v2: {
-      title: 'Presença Invisível', place: 'Último Gole · Corredor lateral · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
-        'Você se aproxima sem disputar espaço na atenção de ninguém. O poder não apaga seu corpo; faz olhos e pensamentos escorregarem para coisas mais importantes.',
-        '“Você vai passar a noite inteira nisso?” Rafael aponta para a câmera.',
-        '“Eu vim para fotografar a banda.”',
-        '“Você falou que a gente ia sair.”',
-        '“A gente saiu. Você veio comigo para o lugar onde eu falei que ia trabalhar.”',
-        'Ele abaixa a voz. “Eu só queria uma noite sem essa câmera.”',
-        'Clara demora um pouco. “Então fala isso, Rafael. Não tenta me deixar culpada até eu adivinhar.”',
+      portraitMood: 'argument',
+      title: 'Presença Invisível', place: 'Último Gole · Corredor lateral · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Você se aproxima sem disputar espaço na atenção de ninguém. O poder não apaga seu corpo; faz olhos e pensamentos escorregarem para coisas mais importantes.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Você vai passar a noite inteira nisso?',
+        },
+        {
+          type: 'narration',
+          text: 'Rafael aponta para a câmera.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Eu vim para fotografar a banda.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Você falou que a gente ia sair.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'A gente saiu. Você veio comigo para o lugar onde eu falei que ia trabalhar.',
+        },
+        {
+          type: 'narration',
+          text: 'Ele abaixa a voz.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Eu só queria uma noite sem essa câmera.',
+        },
+        {
+          type: 'narration',
+          text: 'Clara demora um pouco.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Então fala isso, Rafael. Não tenta me deixar culpada até eu adivinhar.',
+        },
       ],
       choices: [ { id: 'second2_obfuscate_leave_v2', text: 'Afastar-se antes de permanecer perto tempo demais.', next: 'second2_after_show_table', minutes: 12 } ],
     },
 
     second2_argument_body_success_v2: {
-      title: 'Sem ouvir as palavras', place: 'Último Gole · Salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portraitMood: 'serious',
+      title: 'Sem ouvir as palavras', place: 'Último Gole · Salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Você não ouve frases completas, mas a linguagem corporal mostra a estrutura da conversa. Rafael começa apontando para a câmera e falando rápido. Clara responde com os braços cruzados, mais cansada do que agressiva.',
         'Em algum momento ele reduz o volume. Não parece uma ameaça imediata. Parece uma discussão antiga sobre atenção, trabalho e expectativa, agravada pela bebida e pelo que já aconteceu naquela noite.',
       ],
@@ -3980,14 +4419,16 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
     },
 
     second2_argument_stealth_fail_v2: {
+      portraitMood: 'serious',
       title: 'Perto demais para ser discreto', place: 'Último Gole · Salão · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
-      text: [ 'O fluxo de pessoas muda antes de você encontrar um ponto bom. Para chegar mais perto teria que atravessar uma área aberta e se tornar parte da discussão. Você decide não forçar.' ],
+      narration: [ 'O fluxo de pessoas muda antes de você encontrar um ponto bom. Para chegar mais perto teria que atravessar uma área aberta e se tornar parte da discussão. Você decide não forçar.' ],
       choices: [ { id: 'second2_stealth_fail_continue_v2', text: 'Voltar para o salão.', next: 'second2_after_show_table', minutes: 12 } ],
     },
 
     second2_argument_stealth_botch_v2: {
-      title: 'Clara percebe', place: 'Último Gole · Corredor lateral · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portraitMood: 'angry',
+      title: 'Clara percebe', place: 'Último Gole · Corredor lateral · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Você chega perto justamente quando a passagem fica vazia. Clara olha de lado e percebe você antes que consiga fingir outro motivo.',
         'Ela não faz cena. Só interrompe a própria frase por um segundo e o olhar deixa claro que entendeu o que você estava tentando fazer. Rafael não percebe. Clara percebe.',
       ],
@@ -3999,8 +4440,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Depois do show · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'angry',
+      narration: [
         'A tensão entre os três já existe antes de qualquer frase.',
         'Rafael reclama da câmera.',
         'Clara responde sem paciência.',
@@ -4035,12 +4477,29 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        'Clara se afasta para guardar a câmera.',
-        'Quando você pergunta se ela quer companhia, ela pensa por um instante.',
-        '“Pode ficar.”',
-        'Não é um convite íntimo.',
-        'Mas também não é um pedido para você ir embora.',
+      portraitMood: 'serious',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Clara se afasta para guardar a câmera.',
+        },
+        {
+          type: 'narration',
+          text: 'Quando você pergunta se ela quer companhia, ela pensa por um instante.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Pode ficar.',
+        },
+        {
+          type: 'narration',
+          text: 'Não é um convite íntimo.',
+        },
+        {
+          type: 'narration',
+          text: 'Mas também não é um pedido para você ir embora.',
+        },
       ],
       choices: [
         {
@@ -4090,15 +4549,23 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       blocks: [
         {
           type: 'narration',
-          text: `O último acorde de War Pigs se desfaz numa mistura de aplausos, assobios e amplificadores ainda vibrando. O vocalista agradece, o baterista joga uma baqueta para alguém na frente e, antes que o salão consiga ficar silencioso, os técnicos já começam a puxar cabos pelo palco.`,
+          text: `O último acorde de War Pigs se desfaz numa parede de aplausos, assobios e amplificadores ainda vibrando.
+
+Por alguns segundos ninguém parece saber se o show realmente acabou. O vocalista agradece, o baterista joga uma baqueta para alguém na frente e os técnicos já começam a puxar cabos pelo palco.`,
         },
         {
           type: 'narration',
-          text: `O Último Gole muda de forma depressa. Quem estava espremido diante da banda se espalha pelas mesas, o volume cai o bastante para as conversas deixarem de disputar espaço com as caixas de som e os comentários sobre o show começam a surgir de todos os lados, cada um mais definitivo do que o anterior.`,
+          text: `O Último Gole muda de forma depressa.
+
+Quem estava espremido perto do palco se espalha pelas mesas. O volume cai o bastante para conversas deixarem de ser uma competição com as caixas de som. Copos aparecem, cadeiras são puxadas e gente que mal conseguia se ouvir há dez minutos começa a discutir qual música foi tocada melhor.`,
         },
         {
           type: 'narration',
-          text: `Caroline ocupa uma mesa perto do balcão e chama Clara com dois dedos no ar. Clara termina de guardar uma lente, prende a tampa na câmera e se junta à roda. Íris, que passou parte da noite correndo entre o palco e a produção, senta ao lado dela. Caio, um dos habituais do bar, aparece carregando três cervejas e uma água que ninguém admite ter pedido. Você acaba ficando com eles.`,
+          text: `Caroline ocupa uma mesa perto do balcão e chama Clara com dois dedos no ar.
+
+Clara termina de guardar uma lente, prende a tampa na câmera e se junta à roda. Íris, que passou parte da noite correndo entre o palco e a produção, senta ao lado dela. Caio, um dos amigos do bar, aparece carregando três cervejas e uma água que ninguém admite ter pedido.
+
+Você acaba ficando com eles.`,
         },
         {
           type: 'dialogue',
@@ -4117,7 +4584,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Clara ri enquanto coloca a câmera sobre a mesa, encostada na parede e protegida pelo próprio braço. É a primeira vez naquela noite em que ela parece ter realmente terminado de trabalhar.`,
+          text: `Clara ri e coloca a câmera sobre a mesa, encostada na parede, protegida pelo próprio braço.
+
+É a primeira vez na noite em que ela parece realmente ter terminado de trabalhar.`,
         },
         {
           type: 'dialogue',
@@ -4162,7 +4631,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       blocks: [
         {
           type: 'narration',
-          text: `A conversa demora alguns minutos para encontrar um assunto só. Caio insiste que a banda acelerou War Pigs, Íris diz que foi o contrário e Caroline jura que ninguém naquela mesa saberia manter o tempo nem batendo palma. A discussão não tem importância nenhuma, e talvez por isso funcione tão bem.`,
+          text: `A conversa demora alguns minutos para encontrar um assunto só.
+
+Caio insiste que a banda acelerou War Pigs. Íris diz que foi o contrário. Caroline jura que ninguém naquela mesa saberia manter o tempo nem batendo palma.`,
         },
         {
           type: 'dialogue',
@@ -4181,7 +4652,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Clara liga a câmera outra vez e passa as fotografias devagar. Todos se inclinam para o visor. Numa delas, o guitarrista aparece com um joelho no chão e uma mão procurando apoio; na seguinte, um roadie segura seu braço enquanto ele tenta recuperar a postura sem abandonar o solo.`,
+          text: `Clara liga a câmera outra vez e passa as fotografias devagar.
+
+Todo mundo se inclina para o visor. Numa delas, o guitarrista aparece com um joelho no chão, uma mão procurando apoio e uma expressão que poderia ser confundida com virtuosismo se a foto seguinte não mostrasse um roadie segurando seu braço.`,
         },
         {
           type: 'dialogue',
@@ -4200,7 +4673,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Rafael ri junto com os outros. A cerveja que trouxe do show já acabou e outra apareceu na mão dele sem que ninguém percebesse exatamente quando foi buscá-la. Enquanto Clara passa as fotos, ele bebe em goles longos e participa da conversa como se o desconforto anterior tivesse sido guardado junto com os cabos do palco.`,
+          text: `Rafael ri junto.
+
+Ele terminou a cerveja que trouxe do show e já está com outra. Ninguém viu exatamente quando buscou. Enquanto Clara passa as fotos, ele bebe em goles longos, participando da conversa como se o desconforto anterior tivesse sido guardado junto com os cabos do palco.`,
         },
         {
           type: 'dialogue',
@@ -4234,13 +4709,16 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Mesa perto do balcão · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
       showPortrait: false,
 
       blocks: [
         {
           type: 'narration',
-          text: `Quando Caroline devolve a câmera, a conversa se espalha para outros shows, gente que frequenta o bar e histórias que parecem melhorar toda vez que são contadas. Rafael acompanha tudo sem dificuldade, mas continua bebendo. O humor na mesa ainda é leve quando Caio comenta sobre um homem de jaqueta jeans que passou boa parte do show tentando falar com Clara.`,
+          text: `Caroline devolve a câmera e a conversa passa para outros shows, gente que frequenta o bar e histórias que parecem melhorar toda vez que são contadas.
+
+Rafael acompanha, mas continua bebendo.`,
         },
         {
           type: 'dialogue',
@@ -4264,7 +4742,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Clara dá de ombros. Rafael não. A mudança é pequena, mas suficiente para alterar o ritmo da conversa.`,
+          text: `Clara dá de ombros.
+
+Rafael não.`,
         },
         {
           type: 'dialogue',
@@ -4288,7 +4768,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Caio ri pelo nariz. Rafael acompanha, mas o sorriso dele termina primeiro.`,
+          text: `Caio solta uma risada curta.
+
+Rafael também ri, mas a dele acaba primeiro.`,
         },
         {
           type: 'dialogue',
@@ -4315,24 +4797,30 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       choices: [
         {
           id: 'second2_table_macho_disagree',
-          text: '“Ela estava trabalhando. Conversar com alguém faz parte disso.”',
+          text: '"Ela estava trabalhando. Conversar com alguém faz parte disso."',
           next: 'second2_table_macho_reaction',
           minutes: 4,
-          flags: { playerRejectedRafaelMachoComment: true },
+          flags: {
+            playerRejectedRafaelMachoComment: true,
+          },
         },
         {
           id: 'second2_table_macho_leave_clara',
           text: 'Não falar por Clara e ver como a conversa segue.',
           next: 'second2_table_macho_reaction',
           minutes: 4,
-          flags: { playerRespectedClaraAgency: true },
+          flags: {
+            playerRespectedClaraAgency: true,
+          },
         },
         {
           id: 'second2_table_macho_needling',
-          text: '“Talvez o problema seja você saber demais como esses caras pensam.”',
+          text: '"Talvez o problema seja você saber demais como esses caras pensam."',
           next: 'second2_table_macho_reaction',
           minutes: 4,
-          flags: { playerNeedledRafaelAtTable: true },
+          flags: {
+            playerNeedledRafaelAtTable: true,
+          },
         },
       ],
     },
@@ -4342,13 +4830,16 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Mesa perto do balcão · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'argument',
       showPortrait: false,
 
       blocks: [
         {
           type: 'narration',
-          text: `Rafael gira a garrafa entre os dedos e, por um momento, parece que vai responder diretamente. Em vez disso, recosta na cadeira e tenta empurrar a conversa de volta para o terreno da brincadeira, como se bastasse mudar o tom para apagar o que acabou de dizer.`,
+          text: `Rafael gira a garrafa entre os dedos.
+
+Por um momento parece que vai responder diretamente. Em vez disso, recosta na cadeira e tenta empurrar a conversa de volta para o terreno da brincadeira.`,
         },
         {
           type: 'dialogue',
@@ -4382,7 +4873,11 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Rafael abre a boca, mas a resposta demora mais do que deveria. Clara espera. Ele olha primeiro para Íris e depois para Clara, como se procurasse uma formulação que soasse melhor do que a ideia original.`,
+          text: `Rafael abre a boca, mas a resposta demora mais do que deveria.
+
+Clara espera.
+
+Ele olha primeiro para Íris, depois para Clara.`,
         },
         {
           type: 'dialogue',
@@ -4396,7 +4891,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Caio tenta esconder a risada atrás do copo. Clara não ri.`,
+          text: `Caio tenta esconder a risada atrás do copo.
+
+Clara não ri.`,
         },
         {
           type: 'dialogue',
@@ -4431,12 +4928,15 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
       showPortrait: false,
 
       blocks: [
         {
           type: 'narration',
-          text: `Íris percebe o ponto em que a discussão deixou de ser engraçada e puxa outra história sem cerimônia. Fala de um vocalista que se recusou a subir ao palco porque alguém havia servido a marca errada de água; Caroline completa a história, Caio corrige os dois e, em menos de um minuto, todos estão discutindo se aquilo aconteceu em Campinas ou Sorocaba.`,
+          text: `Íris percebe o ponto em que a discussão deixou de ser engraçada e puxa outra história sem cerimônia.
+
+Fala de um vocalista que se recusou a subir ao palco porque alguém havia servido a marca errada de água. Caroline completa a história. Caio corrige os dois. Em menos de um minuto, todos estão discutindo se aquilo aconteceu em Campinas ou Sorocaba.`,
         },
         {
           type: 'dialogue',
@@ -4465,7 +4965,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `A roda volta a funcionar. Rafael participa outra vez, primeiro pouco e depois cada vez mais. Conta uma história longa sobre uma banda que ninguém além dele parece conhecer e termina outra cerveja no meio da narrativa.`,
+          text: `A roda volta a funcionar.
+
+Rafael participa de novo, primeiro pouco, depois mais. Conta uma história longa sobre uma banda que ninguém além dele parece conhecer. No meio dela, termina outra cerveja.`,
         },
         {
           type: 'dialogue',
@@ -4489,7 +4991,20 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Rafael se levanta de repente. A cadeira raspa no chão e ele segura a borda da mesa por um instante antes de encontrar o próprio equilíbrio. Diz que vai ao banheiro e atravessa o salão em direção ao corredor. É a segunda vez naquela noite que desaparece naquela direção.`,
+          text: `Rafael levanta.
+
+A cadeira raspa no chão. Por um instante ele segura a borda da mesa antes de encontrar o próprio equilíbrio.`,
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Vou mijar.',
+        },
+        {
+          type: 'narration',
+          text: `Ele atravessa o salão em direção ao corredor dos banheiros.
+
+É a segunda vez naquela noite que desaparece naquela direção.`,
         },
       ],
 
@@ -4509,12 +5024,15 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
       showPortrait: false,
 
       blocks: [
         {
           type: 'narration',
-          text: `Ninguém comenta Rafael imediatamente. Caio termina a própria história, Íris pega uma das fotos que Clara marcou como favorita e pergunta se pode usá-la na divulgação, enquanto Caroline recolhe duas garrafas vazias da mesa e as coloca no balcão atrás dela.`,
+          text: `Ninguém comenta Rafael imediatamente.
+
+Caio termina a própria história. Íris pega uma das fotos que Clara marcou como favorita e pergunta se pode usar na divulgação. Caroline recolhe duas garrafas vazias da mesa e coloca no balcão atrás dela.`,
         },
         {
           type: 'dialogue',
@@ -4538,7 +5056,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `O clima melhora alguns graus. Clara aceita a mudança de assunto sem fingir que a conversa anterior nunca aconteceu, e a roda volta a falar de música, agenda do bar e da próxima banda que pretende ocupar aquele palco.`,
+          text: `O clima melhora alguns graus.
+
+Clara parece aceitar a mudança de assunto sem fingir que a discussão anterior não aconteceu.`,
         },
         {
           type: 'dialogue',
@@ -4577,17 +5097,22 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Mesa perto do balcão · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
       showPortrait: false,
 
       blocks: [
         {
           type: 'narration',
-          text: `Rafael volta menos de dez minutos depois. A bebida continua evidente na coordenação: ao contornar uma cadeira, ele calcula mal o espaço e bate o quadril no encosto. O que desapareceu foi a lentidão que começava a acompanhar o álcool.`,
+          text: `Rafael volta menos de dez minutos depois.
+
+A bebida ainda está nele. Isso aparece quando ele contorna uma cadeira e calcula mal o espaço, batendo o quadril no encosto.`,
         },
         {
           type: 'narration',
-          text: `Ele se senta, levanta outra vez porque esqueceu o copo no balcão, volta com ele e entra na conversa de Caio antes mesmo de entender o assunto. Há uma pressa nova nos gestos, como se cada silêncio precisasse ser preenchido antes que outra pessoa pudesse fazê-lo.`,
+          text: `Mas a lentidão desapareceu.
+
+Ele se senta, levanta outra vez porque esqueceu o copo no balcão, volta com ele e começa a responder a Caio antes mesmo de entender sobre o que estavam falando.`,
         },
         {
           type: 'dialogue',
@@ -4616,7 +5141,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Ele ri alto demais da própria frase. Quando o sorriso desaparece, o maxilar se contrai e o polegar continua correndo pela borda do copo. Íris começa a explicar alguma coisa, mas Rafael entra por cima dela antes que termine.`,
+          text: `Ele ri alto demais da própria frase.
+
+O maxilar se contrai quando o sorriso desaparece. O polegar corre repetidamente pela borda do copo. Quando Íris demora um segundo para terminar uma frase, Rafael entra por cima dela.`,
         },
         {
           type: 'dialogue',
@@ -4653,7 +5180,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
             success3: {
               next: 'second2_table_return_read_high',
               minutes: 4,
-              flags: { rafaelSecondDrugUseSuspected: true },
+              flags: {
+                rafaelSecondDrugUseSuspected: true,
+              },
             },
             success: {
               next: 'second2_table_return_read_success',
@@ -4683,17 +5212,38 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Mesa perto do balcão · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
+      portrait: '/images/npcs/clara/portrait.jpg',
       showPortrait: false,
 
-      narration: [
-        `A mudança é real, mas não entrega uma causa sozinha. A bebida continua visível na coordenação de Rafael; ao mesmo tempo, ele está mais rápido, inquieto e reativo do que estava antes de desaparecer no banheiro. Você consegue afirmar que alguma coisa alterou o estado dele, mas não consegue afirmar o quê.`,
-      ],
+      blocks: [
+        {
+          type: 'narration',
+          text: `A mudança é real, mas não entrega uma causa sozinha.
 
-      dialogue: {
-        speaker: 'Clara',
-        text: 'Toma água.',
-      },
+A bebida continua visível na coordenação de Rafael. Ao mesmo tempo, ele está mais rápido, mais inquieto e mais reativo do que antes de desaparecer no banheiro.`,
+        },
+        {
+          type: 'narration',
+          text: `Você consegue afirmar que alguma coisa alterou o estado dele.
+
+Não consegue afirmar o quê.`,
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Toma água.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Eu não preciso de água.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Caroline',
+          text: 'Essa frase também costuma significar que precisa.',
+        },
+      ],
 
       choices: [
         {
@@ -4710,19 +5260,38 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Mesa perto do balcão · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
+      portrait: '/images/npcs/clara/portrait.jpg',
       showPortrait: false,
 
-      narration: [
-        `Agora os sinais se encaixam melhor. Rafael continua bêbado, mas a fala acelerada, a inquietação, o maxilar contraído e a mudança abrupta depois de alguns minutos sozinho no banheiro apontam para alguma coisa além do álcool.`,
+      blocks: [
+        {
+          type: 'narration',
+          text: `Agora os sinais se encaixam melhor.
 
-        `O comportamento é compatível com um estimulante. Cocaína seria uma possibilidade plausível, embora você não tenha visto Rafael usar nada e não possa transformar a leitura em certeza. A hipótese, no entanto, já não parece gratuita.`,
+Rafael continua bêbado, mas a fala acelerada, a inquietação, o maxilar contraído e a mudança abrupta depois de alguns minutos sozinho no banheiro apontam para alguma coisa além do álcool.`,
+        },
+        {
+          type: 'narration',
+          text: `O comportamento é compatível com um estimulante.
+
+Cocaína seria uma possibilidade bastante plausível. Você não viu Rafael usar nada e não teria como transformar a leitura em certeza, mas a hipótese já não é gratuita.`,
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Caroline',
+          text: 'Você voltou a mil de novo.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Vocês estão muito preocupados comigo hoje.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Porque você está impossível hoje.',
+        },
       ],
-
-      dialogue: {
-        speaker: 'Caroline',
-        text: 'Você voltou a mil de novo.',
-      },
 
       choices: [
         {
@@ -4730,7 +5299,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
           text: 'Guardar a observação para si e continuar na mesa.',
           next: 'second2_table_after_return',
           minutes: 7,
-          flags: { playerKeptSecondDrugObservationPrivate: true },
+          flags: {
+            playerKeptSecondDrugObservationPrivate: true,
+          },
         },
       ],
     },
@@ -4743,14 +5314,24 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       portrait: '/images/npcs/clara/portrait.jpg',
       showPortrait: false,
 
-      narration: [
-        `Há uma mudança no ritmo de Rafael, mas a noite oferece explicações demais. Álcool, irritação, adrenalina, cansaço ou alguma coisa que aconteceu longe dos seus olhos poderiam explicar parte do que você está vendo. Escolher uma causa mais específica seria apenas escolher a interpretação mais conveniente.`,
-      ],
+      blocks: [
+        {
+          type: 'narration',
+          text: `Há uma mudança no ritmo de Rafael, mas a noite oferece explicações demais.
 
-      dialogue: {
-        speaker: 'Clara',
-        text: 'Você podia parar de beber por meia hora.',
-      },
+Álcool, irritação, adrenalina, cansaço ou alguma coisa que aconteceu longe dos seus olhos: escolher uma causa seria apenas escolher a interpretação mais conveniente.`,
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Você podia parar de beber por meia hora.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Eu estou bem.',
+        },
+      ],
 
       choices: [
         {
@@ -4768,12 +5349,15 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
       showPortrait: false,
 
       blocks: [
         {
           type: 'narration',
-          text: `A noite não termina imediatamente. Por mais vinte minutos a mesa ainda resiste ao fechamento do bar, e a conversa volta para música, lugares que já fecharam em São Paulo e histórias que começam com “uma vez” e terminam sem que ninguém saiba mais se aconteceram exatamente daquele jeito.`,
+          text: `A noite não termina imediatamente.
+
+Por mais vinte minutos a mesa ainda resiste ao fechamento do bar. A conversa volta para música, para lugares que já fecharam em São Paulo e para histórias que começam com "uma vez" e ninguém sabe mais se aconteceram exatamente daquele jeito.`,
         },
         {
           type: 'dialogue',
@@ -4807,7 +5391,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Rafael ri, interrompe duas vezes, esquece o começo de uma história e pede outra cerveja. Caroline olha para o relógio e não entrega.`,
+          text: `Rafael ri, interrompe duas vezes, esquece o começo de uma história e pede outra cerveja.
+
+Caroline olha para o relógio e não entrega.`,
         },
         {
           type: 'dialogue',
@@ -4826,7 +5412,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Clara solta o ar pelo nariz, quase rindo apesar de si mesma, e dessa vez Rafael deixa a provocação passar. Pouco depois, Íris começa a se despedir e Caio se levanta para ajudar alguém da banda com um pedestal. A roda finalmente começa a se desfazer.`,
+          text: `Clara solta o ar pelo nariz, quase rindo apesar de si mesma.
+
+Dessa vez Rafael deixa passar.`,
         },
         {
           type: 'dialogue',
@@ -4845,7 +5433,11 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Caroline recolhe os últimos copos. Clara pega a câmera e verifica a bolsa antes de se levantar. Rafael levanta logo depois.`,
+          text: `A roda começa a se desfazer.
+
+Íris vai embora. Caio ajuda alguém da banda com um pedestal. Caroline começa a recolher os últimos copos.
+
+Rafael levanta quando Clara pega a câmera.`,
         },
       ],
 
@@ -4864,17 +5456,23 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Saída · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
+      portrait: '/images/npcs/clara/portrait.jpg',
       showPortrait: false,
 
       blocks: [
         {
           type: 'narration',
-          text: `Perto das duas, o Último Gole finalmente começa a expulsar a noite para a calçada. As últimas cadeiras são empilhadas, a porta lateral abre e fecha enquanto equipamento da banda passa para fora e Clara guarda a câmera antes de se despedir de Caroline.`,
+          text: `Perto das duas, o Último Gole finalmente começa a expulsar a noite para a calçada.
+
+As últimas cadeiras são empilhadas. A porta lateral abre e fecha enquanto equipamento da banda passa para fora. Clara coloca a câmera na bolsa e se despede de Caroline.`,
         },
         {
           type: 'narration',
-          text: `Rafael segue até a saída com a mesma energia inquieta que trouxe do banheiro, mas nada disso corrige a quantidade que bebeu. Ao atravessar o salão, toca o encosto de uma cadeira e depois a parede do corredor. Do lado de fora, enfia a mão no bolso procurando as chaves e erra o bolso na primeira tentativa.`,
+          text: `Rafael segue até a saída.
+
+A energia inquieta continua nele, mas não corrigiu a quantidade que bebeu. Ele toca o encosto de uma cadeira ao passar, depois a parede do corredor.
+
+Do lado de fora, enfia a mão no bolso procurando as chaves e erra o bolso na primeira tentativa.`,
         },
         {
           type: 'dialogue',
@@ -4883,7 +5481,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           type: 'narration',
-          text: `Clara olha para a mão dele apoiada na parede e depois para o chaveiro.`,
+          text: `Clara olha para a mão dele apoiada na parede.
+
+Depois olha para o chaveiro.`,
         },
         {
           type: 'dialogue',
@@ -4921,7 +5521,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
         },
         {
           id: 'second2_closing_uber',
-          text: '“É mais simples chamar um carro para vocês dois.”',
+          text: '"É mais simples chamar um carro para vocês dois."',
           next: 'second2_uber_reply',
           minutes: 5,
         },
@@ -4959,7 +5559,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
 
     second2_clara_drives_v2: {
       title: 'Então eu dirijo', place: 'Último Gole · Calçada · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Clara pega as chaves. “Ótimo. Eu dirijo.” Rafael reclama que ela está exagerando, mas já não tem coordenação nem paciência para sustentar uma discussão longa. Ele segue para o lado do passageiro.',
         'Clara guarda a câmera no banco de trás e olha para você. “Boa noite. E não acredita em metade das histórias que aquele pessoal contou sobre a banda.”',
         'A frase devolve por alguns segundos o tom do começo da noite. Depois ela entra no carro e vai embora dirigindo.',
@@ -4969,7 +5569,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
 
     second2_offer_both_v2: {
       title: 'Carona', place: 'Último Gole · Calçada · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Clara considera a oferta. Rafael claramente não gosta da ideia de aceitar carona sua, mas está em condições ruins demais para transformar orgulho em argumento.',
         '“Valeu, mas eu posso dirigir o carro dele.” Clara balança o chaveiro. “É menos complicado.” A resposta não é rejeição dramática nem pedido de resgate. É só a solução que ela prefere.',
       ],
@@ -4981,8 +5581,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Saída · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
+      narration: [
         'O bar começa a esvaziar.',
         'Rafael está bêbado demais para dirigir e Clara já perdeu a paciência.',
         'Ele pega as chaves.',
@@ -5009,14 +5610,35 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Saída · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
-        'Clara estende a mão.',
-        '“Me dá.”',
-        '“Clara...”',
-        '“Rafael. As chaves.”',
-        'Ele encara a mão dela por alguns segundos.',
-        'Depois entrega.',
+      portrait: '/images/npcs/clara/portrait.jpg',
+      blocks: [
+        {
+          type: 'narration',
+          text: 'Clara estende a mão.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Me dá.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Rafael',
+          text: 'Clara...',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Rafael. As chaves.',
+        },
+        {
+          type: 'narration',
+          text: 'Ele encara a mão dela por alguns segundos.',
+        },
+        {
+          type: 'narration',
+          text: 'Depois entrega.',
+        },
       ],
       choices: [
         {
@@ -5037,7 +5659,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Clara já está com o celular na mão.',
         '“É o que eu vou fazer.”',
         'Rafael resmunga alguma coisa, mas não discute de verdade.',
@@ -5058,11 +5680,25 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
-        '“Eu chamo.”',
-        'Clara pensa por um instante.',
-        '“Pode ser.”',
-        'Rafael não parece gostar de aceitar ajuda sua, mas está bêbado demais para sustentar uma discussão coerente.',
+      blocks: [
+        {
+          type: 'dialogue',
+          speaker: 'Protagonista',
+          text: 'Eu chamo.',
+        },
+        {
+          type: 'narration',
+          text: 'Clara pensa por um instante.',
+        },
+        {
+          type: 'dialogue',
+          speaker: 'Clara',
+          text: 'Pode ser.',
+        },
+        {
+          type: 'narration',
+          text: 'Rafael não parece gostar de aceitar ajuda sua, mas está bêbado demais para sustentar uma discussão coerente.',
+        },
       ],
       choices: [
         {
@@ -5083,7 +5719,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'Você não desafia Rafael.',
         'Só torna a alternativa simples o bastante para que ele aceite sem sentir que perdeu uma disputa.',
         'Ele solta o ar e entrega as chaves para Clara.',
@@ -5099,8 +5735,8 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
     },
 
     second2_keys_social_fail: {
-      title: 'Eu consigo dirigir', place: 'Último Gole · Saída · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      title: 'Eu consigo dirigir', place: 'Último Gole · Saída · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Rafael interpreta sua tentativa como mais uma pessoa dizendo o que ele pode ou não fazer. “Eu consigo dirigir.”',
         'Clara estende a mão. “E eu consigo dirigir melhor do que você agora. Me dá.”',
         'Ele olha para ela, para as chaves e depois para você. Por alguns segundos parece disposto a transformar aquilo em disputa.',
@@ -5114,8 +5750,8 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Saída · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Clara olha primeiro para você.',
         'Depois para Rafael.',
         '“Não.”',
@@ -5147,7 +5783,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
 
     second2_goodbye: {
       title: 'Fim da noite', place: 'Último Gole · Calçada · Pinheiros', venueId: 'ultimo_gole', locations: ['pinheiros'], portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'A movimentação na porta diminui. Caroline ainda está dentro fechando o caixa e duas pessoas da roda se despedem do outro lado da calçada.',
         'Clara termina de guardar a câmera e faz um gesto curto de despedida. “Boa noite.”',
         'Se a noite não terminou mal entre vocês, ela ainda acrescenta com um meio sorriso: “Semana que vem vê se aparece antes da banda começar. Talvez a gente consiga conversar sem alguém gritando Ozzy no nosso ouvido.”',
@@ -5161,8 +5797,9 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Calçada · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      portraitMood: 'serious',
+      narration: [
         'Quando o carro chega, Clara abre a porta para Rafael.',
         'Antes de entrar, olha para você.',
         '“Boa noite.”',
@@ -5188,8 +5825,8 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Saída · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      portrait: '/images/npcs/clara/clara-seria.png',
-      text: [
+      portrait: '/images/npcs/clara/portrait.jpg',
+      narration: [
         'Você deixa o salão antes do fim da noite.',
         'A música continua atrás da porta.',
         'A última imagem que leva de Clara é a câmera contra o peito e Rafael alguns passos adiante.',
@@ -5214,7 +5851,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'São Paulo',
       locations: ['pinheiros'],
       portrait: '/images/npcs/clara/portrait.jpg',
-      text: [
+      narration: [
         'A noite no Último Gole fica para trás.',
         'O que aconteceu entre Clara e Rafael não parece resolvido.',
         'Nem o que Clara pensa sobre você.',
@@ -5228,7 +5865,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Você apenas cumprimenta.',
         'Clara olha para a cadeira vazia e depois para você.',
         '“Eu estava falando sério.”',
@@ -5245,7 +5882,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara mostra uma sequência feita depois do show anterior. Técnicos desmontando cabos. Um músico dormindo sentado. Duda contando o caixa.',
         '“Essas são as minhas favoritas e são as que ninguém compra.”',
         'Ela fecha o notebook.',
@@ -5263,7 +5900,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         '“Não.”',
         'O telefone vibra sobre a mesa. Clara olha para a tela e a vira para baixo.',
         '“Quer dizer... ainda não.”',
@@ -5281,7 +5918,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara demora para responder.',
         '“Aqui? Sim.”',
         'Ela olha para Duda no balcão.',
@@ -5300,7 +5937,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Depois de algum tempo, Clara apoia o queixo na mão.',
         '“Eu falei um monte e ainda não sei quase nada sobre você.”',
         'Ela aponta para você com uma caneta.',
@@ -5320,7 +5957,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'A conversa continua sem que nenhum dos dois perceba imediatamente quanto tempo passou.',
         'Quando Duda aumenta as luzes por alguns segundos para avisar que uma parte do salão será limpa, Clara pisca e olha em volta.',
         '“Eu devia estar editando.”',
@@ -5338,7 +5975,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Na noite seguinte em que você encontra Clara, Rafael aparece antes da meia-noite.',
         'Ele não entra imediatamente. Fica do lado de fora, visível pela porta, mandando mensagens.',
         'Clara vê a tela, guarda o telefone e continua conversando com Íris perto do palco.',
@@ -5359,7 +5996,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara diz alguma coisa. Rafael aproxima o rosto do dela.',
         'Ela tenta passar.',
         'Ele bloqueia o caminho com o corpo.',
@@ -5403,7 +6040,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Duda chega primeiro.',
         '“Solta.”',
         'Não há grito. Há autoridade.',
@@ -5423,7 +6060,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Você se aproxima.',
         '“Solta ela.”',
         'Rafael olha para você e aperta a mandíbula.',
@@ -5442,7 +6079,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Você percebe a diferença entre duas vontades.',
         'Uma quer que Clara fique segura.',
         'A outra quer que Rafael sofra.',
@@ -5459,7 +6096,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Sua aproximação muda a temperatura da conversa.',
         'Rafael solta Clara e se vira para você.',
         '“Ah. Então é isso.”',
@@ -5478,7 +6115,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'A Besta reduz a cena a uma conta simples: ameaça, rival, alvo.',
         'Você dá um passo.',
         'Depois outro.',
@@ -5523,7 +6160,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Rafael bate contra uma mesa e derruba duas cadeiras.',
         'O silêncio em volta dura pouco, mas é suficiente.',
         'Você sabe exatamente quanta força usou.',
@@ -5542,7 +6179,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · calçada · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Rafael para perto de um carro e percebe que você o seguiu.',
         '“Sabia.”',
         'Ele sorri sem humor.',
@@ -5560,7 +6197,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Rafael sai do bar.',
         'Clara fica alguns segundos olhando para a porta.',
         'Depois pega a câmera e a bolsa.',
@@ -5582,7 +6219,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Vocês esperam perto do balcão.',
         'Clara não fala sobre Rafael durante os primeiros minutos.',
         'Fala de uma lente que precisa consertar. De Bia reclamando que ela trabalha de graça. De um gato que aparece na janela do apartamento.',
@@ -5599,7 +6236,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara olha para Duda. Duda não responde por ela.',
         '“Pode ser.”',
         'Ela pega o capacete emprestado do bar.',
@@ -5616,7 +6253,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara balança a cabeça.',
         '“Não esta noite.”',
         'Não há espaço para interpretar a resposta como convite para insistir.',
@@ -5632,7 +6269,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Ruas de São Paulo · Pinheiros',
       venueId: 'pinheiros_streets',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'No primeiro sinal vermelho, Clara bate duas vezes de leve em seu ombro para chamar sua atenção.',
         '“Obrigada.”',
         'No segundo, ela pergunta se você sempre está acordado a essa hora.',
@@ -5650,7 +6287,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Na noite seguinte, há uma mensagem de Clara.',
         '“Desculpa por ontem.”',
         'Outra chega menos de um minuto depois.',
@@ -5669,7 +6306,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara volta duas noites depois.',
         'Está sozinha.',
         'Ela não parece aliviada. Parece cansada.',
@@ -5691,7 +6328,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara fica em silêncio.',
         '“Eu sei que você acha que isso ajuda.”',
         'Ela esfrega os olhos.',
@@ -5710,7 +6347,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara enumera o que já sabe que precisa fazer: trocar a fechadura, deixar parte do equipamento com Bia, avisar Duda e guardar as mensagens.',
         '“Eu não quero desaparecer da minha própria vida porque ele não aceita uma palavra de duas letras.”',
         'Ela quer continuar trabalhando.',
@@ -5728,7 +6365,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Na noite seguinte, Rafael espera do lado de fora.',
         'Ele não tenta entrar. Apenas permanece perto de um carro até Clara sair para falar com Duda na porta.',
         'Quando percebe que foi visto, ergue o telefone e tira uma fotografia.',
@@ -5749,7 +6386,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'O prazo não é uma regra de Rafael. É a janela em que vocês ainda sabem onde Clara estará e podem mudar sua rotina antes que ele tente cumprir a ameaça.',
         'As mensagens podem ser preservadas. Duda tem gravações do bar. Bia pode recebê-la. A fechadura pode ser trocada.',
         'Clara repete uma condição:',
@@ -5794,7 +6431,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Ruas de Pinheiros',
       venueId: 'pinheiros_streets',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Rafael aceita o encontro, mas não veio para conversar.',
         'Ele surge entre dois carros com uma lâmina curta. O primeiro movimento deixa claro que a ameaça não era apenas linguagem.',
         'O bar ainda está perto. Há luz, câmeras e pessoas na esquina.',
@@ -5860,7 +6497,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Ruas de Pinheiros',
       venueId: 'pinheiros_streets',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Você consegue manter a violência dentro de um limite.',
         'Rafael termina no chão, vivo e consciente o bastante para entender que perdeu.',
         'O que importa agora não é fazê-lo sofrer.',
@@ -5885,7 +6522,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Ruas de Pinheiros',
       venueId: 'pinheiros_streets',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Quando você recupera a dimensão da rua, Rafael está no chão e há sangue demais para chamar aquilo de simples contenção.',
         'Ele ainda respira.',
         'A percepção não produz alívio imediato.',
@@ -5910,7 +6547,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Cinco noites depois, Clara volta ao Último Gole com Bia.',
         'Rafael está afastado de sua rotina, mas isso não apaga o hábito de Clara olhar para a rua quando um carro reduz a velocidade.',
         'Ela veio buscar parte do equipamento e conversar com Íris sobre trabalho.',
@@ -5930,7 +6567,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Íris conseguiu dois trabalhos pagos e deixou Clara usar uma das noites para começar o projeto pessoal.',
         'Ela mostra imagens de um padeiro chegando às três da manhã, uma enfermeira esperando ônibus e dois garis dividindo café num posto.',
         '“Ainda quero fazer aquela série.”',
@@ -5948,7 +6585,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         '“Melhor e pior.”',
         'Clara dá de ombros.',
         '“Melhor porque não tenho que explicar cada mensagem. Pior porque agora eu percebo quantas coisas eu parei de fazer para evitar discussão.”',
@@ -5966,7 +6603,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara fecha a pasta.',
         '“Eu não terminei com ele para chegar a sua vez.”',
         'A frase não é cruel. É precisa.',
@@ -5983,7 +6620,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara ergue a câmera.',
         '“Fica parado.”',
         'A lente aponta diretamente para você desta vez.',
@@ -6004,7 +6641,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'O obturador dispara.',
         'Clara olha o visor e sorri.',
         '“Finalmente.”',
@@ -6024,7 +6661,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara abaixa a câmera.',
         '“Você é realmente estranho com foto.”',
         'Ela diz sorrindo, mas observa sua reação.',
@@ -6042,7 +6679,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Quatro noites depois, vocês conseguem passar quase uma hora juntos sem falar de Rafael.',
         'Clara conta histórias de trabalhos ruins, clientes que pedem “foto espontânea” depois de ensaiar pose e bandas que oferecem divulgação como pagamento.',
         'Ela ri bastante.',
@@ -6062,7 +6699,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara percebe a aproximação e não recua.',
         'O beijo começa humano.',
         'Então a proximidade muda outras coisas.',
@@ -6107,7 +6744,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'A fome continua presente, mas não atravessa a decisão.',
         'Quando o beijo termina, Clara permanece perto.',
         '“Você está gelado.”',
@@ -6125,7 +6762,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Você se afasta abruptamente.',
         'Clara percebe.',
         '“O que foi?”',
@@ -6144,7 +6781,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara recua um centímetro.',
         '“Você me mordeu?”',
         'Não houve perfuração. Não houve sangue.',
@@ -6162,7 +6799,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Você se afasta antes de perder a capacidade de fingir que a fome não existe.',
         'Clara não parece ofendida. Apenas surpresa.',
         '“Tudo bem?”',
@@ -6179,7 +6816,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Em outro encontro, Clara chega com duas cervejas por hábito e para antes de entregar uma delas.',
         '“Você nunca bebe.”',
         'Ela coloca as duas na mesa.',
@@ -6203,7 +6840,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara não gosta da resposta.',
         'Mas acredita que ela é, pelo menos, parcialmente verdadeira.',
         '“Então não me faz achar que eu estou ficando louca.”',
@@ -6220,7 +6857,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Cada explicação funciona sozinha.',
         'Juntas, funcionam pior.',
         'Clara não discute.',
@@ -6238,7 +6875,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'A proximidade continua sem que vocês a transformem em namoro.',
         'Clara manda fotografias ruins de placas engraçadas de madrugada. Pede opinião sobre trabalhos. Às vezes simplesmente ocupa a mesma mesa enquanto edita.',
         'Ela se torna uma das poucas pessoas mortais com quem você consegue passar uma noite sem precisar representar alguma coisa o tempo todo.',
@@ -6261,7 +6898,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Clara coloca uma fotografia impressa sobre a mesa.',
         'É uma imagem do Último Gole quase vazio. Você aparece ao fundo, ou apenas a cadeira onde costuma sentar se nunca permitiu o retrato.',
         '“Eu gosto porque não parece que ninguém está tentando impressionar ninguém.”',
@@ -6303,7 +6940,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Algumas relações terminam antes de receber um nome.',
         'Clara não insiste.',
         'Quando vocês se encontram no bar, ela cumprimenta. Às vezes conversa. Às vezes não.',
@@ -6326,7 +6963,7 @@ A conversa claramente não está indo bem, mas as palavras se perdem no volume d
       place: 'Ruas de Pinheiros',
       venueId: 'pinheiros_streets',
       locations: ['pinheiros'],
-      text: [
+      narration: [
         'Bia é quem traz a notícia.',
         'Rafael encontrou Clara antes que as medidas de proteção fossem concluídas.',
         'As mensagens preservadas deixam claro que a ameaça era deliberada.',

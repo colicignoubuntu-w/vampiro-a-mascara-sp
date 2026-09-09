@@ -1434,3 +1434,177 @@
 
   font-weight: 700;
 }
+
+/* ==========================================
+   VIDEO DE FUNDO — GARANTIR VISIBILIDADE
+   ========================================== */
+
+.game-screen.has-city-video .game-background {
+  z-index: 0;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(2, 2, 3, 0.38) 0%,
+      rgba(3, 2, 3, 0.20) 42%,
+      rgba(3, 2, 3, 0.05) 100%
+    ),
+    linear-gradient(
+      0deg,
+      rgba(2, 2, 3, 0.20),
+      transparent 55%
+    );
+  pointer-events: none;
+}
+
+.game-screen.has-city-video .game-dark-overlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.10),
+      transparent 20%,
+      transparent 80%,
+      rgba(0, 0, 0, 0.10)
+    );
+}
+/* ==========================================================
+   CITY VIDEO · VISÍVEL ATRÁS DO FREE ROAM
+   ========================================================== */
+
+.game-screen.has-city-video .free-roam-screen {
+  background: transparent !important;
+}
+
+.game-screen.has-city-video .free-roam-background {
+  background-image: none !important;
+  background-color: transparent !important;
+  opacity: 1;
+}
+
+/*
+ * Mantém a interface legível, mas deixa o vídeo aparecer
+ * através das áreas vazias da exploração.
+ */
+.game-screen.has-city-video .free-roam-layout,
+.game-screen.has-city-video .free-roam-main {
+  background: transparent !important;
+}
+/* ==========================================================
+   CITY VIDEO · ORDEM DAS CAMADAS
+   ========================================================== */
+
+.game-screen.has-city-video > .game-background {
+  z-index: 0 !important;
+  background: transparent !important;
+}
+
+.game-screen.has-city-video > .game-dark-overlay {
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+.game-screen.has-city-video .free-roam-screen {
+  position: relative;
+  z-index: 2;
+  background: transparent !important;
+}
+
+.game-screen.has-city-video .free-roam-background {
+  background: transparent !important;
+}
+
+
+/* ==========================================================
+   RELACIONAMENTO EM DIALOG + CITY VIDEO
+   Esconde a exploração que fica atrás do portal,
+   mas preserva o vídeo do YouTube.
+   ========================================================== */
+
+body:has(
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode[open]
+)
+.game-screen.has-city-video
+.free-roam-screen {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/*
+ * O fundo normal do jogo também não deve aparecer por trás
+ * da cena; o CityVideoPlayer continua visível.
+ */
+body:has(
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode[open]
+)
+.game-screen.has-city-video
+.game-background,
+body:has(
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode[open]
+)
+.game-screen.has-city-video
+.game-dark-overlay {
+  opacity: 0 !important;
+}
+
+/*
+ * Mantém o vídeo ativo e visível enquanto o diálogo
+ * de relacionamento estiver aberto.
+ */
+body:has(
+  dialog.relationships-dialog.relationship-place.relationship-place-story-mode[open]
+)
+.game-screen.has-city-video
+.city-video {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+
+/* ==========================================================
+   DIALOG RELATIONSHIP V4
+   Portais ficam no body. Durante a cena, escondemos o jogo
+   base e preservamos somente o CityVideoPlayer.
+   ========================================================== */
+
+body.relationship-place-dialog-open
+.game-screen.has-city-video
+> :not(.city-video):not(.city-video-actions),
+body.ultimo-gole-encounter-dialog-open
+.game-screen.has-city-video
+> :not(.city-video):not(.city-video-actions) {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.relationship-place-dialog-open
+.game-screen.has-city-video
+> .city-video,
+body.ultimo-gole-encounter-dialog-open
+.game-screen.has-city-video
+> .city-video {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+body.relationship-place-dialog-open
+.game-screen.has-city-video
+> .city-video-actions,
+body.ultimo-gole-encounter-dialog-open
+.game-screen.has-city-video
+> .city-video-actions {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+body.relationship-place-dialog-open
+.game-screen.has-city-video
+.free-roam-screen,
+body.ultimo-gole-encounter-dialog-open
+.game-screen.has-city-video
+.free-roam-screen {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

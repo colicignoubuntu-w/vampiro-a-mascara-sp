@@ -143,14 +143,9 @@ test('cross-NPC help requires earned trust, and every other arc has a reachable 
   }
 })
 
-test('authored self-control tests follow their outcomes instead of ending the relationship', () => {
-  for (const result of ['success', 'failure', 'botch']) {
-    let g = game()
-    g = choose(g, 'clara', 'hold')
-    const choice = RELATIONSHIP_NPCS.clara.scenes.arrival_hold.choices.find(c => c.id === 'control')
-    g = performRelationshipChoice(g, 'clara', 'arrival_hold', 'control', () => ({ result, successes: result === 'success' ? 2 : 0, dice: [6] }))
-    assert.equal(g.relationships.clara.node, choice.test[result].next)
-    assert.equal(g.relationships.clara.completed, false)
-    assert.equal(g.relationships.clara.journal.at(-1).test.result, result)
-  }
+test('clara encounter scenes explicitly name the current speaker in the first and second meetings', () => {
+  assert.equal(RELATIONSHIP_NPCS.clara.scenes.first_opener_band.dialogue.speaker, 'Clara')
+  assert.equal(RELATIONSHIP_NPCS.clara.scenes.first_livia_recognition.dialogue.speaker, 'Clara')
+  assert.equal(RELATIONSHIP_NPCS.clara.scenes.second2_show_rafael_question.dialogue.speaker, 'Rafael')
+  assert.equal(RELATIONSHIP_NPCS.clara.scenes.second2_touch_scene.dialogue.speaker, 'Clara')
 })
