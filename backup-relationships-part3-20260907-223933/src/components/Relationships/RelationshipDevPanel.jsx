@@ -1,0 +1,700 @@
+import { useMemo, useState } from 'react'
+
+import {
+  RELATIONSHIP_NPCS,
+} from '../../data/npcs/relationships/index.js'
+
+import {
+  DOMINATION_STATES,
+  PRESENCE_STATES,
+  RELATIONSHIP_METRIC_CONFIG,
+  RELATIONSHIP_STATUS,
+  adjustRelationshipMetric,
+  getRelationshipState,
+  relationshipPresentation,
+  resetAllRelationships,
+  resetRelationship,
+  setRelationshipContact,
+  setRelationshipInfluence,
+  setRelationshipStatus,
+} from '../../engine/relationships/relationshipModel'
+
+import './RelationshipDevPanel.css'
+
+function MetricControl({
+  label,
+  value,
+  min,
+  max,
+  onAdjust,
+}) {
+  return (
+    <div className="relationship-dev-metric">
+      <div className="relationship-dev-metric-heading">
+        <span>{label}</span>
+        <strong>{value}</strong>
+      </div>
+
+      <div className="relationship-dev-scale">
+        <div
+          style={{
+            width:
+              `${Math.max(
+                0,
+                Math.min(
+                  100,
+                  ((value - min) /
+                    (max - min)) *
+                    100
+                )
+              )}%`,
+          }}
+        />
+      </div>
+
+      <div className="relationship-dev-buttons">
+        <button
+          type="button"
+          onClick={() =>
+            onAdjust(-10)
+          }
+          disabled={
+            value <= min
+          }
+        >
+          -10
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            onAdjust(-1)
+          }
+          disabled={
+            value <= min
+          }
+        >
+          -1
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            onAdjust(1)
+          }
+          disabled={
+            value >= max
+          }
+        >
+          +1
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            onAdjust(10)
+          }
+          disabled={
+            value >= max
+          }
+        >
+          +10
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default function RelationshipDevPanel({
+  game,
+  onChange,
+}) {
+  const ids =
+    useMemo(
+      () =>
+        Object.keys(
+          RELATIONSHIP_NPCS
+        ),
+      []
+    )
+
+  const [npcId, setNpcId] =
+    useState(
+      ids[0] ??
+      ''
+    )
+
+  const npc =
+    RELATIONSHIP_NPCS[
+      npcId
+    ]
+
+  const state =
+    npc
+      ? getRelationshipState(
+          game,
+          npcId
+        )
+      : null
+
+  const presentation =
+    state
+      ? relationshipPresentation(
+          state
+        )
+      : null
+
+  function persist(nextGame) {
+    onChange?.(
+      nextGame
+    )
+  }
+
+  function adjust(
+    key,
+    amount
+  ) {
+    persist(
+      adjustRelationshipMetric(
+        game,
+        npcId,
+        key,
+        amount
+      )
+    )
+  }
+
+  function changeStatus(
+    event
+  ) {
+    persist(
+      setRelationshipStatus(
+        game,
+        npcId,
+        event.target.value
+      )
+    )
+  }
+
+  function changeBloodBond(
+    amount
+  ) {
+    persist(
+      setRelationshipInfluence(
+        game,
+        npcId,
+        {
+          bloodBond:
+            (
+              state
+                ?.influence
+                ?.bloodBond ??
+              0
+            ) +
+            amount,
+        }
+      )
+    )
+  }
+
+  function resetOne() {
+    const confirmed =
+      window.confirm(
+        `Resetar completamente a relação com ${npc.name}? Diário, flags, prazos, contato e progresso serão zerados.`
+      )
+
+    if (!confirmed) {
+      return
+    }
+
+    persist(
+      resetRelationship(
+        game,
+        npcId
+      )
+    )
+  }
+
+  function resetAll() {
+    const confirmed =
+      window.confirm(
+        'Resetar TODAS as relações? Isso reinicia Clara, Mara, Elisa, Íris e Helena.'
+      )
+
+    if (!confirmed) {
+      return
+    }
+
+    persist(
+      resetAllRelationships(
+        game
+      )
+    )
+  }
+
+  if (
+    !npc ||
+    !state
+  ) {
+    return null
+  }
+
+  return (
+    <section className="relationship-dev">
+      <header className="relationship-dev-title">
+        <div>
+          <small>
+            RELACIONAMENTOS
+          </small>
+
+          <strong>
+            Editor de estado
+          </strong>
+        </div>
+
+        <span>
+          DEV
+        </span>
+      </header>
+
+      <label className="relationship-dev-field">
+        <span>
+          Personagem
+        </span>
+
+        <select
+          value={npcId}
+          onChange={
+            event =>
+              setNpcId(
+                event.target.value
+              )
+          }
+        >
+          {ids.map(id => (
+            <option
+              key={id}
+              value={id}
+            >
+              {
+                RELATIONSHIP_NPCS[
+                  id
+                ].name
+              }
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <div className="relationship-dev-summary">
+        <strong>
+          {npc.name}
+        </strong>
+
+        <span>
+          {presentation.status}
+          {' · '}
+          {presentation.mood}
+        </span>
+
+        <small>
+          Nó atual: {state.node}
+          {state.completed
+            ? ' · concluído'
+            : ''}
+        </small>
+      </div>
+
+      <label className="relationship-dev-field">
+        <span>
+          Estado social
+        </span>
+
+        <select
+          value={
+            state.status
+          }
+          onChange={
+            changeStatus
+          }
+        >
+          {Object.entries(
+            RELATIONSHIP_STATUS
+          ).map(
+            ([
+              id,
+              label,
+            ]) => (
+              <option
+                key={id}
+                value={id}
+              >
+                {label}
+              </option>
+            )
+          )}
+        </select>
+      </label>
+
+      <div className="relationship-dev-metrics">
+        {Object.entries(
+          RELATIONSHIP_METRIC_CONFIG
+        ).map(
+          ([
+            key,
+            config,
+          ]) => (
+            <MetricControl
+              key={key}
+              label={
+                config.label
+              }
+              value={
+                state
+                  .relationshipMetrics
+                  ?.[key] ??
+                0
+              }
+              min={
+                config.min
+              }
+              max={
+                config.max
+              }
+              onAdjust={
+                amount =>
+                  adjust(
+                    key,
+                    amount
+                  )
+              }
+            />
+          )
+        )}
+      </div>
+
+      <div className="relationship-dev-block">
+        <span className="relationship-dev-block-label">
+          Laço de Sangue
+        </span>
+
+        <div className="relationship-dev-bond">
+          <button
+            type="button"
+            onClick={() =>
+              changeBloodBond(
+                -1
+              )
+            }
+            disabled={
+              (
+                state
+                  .influence
+                  ?.bloodBond ??
+                0
+              ) <= 0
+            }
+          >
+            −
+          </button>
+
+          <strong>
+            {
+              state
+                .influence
+                ?.bloodBond ??
+              0
+            }/3
+          </strong>
+
+          <button
+            type="button"
+            onClick={() =>
+              changeBloodBond(
+                1
+              )
+            }
+            disabled={
+              (
+                state
+                  .influence
+                  ?.bloodBond ??
+                0
+              ) >= 3
+            }
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      <label className="relationship-dev-field">
+        <span>
+          Dominação
+        </span>
+
+        <select
+          value={
+            state
+              .influence
+              ?.domination ??
+            'none'
+          }
+          onChange={
+            event =>
+              persist(
+                setRelationshipInfluence(
+                  game,
+                  npcId,
+                  {
+                    domination:
+                      event
+                        .target
+                        .value,
+                  }
+                )
+              )
+          }
+        >
+          {Object.entries(
+            DOMINATION_STATES
+          ).map(
+            ([
+              id,
+              label,
+            ]) => (
+              <option
+                key={id}
+                value={id}
+              >
+                {label}
+              </option>
+            )
+          )}
+        </select>
+      </label>
+
+      <label className="relationship-dev-field">
+        <span>
+          Presença
+        </span>
+
+        <select
+          value={
+            state
+              .influence
+              ?.presence ??
+            'none'
+          }
+          onChange={
+            event =>
+              persist(
+                setRelationshipInfluence(
+                  game,
+                  npcId,
+                  {
+                    presence:
+                      event
+                        .target
+                        .value,
+                  }
+                )
+              )
+          }
+        >
+          {Object.entries(
+            PRESENCE_STATES
+          ).map(
+            ([
+              id,
+              label,
+            ]) => (
+              <option
+                key={id}
+                value={id}
+              >
+                {label}
+              </option>
+            )
+          )}
+        </select>
+      </label>
+
+      <div className="relationship-dev-block">
+        <span className="relationship-dev-block-label">
+          Telefone
+        </span>
+
+        <label className="relationship-dev-check">
+          <input
+            type="checkbox"
+            checked={
+              Boolean(
+                state
+                  .contact
+                  ?.known
+              )
+            }
+            onChange={
+              event =>
+                persist(
+                  setRelationshipContact(
+                    game,
+                    npcId,
+                    {
+                      known:
+                        event
+                          .target
+                          .checked,
+                    }
+                  )
+                )
+            }
+          />
+
+          <span>
+            Número conhecido
+          </span>
+        </label>
+
+        <label className="relationship-dev-check">
+          <input
+            type="checkbox"
+            checked={
+              Boolean(
+                state
+                  .contact
+                  ?.blocked
+              )
+            }
+            onChange={
+              event =>
+                persist(
+                  setRelationshipContact(
+                    game,
+                    npcId,
+                    {
+                      blocked:
+                        event
+                          .target
+                          .checked,
+                    }
+                  )
+                )
+            }
+          />
+
+          <span>
+            Bloqueou o personagem
+          </span>
+        </label>
+
+        <label className="relationship-dev-field">
+          <span>
+            Número / identificação
+          </span>
+
+          <input
+            type="text"
+            value={
+              state
+                .contact
+                ?.number ??
+              ''
+            }
+            placeholder="Número salvo"
+            onChange={
+              event =>
+                persist(
+                  setRelationshipContact(
+                    game,
+                    npcId,
+                    {
+                      number:
+                        event
+                          .target
+                          .value ||
+                        null,
+                    }
+                  )
+                )
+            }
+          />
+        </label>
+      </div>
+
+      <details className="relationship-dev-legacy">
+        <summary>
+          Compatibilidade antiga
+        </summary>
+
+        <div>
+          <span>
+            Confiança antiga
+          </span>
+          <strong>
+            {
+              state
+                .metrics
+                ?.trust ??
+              0
+            }
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            Afinidade antiga
+          </span>
+          <strong>
+            {
+              state
+                .metrics
+                ?.affinity ??
+              0
+            }
+          </strong>
+        </div>
+
+        <div>
+          <span>
+            Respeito antigo
+          </span>
+          <strong>
+            {
+              state
+                .metrics
+                ?.respect ??
+              0
+            }
+          </strong>
+        </div>
+
+        <small>
+          Estes três valores continuam existindo porque as cenas antigas ainda os usam para requisitos e escolhas. O novo sistema é atualizado junto com eles.
+        </small>
+      </details>
+
+      <div className="relationship-dev-reset">
+        <button
+          type="button"
+          onClick={
+            resetOne
+          }
+        >
+          Resetar {npc.name.split(' ')[0]}
+        </button>
+
+        <button
+          type="button"
+          className="relationship-dev-danger"
+          onClick={
+            resetAll
+          }
+        >
+          Resetar todas
+        </button>
+      </div>
+    </section>
+  )
+}

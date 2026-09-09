@@ -1,0 +1,2769 @@
+import { RELATIONSHIP_NPCS } from '../../data/npcs/relationships/index.js'
+import {
+  adjustRelationshipMetric,
+  getRelationshipState,
+  setRelationshipContact,
+} from './relationshipModel'
+
+const DAY = 1440
+
+export const RELATIONSHIP_PHONE_ACTIONS = {
+  message: 'Mensagem',
+  call: 'Ligar',
+  invite: 'Convidar para sair',
+  help: 'Pedir ajuda',
+  blood: 'Pedir sangue',
+}
+
+export function relationshipPhoneMinutes(world) {
+  return (
+    ((world?.day ?? 1) - 1) * DAY +
+    (world?.hour ?? 0) * 60 +
+    (world?.minute ?? 0)
+  )
+}
+
+function addPhoneEntry(
+  game,
+  {
+    npcId,
+    sender,
+    text,
+    kind = 'message',
+    direction = 'incoming',
+    at,
+  }
+) {
+  const currentPhone =
+    game?.livelihood?.phone ?? []
+
+  const now =
+    at ??
+    relationshipPhoneMinutes(
+      game?.world
+    )
+
+  const entry = {
+    id:
+      `relationship-phone:${npcId}:${now}:${currentPhone.length}`,
+
+    npcId,
+    sender,
+    text,
+    kind,
+    direction,
+    at: now,
+    read:
+      direction === 'outgoing',
+  }
+
+  return {
+    ...game,
+
+    livelihood: {
+      ...(game.livelihood ?? {}),
+      phone: [
+        ...currentPhone,
+        entry,
+      ],
+    },
+  }
+}
+
+function addMemory(
+  game,
+  npcId,
+  {
+    id,
+    type,
+    text,
+    weight = 1,
+  }
+) {
+  const state =
+    getRelationshipState(
+      game,
+      npcId
+    )
+
+  if (!state) {
+    return game
+  }
+
+  const at =
+    relationshipPhoneMinutes(
+      game.world
+    )
+
+  return {
+    ...game,
+
+    relationships: {
+      ...(game.relationships ?? {}),
+
+      [npcId]: {
+        ...state,
+
+        memories: [
+          ...(state.memories ?? []),
+
+          {
+            id:
+              `${id}:${at}`,
+
+            type,
+            text,
+            weight,
+            at,
+          },
+        ],
+      },
+    },
+  }
+}
+
+function isBusy(game) {
+  return Boolean(
+    game?.livelihood?.active ||
+    game?.livelihood?.crime ||
+    game?.livelihood?.workEvent ||
+    game?.flags?.humanityCheckRequired
+  )
+}
+
+export function relationshipPhoneActionReason(
+  game,
+  npcId,
+  action
+) {
+  const state =
+    getRelationshipState(
+      game,
+      npcId
+    )
+
+  const npc =
+    RELATIONSHIP_NPCS[
+      npcId
+    ]
+
+  if (
+    !state ||
+    !npc
+  ) {
+    return 'Contato desconhecido.'
+  }
+
+  if (
+    !state.contact?.known
+  ) {
+    return 'Você ainda não tem o número dessa pessoa.'
+  }
+
+  if (
+    state.contact?.blocked
+  ) {
+    return 'Essa pessoa bloqueou seu contato.'
+  }
+
+  if (isBusy(game)) {
+    return 'Resolva a atividade em andamento antes de usar o celular.'
+  }
+
+  const m =
+    state.relationshipMetrics ?? {}
+
+  if (
+    action === 'invite' &&
+    ['enemy', 'hostile'].includes(
+      state.status
+    )
+  ) {
+    return 'A relação está hostil demais para um convite casual.'
+  }
+
+  if (
+    action === 'help' &&
+    (
+      (m.trust ?? 0) < 20 ||
+      (m.anger ?? 0) >= 75
+    )
+  ) {
+    return 'A relação ainda não tem confiança suficiente para pedir ajuda.'
+  }
+
+  if (action === 'blood') {
+    const knows =
+      Boolean(
+        state.flags?.knowsVampire ||
+        state.flags?.knowsTruth ||
+        state.flags?.knowsUndead ||
+        state.flags?.bloodDonor
+      ) ||
+      (
+        state.influence
+          ?.bloodBond ??
+        0
+      ) > 0
+
+    if (!knows) {
+      return 'Essa pessoa ainda não sabe o suficiente para entender esse pedido.'
+    }
+
+    if (
+      (m.trust ?? 0) < 45 &&
+      (
+        state.influence
+          ?.bloodBond ??
+        0
+      ) < 2
+    ) {
+      return 'Ela não confia o bastante em você para esse tipo de pedido.'
+    }
+
+    if (
+      (m.safety ?? 0) < 10 &&
+      (
+        state.influence
+          ?.bloodBond ??
+        0
+      ) === 0
+    ) {
+      return 'Ela não se sente segura o bastante com você.'
+    }
+  }
+
+  return null
+}
+
+function reactionScore(state) {
+  const m =
+    state.relationshipMetrics ?? {}
+
+  return (
+    (m.trust ?? 0) * 0.28 +
+    (m.affection ?? 0) * 0.22 +
+    (m.happiness ?? 0) * 0.18 +
+    (m.safety ?? 0) * 0.14 +
+    (m.attraction ?? 0) * 0.08 +
+    (m.dependency ?? 0) * 0.05 -
+    (m.anger ?? 0) * 0.22 -
+    (m.fear ?? 0) * 0.10 +
+    (
+      state.influence
+        ?.bloodBond ??
+      0
+    ) * 12
+  )
+}
+
+function npcReply(
+  game,
+  npcId,
+  text,
+  kind = 'message'
+) {
+  const npc =
+    RELATIONSHIP_NPCS[npcId]
+
+  return addPhoneEntry(
+    game,
+    {
+      npcId,
+      sender:
+        npc?.name ??
+        npcId,
+
+      text,
+      kind,
+      direction:
+        'incoming',
+    }
+  )
+}
+
+function playerEntry(
+  game,
+  npcId,
+  text,
+  kind = 'message'
+) {
+  return addPhoneEntry(
+    game,
+    {
+      npcId,
+      sender: 'Você',
+      text,
+      kind,
+      direction:
+        'outgoing',
+    }
+  )
+}
+
+function applyMetricPatch(
+  game,
+  npcId,
+  patch
+) {
+  let next = game
+
+  for (
+    const [key, amount]
+    of Object.entries(patch)
+  ) {
+    next =
+      adjustRelationshipMetric(
+        next,
+        npcId,
+        key,
+        amount
+      )
+  }
+
+  return next
+}
+
+function nextNightAppointmentStart(
+  game
+) {
+  const now =
+    relationshipPhoneMinutes(
+      game.world
+    )
+
+  const currentDay =
+    Math.floor(
+      now / DAY
+    )
+
+  const hour =
+    game.world?.hour ?? 0
+
+  // Se ainda é cedo na noite, permite um encontro mais tarde;
+  // caso contrário marca para a noite seguinte.
+  if (
+    hour >= 18 &&
+    hour < 21
+  ) {
+    return (
+      currentDay * DAY +
+      22 * 60 +
+      30
+    )
+  }
+
+  return (
+    (currentDay + 1) * DAY +
+    22 * 60 +
+    30
+  )
+}
+
+function appointmentConflict(
+  game,
+  start,
+  end
+) {
+  const work =
+    game?.livelihood
+      ?.appointments ??
+    []
+
+  const relationship =
+    game?.relationshipAppointments ??
+    []
+
+  return [
+    ...work,
+    ...relationship,
+  ].some(
+    appointment =>
+      ![
+        'cancelled',
+        'excused',
+        'missed',
+      ].includes(
+        appointment.status
+      ) &&
+      start <
+        appointment.end &&
+      end >
+        appointment.start
+  )
+}
+
+function appointmentPlace(
+  game,
+  npcId
+) {
+  const state =
+    getRelationshipState(
+      game,
+      npcId
+    )
+
+  const npc =
+    RELATIONSHIP_NPCS[npcId]
+
+  const scene =
+    npc
+      ?.scenes
+      ?.[state?.node]
+
+  return (
+    scene?.place ??
+    npc?.role ??
+    'São Paulo'
+  )
+}
+
+function createRelationshipAppointment(
+  game,
+  npcId
+) {
+  const npc =
+    RELATIONSHIP_NPCS[npcId]
+
+  let start =
+    nextNightAppointmentStart(
+      game
+    )
+
+  let end =
+    start + 120
+
+  // Se houver conflito, tenta até sete noites seguintes.
+  for (
+    let attempt = 0;
+    attempt < 7;
+    attempt += 1
+  ) {
+    if (
+      !appointmentConflict(
+        game,
+        start,
+        end
+      )
+    ) {
+      break
+    }
+
+    start += DAY
+    end += DAY
+  }
+
+  if (
+    appointmentConflict(
+      game,
+      start,
+      end
+    )
+  ) {
+    return {
+      game,
+      appointment: null,
+    }
+  }
+
+  const appointment = {
+    id:
+      `relationship:${npcId}:${start}`,
+
+    npcId,
+    type:
+      'relationship',
+
+    title:
+      `Encontrar ${npc.name}`,
+
+    place:
+      appointmentPlace(
+        game,
+        npcId
+      ),
+
+    start,
+    end,
+
+    status:
+      'scheduled',
+  }
+
+  return {
+    game: {
+      ...game,
+
+      relationshipAppointments: [
+        ...(
+          game
+            .relationshipAppointments ??
+          []
+        ),
+        appointment,
+      ],
+    },
+
+    appointment,
+  }
+}
+
+export function sendRelationshipMessage(
+  input,
+  npcId
+) {
+  const reason =
+    relationshipPhoneActionReason(
+      input,
+      npcId,
+      'message'
+    )
+
+  if (reason) {
+    throw new Error(reason)
+  }
+
+  const state =
+    getRelationshipState(
+      input,
+      npcId
+    )
+
+  const score =
+    reactionScore(
+      state
+    )
+
+  let game =
+    playerEntry(
+      input,
+      npcId,
+      'Oi. Está acordada?'
+    )
+
+  if (
+    (state.relationshipMetrics?.anger ?? 0) >= 75
+  ) {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Estou. Mas não quero conversar agora.'
+      )
+  } else if (
+    score >= 55
+  ) {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Estou. Pensei em você hoje. O que aconteceu?'
+      )
+
+    game =
+      applyMetricPatch(
+        game,
+        npcId,
+        {
+          happiness: 2,
+          affection: 1,
+        }
+      )
+  } else if (
+    score >= 15
+  ) {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Estou. Tudo bem por aí?'
+      )
+  } else {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Vi sua mensagem. Fala.'
+      )
+  }
+
+  return addMemory(
+    game,
+    npcId,
+    {
+      id:
+        'phone-message',
+
+      type:
+        'contact',
+
+      text:
+        'Vocês trocaram mensagens.',
+
+      weight: 1,
+    }
+  )
+}
+
+export function callRelationshipContact(
+  input,
+  npcId
+) {
+  const reason =
+    relationshipPhoneActionReason(
+      input,
+      npcId,
+      'call'
+    )
+
+  if (reason) {
+    throw new Error(reason)
+  }
+
+  const state =
+    getRelationshipState(
+      input,
+      npcId
+    )
+
+  const score =
+    reactionScore(
+      state
+    )
+
+  let game =
+    playerEntry(
+      input,
+      npcId,
+      'Ligação realizada.',
+      'call'
+    )
+
+  if (
+    (state.relationshipMetrics?.anger ?? 0) >= 80
+  ) {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Ligação recusada.',
+        'call'
+      )
+  } else if (
+    score >= 30
+  ) {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Ela atendeu. Vocês conversaram por alguns minutos.',
+        'call'
+      )
+
+    game =
+      applyMetricPatch(
+        game,
+        npcId,
+        {
+          trust: 1,
+          happiness: 1,
+        }
+      )
+  } else {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Ela atendeu, mas a conversa foi curta.',
+        'call'
+      )
+  }
+
+  return addMemory(
+    game,
+    npcId,
+    {
+      id:
+        'phone-call',
+
+      type:
+        'contact',
+
+      text:
+        'Vocês conversaram por telefone.',
+
+      weight: 1,
+    }
+  )
+}
+
+export function inviteRelationshipContact(
+  input,
+  npcId
+) {
+  const reason =
+    relationshipPhoneActionReason(
+      input,
+      npcId,
+      'invite'
+    )
+
+  if (reason) {
+    throw new Error(reason)
+  }
+
+  const state =
+    getRelationshipState(
+      input,
+      npcId
+    )
+
+  const score =
+    reactionScore(
+      state
+    )
+
+  let game =
+    playerEntry(
+      input,
+      npcId,
+      'Quer sair comigo uma noite dessas?'
+    )
+
+  if (
+    (state.relationshipMetrics?.anger ?? 0) >= 70
+  ) {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Agora não. Eu ainda estou com raiva de você.'
+      )
+
+    return addMemory(
+      game,
+      npcId,
+      {
+        id:
+          'invite-refused-angry',
+
+        type:
+          'rejection',
+
+        text:
+          'Ela recusou um convite porque ainda estava com raiva.',
+
+        weight: 4,
+      }
+    )
+  }
+
+  if (
+    score < 0
+  ) {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Acho melhor não.'
+      )
+
+    return addMemory(
+      game,
+      npcId,
+      {
+        id:
+          'invite-refused',
+
+        type:
+          'rejection',
+
+        text:
+          'Ela recusou um convite para sair.',
+
+        weight: 2,
+      }
+    )
+  }
+
+  const result =
+    createRelationshipAppointment(
+      game,
+      npcId
+    )
+
+  if (
+    !result.appointment
+  ) {
+    return npcReply(
+      game,
+      npcId,
+      'Quero, mas nossas agendas estão péssimas. A gente combina depois.'
+    )
+  }
+
+  game =
+    result.game
+
+  const day =
+    Math.floor(
+      result.appointment.start /
+      DAY
+    ) + 1
+
+  const time =
+    result.appointment.start %
+    DAY
+
+  const hour =
+    String(
+      Math.floor(
+        time / 60
+      )
+    ).padStart(
+      2,
+      '0'
+    )
+
+  const minute =
+    String(
+      time % 60
+    ).padStart(
+      2,
+      '0'
+    )
+
+  game =
+    npcReply(
+      game,
+      npcId,
+      `Fechado. Dia ${day}, às ${hour}:${minute}.`
+    )
+
+  game =
+    applyMetricPatch(
+      game,
+      npcId,
+      {
+        happiness:
+          score >= 45
+            ? 4
+            : 2,
+
+        affection:
+          score >= 45
+            ? 2
+            : 1,
+      }
+    )
+
+  return addMemory(
+    game,
+    npcId,
+    {
+      id:
+        'date-scheduled',
+
+      type:
+        'positive',
+
+      text:
+        'Vocês marcaram um encontro pelo celular.',
+
+      weight: 3,
+    }
+  )
+}
+
+export function askRelationshipHelp(
+  input,
+  npcId
+) {
+  const reason =
+    relationshipPhoneActionReason(
+      input,
+      npcId,
+      'help'
+    )
+
+  if (reason) {
+    throw new Error(reason)
+  }
+
+  const state =
+    getRelationshipState(
+      input,
+      npcId
+    )
+
+  const score =
+    reactionScore(
+      state
+    )
+
+  let game =
+    playerEntry(
+      input,
+      npcId,
+      'Preciso de uma ajuda. Posso contar com você?'
+    )
+
+  if (
+    score >= 35
+  ) {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Pode. Me explica o que você precisa.'
+      )
+
+    game =
+      applyMetricPatch(
+        game,
+        npcId,
+        {
+          trust: 1,
+          dependency: 1,
+        }
+      )
+  } else {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Depende do que você está me pedindo.'
+      )
+  }
+
+  return addMemory(
+    game,
+    npcId,
+    {
+      id:
+        'asked-for-help',
+
+      type:
+        'request',
+
+      text:
+        'Você pediu ajuda pelo telefone.',
+
+      weight: 2,
+    }
+  )
+}
+
+export function askRelationshipBlood(
+  input,
+  npcId
+) {
+  const reason =
+    relationshipPhoneActionReason(
+      input,
+      npcId,
+      'blood'
+    )
+
+  if (reason) {
+    throw new Error(reason)
+  }
+
+  const state =
+    getRelationshipState(
+      input,
+      npcId
+    )
+
+  const m =
+    state.relationshipMetrics ??
+    {}
+
+  const bond =
+    state.influence
+      ?.bloodBond ??
+    0
+
+  let game =
+    playerEntry(
+      input,
+      npcId,
+      'Estou com fome. Preciso de sangue.'
+    )
+
+  const freely =
+    (m.trust ?? 0) >= 65 &&
+    (m.safety ?? 0) >= 40 &&
+    (m.happiness ?? 0) >= -10 &&
+    (m.anger ?? 0) < 45
+
+  if (freely) {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Está bem. Mas venha conversar comigo antes. Eu quero saber que você está no controle.'
+      )
+
+    game =
+      applyMetricPatch(
+        game,
+        npcId,
+        {
+          trust: 1,
+          safety: 1,
+          happiness: -1,
+        }
+      )
+
+    game =
+      addMemory(
+        game,
+        npcId,
+        {
+          id:
+            'blood-request-consented',
+
+          type:
+            'intimacy',
+
+          text:
+            'Ela aceitou conversar sobre doar sangue por vontade própria.',
+
+          weight: 5,
+        }
+      )
+  } else if (
+    bond >= 2 ||
+    (m.dependency ?? 0) >= 70
+  ) {
+    game =
+      npcReply(
+        game,
+        npcId,
+        '...Está bem. Onde você quer que eu vá?'
+      )
+
+    game =
+      applyMetricPatch(
+        game,
+        npcId,
+        {
+          happiness: -4,
+          safety: -5,
+          fear: 2,
+          dependency: 3,
+        }
+      )
+
+    game =
+      addMemory(
+        game,
+        npcId,
+        {
+          id:
+            'blood-request-dependent',
+
+          type:
+            'coercive-dependency',
+
+          text:
+            'Ela aceitou um pedido de sangue enquanto havia dependência ou influência sobrenatural.',
+
+          weight: 8,
+        }
+      )
+  } else {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Não. Hoje não.'
+      )
+
+    game =
+      addMemory(
+        game,
+        npcId,
+        {
+          id:
+            'blood-request-refused',
+
+          type:
+            'boundary',
+
+          text:
+            'Ela recusou um pedido de sangue.',
+
+          weight: 4,
+        }
+      )
+  }
+
+  return game
+}
+
+export function performRelationshipPhoneAction(
+  game,
+  npcId,
+  action
+) {
+  switch (action) {
+    case 'message':
+      return sendRelationshipMessage(
+        game,
+        npcId
+      )
+
+    case 'call':
+      return callRelationshipContact(
+        game,
+        npcId
+      )
+
+    case 'invite':
+      return inviteRelationshipContact(
+        game,
+        npcId
+      )
+
+    case 'help':
+      return askRelationshipHelp(
+        game,
+        npcId
+      )
+
+    case 'blood':
+      return askRelationshipBlood(
+        game,
+        npcId
+      )
+
+    default:
+      throw new Error(
+        'Ação de telefone desconhecida.'
+      )
+  }
+}
+
+export function dismissRelationshipAppointment(
+  game,
+  appointmentId
+) {
+  return {
+    ...game,
+
+    relationshipAppointments: (
+      game
+        .relationshipAppointments ??
+      []
+    ).map(
+      appointment =>
+        appointment.id ===
+        appointmentId
+          ? {
+              ...appointment,
+              status:
+                'cancelled',
+            }
+          : appointment
+    ),
+  }
+}
+
+export function markRelationshipAppointmentDone(
+  game,
+  appointmentId
+) {
+  return {
+    ...game,
+
+    relationshipAppointments: (
+      game
+        .relationshipAppointments ??
+      []
+    ).map(
+      appointment =>
+        appointment.id ===
+        appointmentId
+          ? {
+              ...appointment,
+              status:
+                'completed',
+            }
+          : appointment
+    ),
+  }
+}
+
+// Gancho simples para futuros eventos automáticos.
+// Pode ser chamado sempre que o relógio avança.
+export function reconcileRelationshipPhone(
+  game
+) {
+  if (!game) {
+    return game
+  }
+
+  const now =
+    relationshipPhoneMinutes(
+      game.world
+    )
+
+  const appointments =
+    game
+      .relationshipAppointments ??
+    []
+
+  let next = {
+    ...game,
+
+    relationshipAppointments:
+      appointments.map(
+        appointment => {
+          if (
+            appointment.status ===
+              'scheduled' &&
+            now >
+              appointment.end
+          ) {
+            return {
+              ...appointment,
+              status:
+                'missed',
+            }
+          }
+
+          return appointment
+        }
+      ),
+  }
+
+  // Mensagem automática apenas uma vez quando um encontro é perdido.
+  for (
+    const appointment
+    of next.relationshipAppointments
+  ) {
+    if (
+      appointment.status !==
+      'missed'
+    ) {
+      continue
+    }
+
+    const marker =
+      `missed-appointment:${appointment.id}`
+
+    if (
+      next
+        .flags
+        ?.[marker]
+    ) {
+      continue
+    }
+
+    const npc =
+      RELATIONSHIP_NPCS[
+        appointment.npcId
+      ]
+
+    if (!npc) {
+      continue
+    }
+
+    next =
+      npcReply(
+        next,
+        appointment.npcId,
+        'Você não apareceu. Eu fiquei esperando.'
+      )
+
+    next =
+      applyMetricPatch(
+        next,
+        appointment.npcId,
+        {
+          trust: -8,
+          happiness: -12,
+          anger: 12,
+          safety: -5,
+        }
+      )
+
+    next =
+      addMemory(
+        next,
+        appointment.npcId,
+        {
+          id:
+            'stood-up',
+
+          type:
+            'betrayal',
+
+          text:
+            'Você marcou um encontro e não apareceu.',
+
+          weight: 10,
+        }
+      )
+
+    next = {
+      ...next,
+
+      flags: {
+        ...(next.flags ?? {}),
+
+        [marker]:
+          true,
+      },
+    }
+  }
+
+  const calendarDay =
+    game.world?.day ?? 1
+
+  const hour =
+    game.world?.hour ?? 0
+
+  // Iniciativa simples e determinística:
+  // no máximo uma mensagem espontânea por NPC por dia,
+  // apenas depois das 21h.
+  if (hour >= 21) {
+    for (
+      const npcId
+      of Object.keys(
+        RELATIONSHIP_NPCS
+      )
+    ) {
+      const state =
+        getRelationshipState(
+          next,
+          npcId
+        )
+
+      if (
+        !state?.contact?.known ||
+        state.contact.blocked
+      ) {
+        continue
+      }
+
+      const marker =
+        `relationship-initiative:${npcId}:${calendarDay}`
+
+      if (
+        next.flags?.[marker]
+      ) {
+        continue
+      }
+
+      const metrics =
+        state.relationshipMetrics ??
+        {}
+
+      const closeEnough =
+        [
+          'friendship',
+          'intimate',
+          'dating',
+        ].includes(
+          state.status
+        ) ||
+        (metrics.affection ?? 0) >= 55 ||
+        (metrics.trust ?? 0) >= 60
+
+      const upset =
+        (metrics.anger ?? 0) >= 65 ||
+        (
+          (metrics.happiness ?? 0) <= -45 &&
+          (metrics.affection ?? 0) >= 35
+        )
+
+      if (
+        !closeEnough &&
+        !upset
+      ) {
+        continue
+      }
+
+      let message = null
+
+      if (
+        (metrics.anger ?? 0) >= 75
+      ) {
+        message =
+          'A gente precisa conversar. Não vou fingir que está tudo bem.'
+      } else if (
+        (metrics.happiness ?? 0) <= -50 &&
+        (metrics.affection ?? 0) >= 40
+      ) {
+        message =
+          'Eu ainda me importo com você. É justamente por isso que isso está me machucando.'
+      } else if (
+        state.status === 'dating' &&
+        (metrics.affection ?? 0) >= 70
+      ) {
+        message =
+          'Você vai aparecer hoje? Queria te ver.'
+      } else if (
+        (metrics.trust ?? 0) >= 70
+      ) {
+        message =
+          'Está tudo bem por aí? Você sumiu.'
+      } else if (
+        closeEnough
+      ) {
+        message =
+          'Oi. Está acordado?'
+      }
+
+      if (!message) {
+        continue
+      }
+
+      next =
+        npcReply(
+          next,
+          npcId,
+          message
+        )
+
+      next = {
+        ...next,
+
+        flags: {
+          ...(next.flags ?? {}),
+          [marker]: true,
+        },
+      }
+    }
+  }
+
+  return next
+}
+
+export function grantRelationshipContact(
+  game,
+  npcId,
+  number = null
+) {
+  return setRelationshipContact(
+    game,
+    npcId,
+    {
+      known: true,
+      number,
+      blocked: false,
+    }
+  )
+}
+
+
+/* =========================================================
+   CONVERSAS POR LIGAÇÃO
+========================================================= */
+
+function callConversationChoices() {
+  return [
+    {
+      id: 'talk',
+      text: 'Só queria conversar um pouco.',
+    },
+    {
+      id: 'invite',
+      text: 'Quer sair comigo?',
+    },
+    {
+      id: 'ask',
+      text: 'Queria te perguntar uma coisa.',
+    },
+    {
+      id: 'goodbye',
+      text: 'Nada urgente. A gente se fala depois.',
+    },
+  ]
+}
+
+function callQuestionChoices() {
+  return [
+    {
+      id: 'ask_how',
+      text: 'Como você está de verdade?',
+    },
+    {
+      id: 'ask_trust',
+      text: 'Você confia em mim?',
+    },
+    {
+      id: 'ask_upset',
+      text: 'Tem alguma coisa te incomodando?',
+    },
+    {
+      id: 'back',
+      text: 'Deixa para lá.',
+    },
+  ]
+}
+
+function callTalkChoices() {
+  return [
+    {
+      id: 'talk_night',
+      text: 'Como foi sua noite?',
+    },
+    {
+      id: 'talk_small',
+      text: 'Falar de alguma coisa banal.',
+    },
+    {
+      id: 'back',
+      text: 'Mudar de assunto.',
+    },
+    {
+      id: 'goodbye',
+      text: 'Preciso desligar.',
+    },
+  ]
+}
+
+function callLineFromState(
+  state,
+  type
+) {
+  const m =
+    state.relationshipMetrics ??
+    {}
+
+  const trust =
+    m.trust ?? 0
+
+  const affection =
+    m.affection ?? 0
+
+  const happiness =
+    m.happiness ?? 0
+
+  const anger =
+    m.anger ?? 0
+
+  const safety =
+    m.safety ?? 0
+
+  if (type === 'greeting') {
+    if (anger >= 70) {
+      return 'Oi. Eu posso falar agora, mas não estou com muita paciência.'
+    }
+
+    if (
+      affection >= 65 &&
+      happiness >= 20
+    ) {
+      return 'Oi. Tudo bem? Sim, agora eu não estou ocupada. O que aconteceu?'
+    }
+
+    if (trust >= 45) {
+      return 'Oi. Tudo bem? Posso falar agora. O que foi?'
+    }
+
+    return 'Oi. Estou ouvindo. Aconteceu alguma coisa?'
+  }
+
+  if (type === 'how') {
+    if (anger >= 70) {
+      return 'Quer mesmo saber? Ainda estou com raiva de você.'
+    }
+
+    if (
+      happiness <= -45 &&
+      affection >= 35
+    ) {
+      return 'Não muito bem. Eu ainda me importo com você, mas algumas coisas estão me machucando.'
+    }
+
+    if (happiness >= 55) {
+      return 'Estou bem. Cansada, talvez, mas bem. Foi bom você ligar.'
+    }
+
+    return 'Estou levando. Tem noites melhores e noites piores.'
+  }
+
+  if (type === 'trust') {
+    if (trust >= 75) {
+      return 'Confio. Mais do que eu costumo admitir.'
+    }
+
+    if (trust >= 40) {
+      return 'Em algumas coisas, sim. Em outras... ainda estou tentando entender você.'
+    }
+
+    if (trust >= 10) {
+      return 'Eu quero confiar, mas ainda não sei se consigo.'
+    }
+
+    return 'Agora? Não. Você ainda não me deu motivos suficientes.'
+  }
+
+  if (type === 'upset') {
+    if (anger >= 65) {
+      return 'Tem. E você sabe que tem. Eu só não queria discutir isso pelo telefone.'
+    }
+
+    if (happiness <= -35) {
+      return 'Tem algumas coisas. Não sei se quero falar disso agora, mas não está tudo bem.'
+    }
+
+    if (safety <= -20) {
+      return 'Às vezes eu não sei como você vai reagir. Isso me deixa desconfortável.'
+    }
+
+    return 'Nada específico. Se alguma coisa mudar, eu te falo.'
+  }
+
+  if (type === 'night') {
+    if (happiness >= 45) {
+      return 'Foi tranquila. Trabalhei, resolvi algumas coisas e agora finalmente parei um pouco.'
+    }
+
+    if (anger >= 55) {
+      return 'Longa. E eu não estou exatamente com cabeça para fazer resumo da noite.'
+    }
+
+    return 'Normal. Um pouco corrida, mas nada demais.'
+  }
+
+  if (type === 'small') {
+    if (affection >= 60) {
+      return 'Vocês acabam falando de coisas pequenas por alguns minutos. Pela primeira vez na noite, nada parece urgente.'
+    }
+
+    if (trust >= 30) {
+      return 'A conversa fica leve por alguns minutos. Trabalho, lugares da cidade, alguma coisa que aconteceu durante a noite.'
+    }
+
+    return 'Vocês tentam conversar sobre coisas banais. Ainda existe certa distância entre uma frase e outra.'
+  }
+
+  return 'Estou ouvindo.'
+}
+
+export function startRelationshipCall(
+  input,
+  npcId
+) {
+  const reason =
+    relationshipPhoneActionReason(
+      input,
+      npcId,
+      'call'
+    )
+
+  if (reason) {
+    throw new Error(reason)
+  }
+
+  const npc =
+    RELATIONSHIP_NPCS[
+      npcId
+    ]
+
+  const state =
+    getRelationshipState(
+      input,
+      npcId
+    )
+
+  const anger =
+    state.relationshipMetrics
+      ?.anger ??
+    0
+
+  let game =
+    playerEntry(
+      input,
+      npcId,
+      'Ligação iniciada.',
+      'call'
+    )
+
+  if (anger >= 90) {
+    game =
+      npcReply(
+        game,
+        npcId,
+        'Ligação recusada.',
+        'call'
+      )
+
+    return {
+      game,
+
+      conversation: {
+        npcId,
+        active: false,
+        speaker:
+          npc.name,
+        line:
+          'Ela recusou a ligação.',
+        choices: [],
+      },
+    }
+  }
+
+  const line =
+    callLineFromState(
+      state,
+      'greeting'
+    )
+
+  game =
+    npcReply(
+      game,
+      npcId,
+      line,
+      'call'
+    )
+
+  game =
+    addMemory(
+      game,
+      npcId,
+      {
+        id:
+          'phone-call-started',
+
+        type:
+          'contact',
+
+        text:
+          'Vocês conversaram por telefone.',
+
+        weight: 1,
+      }
+    )
+
+  return {
+    game,
+
+    conversation: {
+      npcId,
+      active: true,
+      speaker:
+        npc.name,
+      line,
+      choices:
+        callConversationChoices(),
+    },
+  }
+}
+
+export function resolveRelationshipCallChoice(
+  input,
+  conversation,
+  choiceId
+) {
+  if (
+    !conversation?.npcId
+  ) {
+    throw new Error(
+      'Nenhuma ligação está em andamento.'
+    )
+  }
+
+  const npcId =
+    conversation.npcId
+
+  const npc =
+    RELATIONSHIP_NPCS[
+      npcId
+    ]
+
+  const state =
+    getRelationshipState(
+      input,
+      npcId
+    )
+
+  if (
+    !npc ||
+    !state
+  ) {
+    throw new Error(
+      'Contato desconhecido.'
+    )
+  }
+
+  let game =
+    input
+
+  let line =
+    ''
+
+  let choices =
+    callConversationChoices()
+
+  if (
+    choiceId === 'talk'
+  ) {
+    game =
+      playerEntry(
+        game,
+        npcId,
+        'Só queria conversar um pouco.',
+        'call'
+      )
+
+    const m =
+      state.relationshipMetrics ??
+      {}
+
+    if (
+      (m.anger ?? 0) >= 75
+    ) {
+      line =
+        'Eu não estou muito a fim de fingir que está tudo normal. Mas pode falar.'
+    } else if (
+      (m.affection ?? 0) >= 60
+    ) {
+      line =
+        'Pode falar. Eu não estou com pressa.'
+    } else {
+      line =
+        'Tá. Sobre o quê?'
+    }
+
+    game =
+      npcReply(
+        game,
+        npcId,
+        line,
+        'call'
+      )
+
+    game =
+      applyMetricPatch(
+        game,
+        npcId,
+        {
+          happiness:
+            (m.anger ?? 0) < 50
+              ? 2
+              : 0,
+
+          trust: 1,
+        }
+      )
+
+    choices =
+      callTalkChoices()
+  } else if (
+    choiceId === 'talk_night'
+  ) {
+    game =
+      playerEntry(
+        game,
+        npcId,
+        'Como foi sua noite?',
+        'call'
+      )
+
+    line =
+      callLineFromState(
+        state,
+        'night'
+      )
+
+    game =
+      npcReply(
+        game,
+        npcId,
+        line,
+        'call'
+      )
+
+    game =
+      applyMetricPatch(
+        game,
+        npcId,
+        {
+          happiness: 1,
+        }
+      )
+
+    choices =
+      callTalkChoices()
+  } else if (
+    choiceId === 'talk_small'
+  ) {
+    game =
+      playerEntry(
+        game,
+        npcId,
+        'Vocês começam a falar de coisas sem importância.',
+        'call'
+      )
+
+    line =
+      callLineFromState(
+        state,
+        'small'
+      )
+
+    game =
+      npcReply(
+        game,
+        npcId,
+        line,
+        'call'
+      )
+
+    game =
+      applyMetricPatch(
+        game,
+        npcId,
+        {
+          happiness: 2,
+          affection: 1,
+        }
+      )
+
+    choices =
+      callTalkChoices()
+  } else if (
+    choiceId === 'ask'
+  ) {
+    game =
+      playerEntry(
+        game,
+        npcId,
+        'Queria te perguntar uma coisa.',
+        'call'
+      )
+
+    line =
+      'Pergunta.'
+
+    game =
+      npcReply(
+        game,
+        npcId,
+        line,
+        'call'
+      )
+
+    choices =
+      callQuestionChoices()
+  } else if (
+    choiceId === 'ask_how'
+  ) {
+    game =
+      playerEntry(
+        game,
+        npcId,
+        'Como você está de verdade?',
+        'call'
+      )
+
+    line =
+      callLineFromState(
+        state,
+        'how'
+      )
+
+    game =
+      npcReply(
+        game,
+        npcId,
+        line,
+        'call'
+      )
+
+    game =
+      applyMetricPatch(
+        game,
+        npcId,
+        {
+          trust: 1,
+        }
+      )
+
+    choices =
+      callQuestionChoices()
+  } else if (
+    choiceId === 'ask_trust'
+  ) {
+    game =
+      playerEntry(
+        game,
+        npcId,
+        'Você confia em mim?',
+        'call'
+      )
+
+    line =
+      callLineFromState(
+        state,
+        'trust'
+      )
+
+    game =
+      npcReply(
+        game,
+        npcId,
+        line,
+        'call'
+      )
+
+    choices =
+      callQuestionChoices()
+  } else if (
+    choiceId === 'ask_upset'
+  ) {
+    game =
+      playerEntry(
+        game,
+        npcId,
+        'Tem alguma coisa te incomodando?',
+        'call'
+      )
+
+    line =
+      callLineFromState(
+        state,
+        'upset'
+      )
+
+    game =
+      npcReply(
+        game,
+        npcId,
+        line,
+        'call'
+      )
+
+    choices =
+      callQuestionChoices()
+  } else if (
+    choiceId === 'invite'
+  ) {
+    const reason =
+      relationshipPhoneActionReason(
+        game,
+        npcId,
+        'invite'
+      )
+
+    if (reason) {
+      line = reason
+
+      return {
+        game,
+
+        conversation: {
+          ...conversation,
+          line,
+          choices:
+            callConversationChoices(),
+        },
+      }
+    }
+
+    game =
+      playerEntry(
+        game,
+        npcId,
+        'Quer sair comigo?',
+        'call'
+      )
+
+    const score =
+      reactionScore(
+        state
+      )
+
+    if (
+      (state.relationshipMetrics?.anger ?? 0) >=
+      70
+    ) {
+      line =
+        'Agora não. Eu ainda estou com raiva de você.'
+
+      game =
+        npcReply(
+          game,
+          npcId,
+          line,
+          'call'
+        )
+
+      game =
+        addMemory(
+          game,
+          npcId,
+          {
+            id:
+              'call-invite-refused-angry',
+
+            type:
+              'rejection',
+
+            text:
+              'Ela recusou um convite feito por telefone porque ainda estava com raiva.',
+
+            weight: 4,
+          }
+        )
+    } else if (
+      score < 0
+    ) {
+      line =
+        'Acho melhor não.'
+
+      game =
+        npcReply(
+          game,
+          npcId,
+          line,
+          'call'
+        )
+    } else {
+      const result =
+        createRelationshipAppointment(
+          game,
+          npcId
+        )
+
+      game =
+        result.game
+
+      if (
+        !result.appointment
+      ) {
+        line =
+          'Eu quero, mas não achei um horário bom. A gente combina depois.'
+      } else {
+        const day =
+          Math.floor(
+            result.appointment.start /
+            DAY
+          ) + 1
+
+        const time =
+          result.appointment.start %
+          DAY
+
+        const hour =
+          String(
+            Math.floor(
+              time / 60
+            )
+          ).padStart(
+            2,
+            '0'
+          )
+
+        const minute =
+          String(
+            time % 60
+          ).padStart(
+            2,
+            '0'
+          )
+
+        line =
+          `Pode ser. Dia ${day}, às ${hour}:${minute}.`
+
+        game =
+          applyMetricPatch(
+            game,
+            npcId,
+            {
+              happiness:
+                score >= 45
+                  ? 4
+                  : 2,
+
+              affection:
+                score >= 45
+                  ? 2
+                  : 1,
+            }
+          )
+
+        game =
+          addMemory(
+            game,
+            npcId,
+            {
+              id:
+                'call-date-scheduled',
+
+              type:
+                'positive',
+
+              text:
+                'Vocês marcaram um encontro durante uma ligação.',
+
+              weight: 3,
+            }
+          )
+      }
+
+      game =
+        npcReply(
+          game,
+          npcId,
+          line,
+          'call'
+        )
+    }
+
+    choices =
+      callConversationChoices()
+  } else if (
+    choiceId === 'back'
+  ) {
+    game =
+      playerEntry(
+        game,
+        npcId,
+        'Deixa para lá.',
+        'call'
+      )
+
+    line =
+      'Tudo bem. Então, o que você queria?'
+
+    game =
+      npcReply(
+        game,
+        npcId,
+        line,
+        'call'
+      )
+
+    choices =
+      callConversationChoices()
+  } else if (
+    choiceId === 'goodbye'
+  ) {
+    game =
+      playerEntry(
+        game,
+        npcId,
+        'Preciso desligar. A gente se fala depois.',
+        'call'
+      )
+
+    const m =
+      state.relationshipMetrics ??
+      {}
+
+    line =
+      (m.affection ?? 0) >= 55
+        ? 'Tá bom. Se cuida.'
+        : 'Tudo bem. Até mais.'
+
+    game =
+      npcReply(
+        game,
+        npcId,
+        line,
+        'call'
+      )
+
+    return {
+      game,
+
+      conversation: {
+        npcId,
+        active: false,
+        speaker:
+          npc.name,
+        line,
+        choices: [],
+      },
+    }
+  } else {
+    throw new Error(
+      'Escolha de ligação desconhecida.'
+    )
+  }
+
+  return {
+    game,
+
+    conversation: {
+      npcId,
+      active: true,
+      speaker:
+        npc.name,
+      line,
+      choices,
+    },
+  }
+}
+
+
+/* =========================================================
+   CHAT ESTILO WHATSAPP
+========================================================= */
+
+export const RELATIONSHIP_CHAT_ROOT = 'root'
+
+export function getRelationshipChatState(game, npcId) {
+  return (
+    game?.relationshipChats?.[npcId] ?? {
+      node: RELATIONSHIP_CHAT_ROOT,
+      lastChoiceId: null,
+    }
+  )
+}
+
+function setRelationshipChatState(game, npcId, patch) {
+  const current = getRelationshipChatState(game, npcId)
+
+  return {
+    ...game,
+    relationshipChats: {
+      ...(game.relationshipChats ?? {}),
+      [npcId]: {
+        ...current,
+        ...patch,
+      },
+    },
+  }
+}
+
+function chatMetrics(game, npcId) {
+  return (
+    getRelationshipState(game, npcId)
+      ?.relationshipMetrics ?? {}
+  )
+}
+
+function hasOpenHarm(game, npcId) {
+  const state = getRelationshipState(game, npcId)
+
+  return (state?.memories ?? []).some(
+    memory =>
+      !memory.resolved &&
+      ['betrayal', 'trauma', 'abandonment'].includes(
+        memory.type
+      )
+  )
+}
+
+function greetingReply(game, npcId) {
+  const m = chatMetrics(game, npcId)
+
+  if ((m.anger ?? 0) >= 75) {
+    return 'Oi. O que você quer?'
+  }
+
+  if (
+    hasOpenHarm(game, npcId) &&
+    (m.happiness ?? 0) <= -35
+  ) {
+    return 'Oi. Tô levando.'
+  }
+
+  if (
+    (m.affection ?? 0) >= 65 &&
+    (m.happiness ?? 0) >= 25
+  ) {
+    return 'Oi :) Tô bem. E você?'
+  }
+
+  if ((m.trust ?? 0) >= 35) {
+    return 'Oi. Tudo bem por aqui. E aí?'
+  }
+
+  return 'Oi. Tudo.'
+}
+
+function tonightReply(game, npcId) {
+  const m = chatMetrics(game, npcId)
+
+  if ((m.anger ?? 0) >= 70) {
+    return 'Ainda não decidi. E não sei se quero combinar alguma coisa agora.'
+  }
+
+  if (npcId === 'clara') {
+    return 'Provavelmente vou passar no Último Gole mais tarde. Por quê?'
+  }
+
+  if ((m.affection ?? 0) >= 55) {
+    return 'Nada certo ainda. Você tinha alguma coisa em mente?'
+  }
+
+  return 'Ainda não sei. Por quê?'
+}
+
+function seeReply(game, npcId) {
+  const m = chatMetrics(game, npcId)
+
+  if ((m.anger ?? 0) >= 75) {
+    return 'Agora não acho uma boa ideia.'
+  }
+
+  if ((m.affection ?? 0) >= 60) {
+    return 'Eu também queria te ver.'
+  }
+
+  if ((m.trust ?? 0) >= 30) {
+    return 'Pode ser. Onde?'
+  }
+
+  return 'Talvez. O que você tinha em mente?'
+}
+
+function talkReply(game, npcId) {
+  if (hasOpenHarm(game, npcId)) {
+    return 'Pode falar. Mas se for sobre o que aconteceu, não finge que foi nada.'
+  }
+
+  const m = chatMetrics(game, npcId)
+
+  if ((m.trust ?? 0) >= 50) {
+    return 'Claro. O que aconteceu?'
+  }
+
+  return 'Pode falar.'
+}
+
+function optionsForNode(game, npcId, node) {
+  if (node === 'root') {
+    const options = [
+      { id: 'hello', text: 'Oi, tudo bem?' },
+      { id: 'tonight', text: 'Vai fazer o quê hoje?' },
+      { id: 'want_to_see', text: 'Queria te ver.' },
+      { id: 'talk', text: 'Podemos conversar?' },
+    ]
+
+    if (hasOpenHarm(game, npcId)) {
+      options.push({
+        id: 'apologize',
+        text: 'Desculpa pelo que aconteceu.',
+      })
+    }
+
+    return options
+  }
+
+  if (node === 'after_tonight') {
+    if (npcId === 'clara') {
+      return [
+        {
+          id: 'invite_ultimo_gole',
+          text: 'Quer me encontrar no Último Gole?',
+        },
+        {
+          id: 'maybe_show',
+          text: 'Talvez eu apareça por lá.',
+        },
+        {
+          id: 'just_asking',
+          text: 'Só estava perguntando.',
+        },
+      ]
+    }
+
+    return [
+      { id: 'want_to_see', text: 'Queria te ver.' },
+      { id: 'just_asking', text: 'Só estava perguntando.' },
+    ]
+  }
+
+  if (node === 'after_want_to_see') {
+    const options = []
+
+    if (npcId === 'clara') {
+      options.push(
+        { id: 'invite_ultimo_gole', text: 'Último Gole?' },
+        { id: 'quieter_place', text: 'Algum lugar mais tranquilo.' }
+      )
+    }
+
+    options.push({
+      id: 'back_root',
+      text: 'Deixa para depois.',
+    })
+
+    return options
+  }
+
+  if (node === 'after_invite_ultimo_gole') {
+    return [
+      { id: 'confirm_ultimo_gole', text: 'Fechado.' },
+      { id: 'not_today', text: 'Melhor outro dia.' },
+    ]
+  }
+
+  if (node === 'after_talk') {
+    return [
+      {
+        id: 'how_are_you',
+        text: 'Como você está de verdade?',
+      },
+      {
+        id: 'ask_upset',
+        text: 'Tem alguma coisa te incomodando?',
+      },
+      {
+        id: 'back_root',
+        text: 'Nada urgente.',
+      },
+    ]
+  }
+
+  return [
+    {
+      id: 'back_root',
+      text: 'Mandar outra mensagem.',
+    },
+  ]
+}
+
+export function getRelationshipChatOptions(game, npcId) {
+  const chat = getRelationshipChatState(game, npcId)
+  return optionsForNode(game, npcId, chat.node)
+}
+
+function createWhatsappAppointment(game, npcId) {
+  const result = createRelationshipAppointment(game, npcId)
+
+  if (!result.appointment) {
+    return result
+  }
+
+  const appointment = {
+    ...result.appointment,
+    place:
+      npcId === 'clara'
+        ? 'Último Gole'
+        : result.appointment.place,
+    locationId:
+      npcId === 'clara'
+        ? 'ultimo_gole'
+        : result.appointment.locationId,
+    areaId:
+      npcId === 'clara'
+        ? 'stage'
+        : result.appointment.areaId,
+  }
+
+  return {
+    appointment,
+    game: {
+      ...result.game,
+      relationshipAppointments: (
+        result.game.relationshipAppointments ?? []
+      ).map(item =>
+        item.id === appointment.id
+          ? appointment
+          : item
+      ),
+    },
+  }
+}
+
+export function sendRelationshipChatChoice(
+  input,
+  npcId,
+  choiceId
+) {
+  const reason = relationshipPhoneActionReason(
+    input,
+    npcId,
+    'message'
+  )
+
+  if (reason) {
+    throw new Error(reason)
+  }
+
+  const npc = RELATIONSHIP_NPCS[npcId]
+
+  if (!npc) {
+    throw new Error('Contato desconhecido.')
+  }
+
+  const current = getRelationshipChatState(input, npcId)
+  let game = input
+  let reply = ''
+  let nextNode = current.node
+
+  const playerText = {
+    hello: 'Oi, tudo bem?',
+    tonight: 'Vai fazer o quê hoje?',
+    want_to_see: 'Queria te ver.',
+    talk: 'Podemos conversar?',
+    apologize: 'Desculpa pelo que aconteceu.',
+    invite_ultimo_gole: 'Quer me encontrar no Último Gole?',
+    maybe_show: 'Talvez eu apareça por lá.',
+    just_asking: 'Só estava perguntando.',
+    quieter_place: 'Algum lugar mais tranquilo.',
+    confirm_ultimo_gole: 'Fechado.',
+    not_today: 'Melhor outro dia.',
+    how_are_you: 'Como você está de verdade?',
+    ask_upset: 'Tem alguma coisa te incomodando?',
+    back_root: 'Nada urgente.',
+  }[choiceId] ?? choiceId
+
+  game = playerEntry(
+    game,
+    npcId,
+    playerText,
+    'message'
+  )
+
+  switch (choiceId) {
+    case 'hello':
+      reply = greetingReply(game, npcId)
+      nextNode = 'root'
+      break
+
+    case 'tonight':
+      reply = tonightReply(game, npcId)
+      nextNode = 'after_tonight'
+      break
+
+    case 'want_to_see':
+      reply = seeReply(game, npcId)
+      nextNode = 'after_want_to_see'
+      break
+
+    case 'talk':
+      reply = talkReply(game, npcId)
+      nextNode = 'after_talk'
+      break
+
+    case 'apologize':
+      reply =
+        'Eu ouvi. Só não espera que tudo volte ao normal de uma vez.'
+
+      game = applyMetricPatch(game, npcId, {
+        anger: -10,
+        happiness: 3,
+        trust: 2,
+      })
+
+      nextNode = 'root'
+      break
+
+    case 'invite_ultimo_gole': {
+      const m = chatMetrics(game, npcId)
+
+      if ((m.anger ?? 0) >= 70) {
+        reply =
+          'Agora não. Eu ainda estou com raiva de você.'
+        nextNode = 'root'
+      } else {
+        reply =
+          'Pode ser. Último Gole às 22:30?'
+        nextNode = 'after_invite_ultimo_gole'
+      }
+
+      break
+    }
+
+    case 'confirm_ultimo_gole': {
+      const result = createWhatsappAppointment(
+        game,
+        npcId
+      )
+
+      game = result.game
+
+      if (result.appointment) {
+        const day =
+          Math.floor(
+            result.appointment.start /
+              DAY
+          ) + 1
+
+        reply =
+          `Combinado. Dia ${day}, às 22:30.`
+      } else {
+        reply =
+          'Hoje ficou ruim para mim. A gente combina outra noite.'
+      }
+
+      nextNode = 'root'
+      break
+    }
+
+    case 'maybe_show':
+      reply = 'Tá. Se aparecer, me chama.'
+      nextNode = 'root'
+      break
+
+    case 'just_asking':
+      reply = 'Tá bom :)'
+      nextNode = 'root'
+      break
+
+    case 'quieter_place':
+      reply =
+        'Pode ser. Depois a gente decide onde.'
+      nextNode = 'root'
+      break
+
+    case 'not_today':
+      reply =
+        'Sem problema. A gente marca outro dia.'
+      nextNode = 'root'
+      break
+
+    case 'how_are_you':
+      reply = callLineFromState(
+        getRelationshipState(game, npcId),
+        'how'
+      )
+      nextNode = 'after_talk'
+      break
+
+    case 'ask_upset':
+      reply = callLineFromState(
+        getRelationshipState(game, npcId),
+        'upset'
+      )
+      nextNode = 'after_talk'
+      break
+
+    case 'back_root':
+      reply =
+        (chatMetrics(game, npcId).affection ?? 0) >=
+        55
+          ? 'Tudo bem. Me chama se precisar.'
+          : 'Tá.'
+      nextNode = 'root'
+      break
+
+    default:
+      reply = 'Tá.'
+  }
+
+  game = npcReply(
+    game,
+    npcId,
+    reply,
+    'message'
+  )
+
+  game = setRelationshipChatState(
+    game,
+    npcId,
+    {
+      node: nextNode,
+      lastChoiceId: choiceId,
+    }
+  )
+
+  return {
+    game,
+    reply,
+    node: nextNode,
+  }
+}

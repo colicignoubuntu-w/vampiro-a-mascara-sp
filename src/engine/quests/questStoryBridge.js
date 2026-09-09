@@ -251,21 +251,8 @@ function applyLiviaLegacyProgress(
   */
 
   const inspectedComputer =
-    Boolean(
-      flags
-        .inspectedLiviaComputer
-    ) ||
-    Boolean(
-      flags
-        .liviaComputerInvestigated
-    ) ||
-    [
-      'livia_computer',
-      'livia_computer_access',
-      'livia_computer_files',
-    ].includes(
-      sceneId
-    )
+    Boolean(flags.inspectedLiviaComputer || flags.liviaComputerInvestigated || flags.unlockedLiviaComputer) ||
+    ['livia_computer_unlocked', 'livia_computer_access', 'livia_computer_files'].includes(sceneId)
 
   if (
     inspectedComputer

@@ -1,0 +1,2192 @@
+export default {
+  id: 'clara',
+  name: 'Clara Azevedo',
+  age: 26,
+  role: 'Fotógrafa de shows · Último Gole · Pinheiros',
+  portrait: '/images/npcs/clara/portrait.jpg',
+  cast: 'Rafael, namorado controlador; Bia, irmã de Clara; Duda, gerente do Último Gole; Íris, produtora de shows.',
+  start: 'arrival',
+
+  scenes: {
+    arrival: {
+      title: 'Uma fotógrafa no Último Gole',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'O Último Gole está cheio, mas ainda não chegou ao ponto em que conversar exige gritar. A banda termina a passagem de som enquanto as mesas próximas ao palco começam a ocupar.',
+        'Uma garota ruiva circula entre o palco e a grade com uma câmera pendurada no pescoço. Você reconhece o rosto de outras noites, embora nunca tenha falado com ela.',
+        'Ela fotografa o baterista, confere a imagem no visor e atravessa até o balcão. Caroline olha a fotografia que ela mostra, comenta alguma coisa e as duas riem.',
+        'Pouco depois, a fotógrafa volta para perto do palco.',
+      ],
+      choices: [
+        {
+          id: 'ask_band_time',
+          text: 'Aproximar-se. “Desculpa... você sabe que horas a banda começa?”',
+          next: 'first_opener_band',
+          minutes: 5,
+          flags: { playerApproachedClara: true },
+        },
+        {
+          id: 'ask_camera',
+          text: 'Aproximar-se. “Você fotografa sempre aqui?”',
+          next: 'first_opener_camera',
+          minutes: 5,
+          flags: { playerApproachedClara: true },
+        },
+        {
+          id: 'recognize',
+          text: 'Aproximar-se. “Acho que já te vi aqui outras vezes.”',
+          next: 'first_opener_seen',
+          minutes: 5,
+          flags: { playerApproachedClara: true },
+        },
+        {
+          id: 'wait',
+          text: 'Não interrompê-la enquanto trabalha.',
+          next: 'arrival_wait',
+          minutes: 10,
+          metrics: { respect: 1 },
+        },
+      ],
+    },
+
+    arrival_wait: {
+      title: 'Alguns minutos depois',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Você deixa a fotógrafa trabalhar.',
+        'Depois de alguns minutos ela abaixa a câmera, encosta perto da lateral do palco e começa a conferir as últimas fotos no visor.',
+        'Agora existe uma pausa longa o bastante para falar sem precisar disputar sua atenção com o trabalho.',
+      ],
+      choices: [
+        {
+          id: 'go',
+          text: 'Aproximar-se e puxar conversa.',
+          next: 'first_opener_band',
+          minutes: 5,
+          metrics: { respect: 1 },
+          flags: { playerApproachedClara: true },
+        },
+      ],
+    },
+
+    first_opener_band: {
+      title: 'Uma pergunta qualquer',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'A fotógrafa olha para o palco antes de responder.',
+        '“Era pra começar às onze.”',
+        'Ela confere a hora.',
+        '“Então... meia-noite, provavelmente.”',
+        'O canto da boca dela sobe por um instante.',
+        '“Banda de bar.”',
+      ],
+      choices: [
+        {
+          id: 'introduce',
+          text: '“Valeu. Eu sou...”',
+          next: 'first_names',
+          minutes: 5,
+          metrics: { trust: 1 },
+        },
+        {
+          id: 'joke',
+          text: '“Pontualidade é uma construção social.”',
+          next: 'first_names_joke',
+          minutes: 5,
+          metrics: { affinity: 1 },
+        },
+      ],
+    },
+
+    first_opener_camera: {
+      title: 'A câmera',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Ela segura a câmera pelo corpo, afastando a alça do cabelo.',
+        '“Quase sempre que tem show.”',
+        'Ela olha rapidamente para o palco.',
+        '“Às vezes porque me pagam. Às vezes porque eu aceitei trabalhar por cerveja e más decisões.”',
+      ],
+      choices: [
+        {
+          id: 'introduce',
+          text: 'Apresentar-se.',
+          next: 'first_names',
+          minutes: 5,
+          metrics: { trust: 1 },
+        },
+      ],
+    },
+
+    first_opener_seen: {
+      title: 'Um rosto conhecido',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Ela olha melhor para você.',
+        '“Eu também acho.”',
+        'Por um instante, parece procurar a lembrança certa.',
+        '“Espera.”',
+      ],
+      choices: [
+        {
+          id: 'introduce',
+          text: 'Apresentar-se.',
+          next: 'first_names',
+          minutes: 5,
+          metrics: { trust: 1 },
+        },
+      ],
+    },
+
+    first_names_joke: {
+      title: 'Clara',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Ela ri pelo nariz.',
+        '“Clara.”',
+        'Você diz seu nome.',
+        'Ela o repete uma vez, como quem tenta guardar.',
+      ],
+      choices: [
+        {
+          id: 'continue',
+          text: 'Continuar a conversa.',
+          next: 'first_livia_recognition',
+          minutes: 5,
+          metrics: { affinity: 1 },
+        },
+      ],
+    },
+
+    first_names: {
+      title: 'Clara',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        '“Clara.”',
+        'Você diz seu nome.',
+        'Ela o repete uma vez.',
+        '“Prazer.”',
+        'Então volta a observá-lo por um instante, como se o nome tivesse ajudado a encaixar alguma lembrança.',
+      ],
+      choices: [
+        {
+          id: 'continue',
+          text: 'Esperar.',
+          next: 'first_livia_recognition',
+          minutes: 5,
+          metrics: { trust: 1 },
+        },
+      ],
+    },
+
+    first_livia_recognition: {
+      title: 'Lívia',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        '“Você não é amigo da Lívia?”',
+        'Clara aponta discretamente para uma das mesas.',
+        '“Eu sabia que já tinha te visto. Vocês vinham juntos às vezes.”',
+        'Ela pensa um segundo.',
+        '“Eu achava que vocês namoravam.”',
+      ],
+      choices: [
+        {
+          id: 'friends',
+          text: '“Não. A gente era só amigo.”',
+          next: 'first_livia_friends',
+          minutes: 5,
+          metrics: { trust: 1 },
+          flags: { toldClaraLiviaJustFriend: true },
+        },
+        {
+          id: 'joke',
+          text: '“A Lívia ia rir bastante se ouvisse isso.”',
+          next: 'first_livia_joke',
+          minutes: 5,
+          metrics: { affinity: 1 },
+          flags: { toldClaraLiviaJustFriend: true },
+        },
+        {
+          id: 'why',
+          text: '“Por que você achava isso?”',
+          next: 'first_livia_why',
+          minutes: 5,
+        },
+      ],
+    },
+
+    first_livia_why: {
+      title: 'Uma impressão',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Clara dá de ombros.',
+        '“Sei lá. Vocês estavam sempre juntos quando eu via.”',
+        '“Foi só uma impressão.”',
+      ],
+      choices: [
+        {
+          id: 'clarify',
+          text: '“Não. Éramos amigos.”',
+          next: 'first_livia_friends',
+          minutes: 5,
+          flags: { toldClaraLiviaJustFriend: true },
+        },
+      ],
+    },
+
+    first_livia_joke: {
+      title: 'Só amigos',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Clara sorri.',
+        '“Tá. Então eu inventei um namoro inteiro na minha cabeça.”',
+        'Ela deixa a brincadeira morrer sozinha.',
+        '“E ela? Não veio hoje?”',
+      ],
+      choices: [
+        {
+          id: 'travel',
+          text: '“Não. Ela está viajando.”',
+          next: 'first_livia_where',
+          minutes: 5,
+          flags: { startedLiviaLie: true },
+        },
+      ],
+    },
+
+    first_livia_friends: {
+      title: 'Só amigos',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        '“Ah.”',
+        'Clara aceita a correção sem fazer dela um assunto.',
+        '“E ela? Não veio hoje?”',
+      ],
+      choices: [
+        {
+          id: 'travel',
+          text: '“Não. Ela está viajando.”',
+          next: 'first_livia_where',
+          minutes: 5,
+          flags: { startedLiviaLie: true },
+        },
+      ],
+    },
+
+    first_livia_where: {
+      title: 'Pra onde?',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        '“Ah é?”',
+        '“Pra onde?”',
+      ],
+      choices: [
+        {
+          id: 'europe_lie',
+          text: '“Europa. Foi visitar uns parentes.”',
+          test: {
+            label: 'Manipulação + Lábia',
+            attributeGroup: 'social',
+            attribute: 'manipulation',
+            ability: 'subterfuge',
+            difficulty: 6,
+            success: {
+              next: 'first_livia_lie_success',
+              result: 'A história sai sem tropeços.',
+              flags: {
+                toldClaraLiviaEurope: true,
+                liviaLieHeld: true,
+              },
+            },
+            failure: {
+              next: 'first_livia_lie_failure',
+              result: 'Você termina a frase, mas alguma coisa no momento não se encaixa tão bem quanto gostaria.',
+              flags: {
+                toldClaraLiviaEurope: true,
+                claraSuspectsLiviaStory: true,
+              },
+            },
+            botch: {
+              next: 'first_livia_lie_botch',
+              result: 'A mentira sai. A expressão que vem depois é mais difícil de controlar.',
+              flags: {
+                toldClaraLiviaEurope: true,
+                claraSuspectsLiviaStory: true,
+                claraNoticedLiviaGrief: true,
+              },
+            },
+          },
+        },
+      ],
+    },
+
+    first_livia_lie_success: {
+      title: 'Europa',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        '“Que legal.”',
+        'Clara ajeita a câmera no ombro.',
+        '“Faz tempo que ela foi?”',
+      ],
+      choices: [
+        {
+          id: 'vague',
+          text: '“Um tempo.”',
+          next: 'first_after_livia',
+          minutes: 5,
+          metrics: { trust: 1 },
+        },
+        {
+          id: 'empathy',
+          text: '[Percepção + Empatia] Tentar perceber como Clara recebeu a resposta.',
+          test: {
+            label: 'Percepção + Empatia',
+            attributeGroup: 'mental',
+            attribute: 'perception',
+            ability: 'empathy',
+            difficulty: 6,
+            success: {
+              next: 'first_empathy_livia_success',
+              result: 'Você presta atenção à reação dela.',
+            },
+            failure: {
+              next: 'first_empathy_livia_failure',
+              result: 'A reação é pequena demais para uma conclusão segura.',
+            },
+            botch: {
+              next: 'first_empathy_livia_botch',
+              result: 'Você se convence de uma interpretação sem ter certeza.',
+            },
+          },
+        },
+      ],
+    },
+
+    first_livia_lie_failure: {
+      title: 'Europa',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/clara-seria.png',
+      text: [
+        'Clara permanece olhando para você por um instante.',
+        '“Europa?”',
+        '“Entendi.”',
+        'Ela mexe na alça da câmera.',
+        '“Espero que ela esteja bem.”',
+      ],
+      choices: [
+        {
+          id: 'leave_it',
+          text: 'Não tentar explicar mais do que ela perguntou.',
+          next: 'first_after_livia',
+          minutes: 5,
+          metrics: { respect: 1 },
+        },
+        {
+          id: 'empathy',
+          text: '[Percepção + Empatia] Tentar entender aquela pausa.',
+          test: {
+            label: 'Percepção + Empatia',
+            attributeGroup: 'mental',
+            attribute: 'perception',
+            ability: 'empathy',
+            difficulty: 6,
+            success: {
+              next: 'first_empathy_livia_success',
+              result: 'Você observa em vez de presumir.',
+            },
+            failure: {
+              next: 'first_empathy_livia_failure',
+              result: 'Você não consegue decidir se a pausa significou alguma coisa.',
+            },
+            botch: {
+              next: 'first_empathy_livia_botch',
+              result: 'Você força uma interpretação para uma reação ambígua.',
+            },
+          },
+        },
+      ],
+    },
+
+    first_livia_lie_botch: {
+      title: 'Cinzas',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/clara-seria.png',
+      text: [
+        '“Europa.”',
+        'A palavra sai normalmente.',
+        'O problema vem depois.',
+        'Por um instante, é impossível impedir a lembrança das cinzas.',
+        'Sua mandíbula se fecha antes que você consiga disfarçar.',
+        'Clara olha para o seu rosto.',
+        '“Ei...”',
+        '“Tudo bem?”',
+      ],
+      choices: [
+        {
+          id: 'memory',
+          text: '“Tudo. Só lembrei de outra coisa.”',
+          next: 'first_after_livia',
+          minutes: 5,
+          metrics: { trust: 1 },
+        },
+        {
+          id: 'dont_like',
+          text: '“É. Só não gosto de falar disso.”',
+          next: 'first_after_livia',
+          minutes: 5,
+          metrics: { trust: 1, respect: 1 },
+        },
+      ],
+    },
+
+    first_empathy_livia_success: {
+      title: 'Uma pequena reação',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Clara não parece interessada em descobrir detalhes da viagem.',
+        'A atenção dela ficou presa por um momento na mudança do seu rosto quando Lívia entrou na conversa.',
+        'Isso é tudo que você consegue afirmar com segurança.',
+      ],
+      choices: [
+        {
+          id: 'continue',
+          text: 'Não transformar isso em outra conversa.',
+          next: 'first_after_livia',
+          minutes: 5,
+          metrics: { respect: 1 },
+        },
+      ],
+    },
+
+    first_empathy_livia_failure: {
+      title: 'Pouco demais',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'A reação foi pequena demais.',
+        'Pode ter sido dúvida, preocupação, educação ou simplesmente uma pausa.',
+      ],
+      choices: [
+        {
+          id: 'continue',
+          text: 'Deixar o assunto morrer.',
+          next: 'first_after_livia',
+          minutes: 5,
+        },
+      ],
+    },
+
+    first_empathy_livia_botch: {
+      title: 'Uma leitura conveniente',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Por um instante, você acha que entendeu perfeitamente a expressão dela.',
+        'A certeza vem rápido demais para ser confiável.',
+      ],
+      choices: [
+        {
+          id: 'continue',
+          text: 'Continuar a conversa.',
+          next: 'first_after_livia',
+          minutes: 5,
+          flags: { misreadClaraFirstMeeting: true },
+        },
+      ],
+    },
+
+    first_after_livia: {
+      title: 'Outro assunto',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'A conversa encontra um assunto mais simples.',
+        'A banda, o bar, um guitarrista que está demorando demais para terminar a passagem de som.',
+        'Nada exige intimidade. Por alguns minutos, vocês são apenas duas pessoas conversando perto de um palco.',
+      ],
+      choices: [
+        {
+          id: 'casual',
+          text: 'Continuar a conversa sem tentar impressioná-la.',
+          next: 'first_casual_talk',
+          minutes: 10,
+          metrics: { trust: 1, respect: 1 },
+        },
+        {
+          id: 'light_flirt',
+          text: '“Eu devia ter vindo falar com você antes.”',
+          next: 'first_light_flirt',
+          minutes: 5,
+          metrics: { affinity: 1 },
+          flags: { lightFirstFlirt: true },
+        },
+        {
+          id: 'auspex1',
+          text: '[Auspícios •] Aguçar os sentidos e prestar atenção aos pequenos sinais dela.',
+          next: 'first_auspex1',
+          minutes: 5,
+          requires: { discipline: 'auspex', min: 1 },
+          flags: { usedAuspexOnClara: true },
+        },
+        {
+          id: 'aura',
+          text: '[Auspícios ••] Observar a aura de Clara.',
+          test: {
+            label: 'Percepção + Empatia',
+            attributeGroup: 'mental',
+            attribute: 'perception',
+            ability: 'empathy',
+            difficulty: 8,
+            success1: {
+              next: 'first_aura_1',
+              result: 'A aura se torna visível, mas revela pouco.',
+            },
+            success2: {
+              next: 'first_aura_2',
+              result: 'Uma tonalidade principal se destaca.',
+            },
+            success3: {
+              next: 'first_aura_3',
+              result: 'Você distingue padrões e mudanças.',
+            },
+            success4: {
+              next: 'first_aura_4',
+              result: 'Alterações sutis ficam claras.',
+            },
+            success5: {
+              next: 'first_aura_5',
+              result: 'Cores e padrões simultâneos se separam com nitidez.',
+            },
+            success: {
+              next: 'first_aura_1',
+              result: 'A aura se torna visível.',
+            },
+            failure: {
+              next: 'first_aura_failure',
+              result: 'As cores não se organizam de modo legível.',
+            },
+            botch: {
+              next: 'first_aura_botch',
+              result: 'Você confia numa leitura possivelmente errada.',
+              flags: { falseAuraReadClara: true },
+            },
+          },
+          requires: { discipline: 'auspex', min: 2 },
+          flags: { usedAuraOnClara: true },
+        },
+      ],
+    },
+
+    first_auspex1: {
+      title: 'Sentidos Aguçados',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'O ruído do bar se separa em camadas.',
+        'A voz de Clara permanece próxima mesmo quando alguém testa a guitarra no palco.',
+        'Você percebe pequenas mudanças na respiração dela, o atrito dos dedos contra a câmera e pausas que antes desapareceriam no barulho.',
+        'Detalhes não são intenções.',
+      ],
+      choices: [
+        {
+          id: 'interpret',
+          text: '[Percepção + Empatia] Tentar interpretar os sinais.',
+          test: {
+            label: 'Percepção + Empatia',
+            attributeGroup: 'mental',
+            attribute: 'perception',
+            ability: 'empathy',
+            difficulty: 6,
+            success: {
+              next: 'first_auspex1_success',
+              result: 'Os detalhes formam um padrão plausível.',
+            },
+            failure: {
+              next: 'first_auspex1_failure',
+              result: 'Você percebe muito e entende pouco.',
+            },
+            botch: {
+              next: 'first_auspex1_botch',
+              result: 'Detalhes demais conduzem você a uma conclusão ruim.',
+              flags: { auspexMisreadClara: true },
+            },
+          },
+        },
+      ],
+    },
+
+    first_auspex1_success: {
+      title: 'Pequenos sinais',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Clara está confortável o bastante para continuar a conversa.',
+        'Quando Lívia entrou no assunto, porém, a atenção dela mudou. Não para a viagem. Para você.',
+        'Não há informação suficiente para chamar isso de atração.',
+      ],
+      choices: [{ id: 'continue', text: 'Continuar normalmente.', next: 'first_casual_talk', minutes: 5 }],
+    },
+
+    first_auspex1_failure: {
+      title: 'Muito ruído',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Você percebe respiração, postura, ritmo, pequenos movimentos.',
+        'Nenhum deles entrega sozinho o que Clara está pensando.',
+      ],
+      choices: [{ id: 'continue', text: 'Continuar normalmente.', next: 'first_casual_talk', minutes: 5 }],
+    },
+
+    first_auspex1_botch: {
+      title: 'Detalhes demais',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Por alguns segundos, cada pequeno gesto parece confirmar a mesma interpretação.',
+        'A certeza é confortável.',
+        'Isso não a torna verdadeira.',
+      ],
+      choices: [{ id: 'continue', text: 'Continuar a conversa.', next: 'first_casual_talk', minutes: 5 }],
+    },
+
+    first_aura_1: {
+      title: 'Aura',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Uma luminosidade viva envolve Clara.',
+        'Ela é clara o bastante para distinguir uma aura ativa, mas não para dar nome seguro ao que sente.',
+      ],
+      choices: [{ id: 'continue', text: 'Deixar a visão desaparecer.', next: 'first_casual_talk', minutes: 5 }],
+    },
+
+    first_aura_2: {
+      title: 'Uma cor dominante',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'O azul-claro domina a aura.',
+        'Entre uma frase e outra, lampejos violetas aparecem e somem rapidamente.',
+      ],
+      choices: [{ id: 'continue', text: 'Não presumir mais do que as cores mostram.', next: 'first_casual_talk', minutes: 5 }],
+    },
+
+    first_aura_3: {
+      title: 'Mudanças',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'O azul-claro permanece como base.',
+        'Quando a conversa volta por um instante para Lívia, a aura se reorganiza.',
+        'Os lampejos violetas se tornam mais visíveis quando Clara olha novamente para você.',
+      ],
+      choices: [{ id: 'continue', text: 'Guardar a informação.', next: 'first_casual_talk', minutes: 5 }],
+    },
+
+    first_aura_4: {
+      title: 'Variações sutis',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Você consegue acompanhar as mudanças sem confundi-las.',
+        'A menção a Lívia faz as cores se estabilizarem por um momento.',
+        'Quando fica claro que vocês não namoravam, um lampejo violeta aparece e desaparece.',
+        'Não é uma frase. Não é uma confissão. É apenas uma mudança.',
+      ],
+      choices: [{ id: 'continue', text: 'Deixar a leitura terminar.', next: 'first_casual_talk', minutes: 5 }],
+    },
+
+    first_aura_5: {
+      title: 'Cores sobrepostas',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'As cores deixam de parecer uma única emoção.',
+        'Há calma suficiente para permanecer conversando, curiosidade que cresce e uma mudança separada quando Lívia é mencionada.',
+        'Você consegue distinguir essas fontes sem transformá-las numa resposta simples.',
+      ],
+      choices: [{ id: 'continue', text: 'Encerrar a leitura.', next: 'first_casual_talk', minutes: 5 }],
+    },
+
+    first_aura_failure: {
+      title: 'Cores sem forma',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Por um instante há cor.',
+        'Depois ela se perde entre luzes do palco, movimento e concentração.',
+        'Nada confiável permanece.',
+      ],
+      choices: [{ id: 'continue', text: 'Voltar à conversa.', next: 'first_casual_talk', minutes: 5 }],
+    },
+
+    first_aura_botch: {
+      title: 'Uma leitura fácil demais',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Uma cor parece óbvia por um segundo.',
+        'A interpretação chega imediatamente atrás dela.',
+        'Talvez rápida demais.',
+      ],
+      choices: [{ id: 'continue', text: 'Confiar na impressão por enquanto.', next: 'first_casual_talk', minutes: 5 }],
+    },
+
+    first_casual_talk: {
+      title: 'Uma conversa comum',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Vocês falam do show, do atraso da banda e do Último Gole.',
+        'Clara comenta uma história curta sobre um vocalista que derrubou metade do pedestal de microfone tentando parecer mais dramático do que era.',
+        'Você ri. Ela também.',
+        'A conversa não precisa se transformar em confissão para funcionar.',
+      ],
+      choices: [
+        {
+          id: 'keep_casual',
+          text: 'Continuar no mesmo tom.',
+          next: 'first_caroline_passes',
+          minutes: 10,
+          metrics: { trust: 1, respect: 1 },
+        },
+        {
+          id: 'flirt',
+          text: '“Ainda bem que eu resolvi vir falar com você.”',
+          next: 'first_light_flirt',
+          minutes: 5,
+          metrics: { affinity: 1 },
+          flags: { lightFirstFlirt: true },
+        },
+      ],
+    },
+
+    first_light_flirt: {
+      title: 'Um pouco além da conversa',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Clara sustenta o olhar por um instante.',
+        '“Talvez tenha demorado.”',
+        'Ela diz isso num tom leve e não acrescenta mais nada.',
+      ],
+      choices: [
+        {
+          id: 'leave_there',
+          text: 'Deixar o flerte ali e continuar conversando normalmente.',
+          next: 'first_caroline_passes',
+          minutes: 5,
+          metrics: { trust: 1, respect: 2 },
+        },
+        {
+          id: 'push',
+          text: 'Continuar insistindo no interesse.',
+          next: 'first_boundary',
+          minutes: 5,
+          metrics: { respect: -1 },
+          flags: { pushedFirstBoundary: true },
+        },
+      ],
+    },
+
+    first_boundary: {
+      title: 'Um limite simples',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/clara-seria.png',
+      text: [
+        'O sorriso desaparece.',
+        '“Olha...”',
+        '“Eu tenho namorado.”',
+        'Ela ajeita a câmera.',
+        '“Não tô dizendo que você não pode conversar comigo. Só tô deixando isso claro.”',
+      ],
+      choices: [
+        {
+          id: 'respect',
+          text: '“Tudo bem. Desculpa se passei do ponto.”',
+          next: 'first_boundary_respected',
+          minutes: 5,
+          metrics: { trust: 1, respect: 3 },
+          flags: { respectedClaraBoundary: true },
+        },
+        {
+          id: 'secret',
+          text: '“Ele não precisa saber.”',
+          next: 'first_boundary_rejected',
+          minutes: 5,
+          metrics: { trust: -3, respect: -4 },
+          flags: { disrespectedClaraBoundary: true },
+        },
+      ],
+    },
+
+    first_boundary_respected: {
+      title: 'Sem insistência',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Clara observa você por um instante.',
+        '“Tudo bem.”',
+        'Ela não precisa repetir o limite.',
+      ],
+      choices: [
+        {
+          id: 'continue',
+          text: 'Continuar sem voltar ao flerte.',
+          next: 'first_caroline_passes',
+          minutes: 10,
+          metrics: { trust: 1, respect: 1 },
+        },
+      ],
+    },
+
+    first_boundary_rejected: {
+      title: 'Não',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/clara-seria.png',
+      text: [
+        'A expressão de Clara fecha.',
+        '“Não.”',
+        '“Não é sobre ele saber.”',
+        '“Eu estou te falando.”',
+        '“Boa noite.”',
+      ],
+      choices: [
+        {
+          id: 'leave',
+          text: 'Não segui-la.',
+          next: 'second_night',
+          minutes: 5,
+          delayDays: 7,
+          metrics: { respect: -1 },
+          flags: {
+            firstMeetingEndedBadly: true,
+            claraFirstMeetingComplete: true,
+            claraKnowsPlayerName: true,
+            claraKnowsPlayerFromLivia: true,
+          },
+        },
+      ],
+    },
+
+    first_caroline_passes: {
+      title: 'O bar continua',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Caroline passa perto de vocês carregando uma caixa pequena.',
+        '“Clara, depois me manda aquela foto.”',
+        '“Mando.”',
+        'Caroline segue para o balcão sem interromper a conversa.',
+        'Clara olha para o palco.',
+        'A banda finalmente parece pronta.',
+      ],
+      choices: [
+        {
+          id: 'goodbye',
+          text: 'Deixar Clara voltar ao trabalho.',
+          next: 'first_goodbye',
+          minutes: 5,
+          metrics: { respect: 2 },
+        },
+      ],
+    },
+
+    first_goodbye: {
+      title: 'Até sábado, talvez',
+      place: 'Último Gole · Perto do palco · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        'Clara ergue a câmera.',
+        '“Eu preciso voltar. Se eu perder o começo, depois vão dizer que a culpa foi minha.”',
+        'Ela dá alguns passos e lembra de alguma coisa.',
+        '“Sábado que vem vai estar bem pior.”',
+        '“Vai ter cover de Black Sabbath.”',
+        '“Se vier, chega cedo.”',
+      ],
+      choices: [
+        {
+          id: 'probably',
+          text: '“Eu provavelmente vou estar aqui.”',
+          next: 'first_goodbye_end',
+          minutes: 5,
+          metrics: { affinity: 1 },
+        },
+        {
+          id: 'maybe',
+          text: '“Talvez eu apareça.”',
+          next: 'first_goodbye_end',
+          minutes: 5,
+        },
+      ],
+    },
+
+    first_goodbye_end: {
+      title: 'Fim da primeira conversa',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      portrait: '/images/npcs/clara/portrait.jpg',
+      text: [
+        '“Então até sábado, talvez.”',
+        'Clara volta para perto do palco.',
+        'A câmera sobe até o rosto dela no instante em que as luzes diminuem.',
+        'Não houve telefone, promessa ou encontro marcado.',
+        'Só uma conversa.',
+      ],
+      choices: [
+        {
+          id: 'leave',
+          text: 'Continuar a noite.',
+          next: 'second_night',
+          minutes: 5,
+          delayDays: 7,
+          metrics: { trust: 1 },
+          flags: {
+            claraFirstMeetingComplete: true,
+            claraKnowsPlayerName: true,
+            claraKnowsPlayerFromLivia: true,
+          },
+        },
+      ],
+    },
+
+    second_night: {
+      title: 'Ela voltou sem ser por acaso',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Três noites depois, o Último Gole está mais vazio.',
+        'Clara está em uma mesa perto da parede, revisando fotografias no notebook. Rafael não está com ela.',
+        'Quando você entra, ela percebe quase imediatamente.',
+        'Desta vez não há troca de olhares à distância por vários minutos.',
+        'Ela levanta uma mão em cumprimento e aponta para a cadeira vazia em frente.',
+      ],
+      choices: [
+        { id: 'sit', text: 'Sentar e perguntar no que ela está trabalhando.', next: 'second_work_talk', minutes: 15, metrics: { trust: 2, affinity: 1 } },
+        { id: 'ask_rafael', text: 'Perguntar se Rafael não veio.', next: 'second_rafael', minutes: 10, metrics: { trust: 1 } },
+        { id: 'distance', text: 'Cumprimentá-la, mas não presumir que a cadeira é um convite.', next: 'second_clara_invites', minutes: 5, metrics: { respect: 2 } },
+      ],
+    },
+
+    second_clara_invites: {
+      title: '“Eu estava falando sério.”',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Você apenas cumprimenta.',
+        'Clara olha para a cadeira vazia e depois para você.',
+        '“Eu estava falando sério.”',
+        'Ela fecha uma das janelas do notebook.',
+        '“Senta.”',
+      ],
+      choices: [
+        { id: 'sit_now', text: 'Aceitar o convite.', next: 'second_work_talk', minutes: 15, metrics: { affinity: 1, trust: 1 } },
+      ],
+    },
+
+    second_work_talk: {
+      title: 'Fotos que ninguém comprou',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara mostra uma sequência feita depois do show anterior. Técnicos desmontando cabos. Um músico dormindo sentado. Duda contando o caixa.',
+        '“Essas são as minhas favoritas e são as que ninguém compra.”',
+        'Ela fecha o notebook.',
+        '“Íris quer me indicar para umas casas maiores. Eu devia estar feliz. Só fico pensando que vão querer exatamente as fotos que eu acho mais chatas.”',
+      ],
+      choices: [
+        { id: 'support', text: 'Perguntar o que ela quer, em vez de dizer o que deveria fazer.', next: 'second_personal', minutes: 15, metrics: { trust: 2, respect: 2 } },
+        { id: 'practical', text: 'Sugerir que aceite trabalhos pagos e mantenha o projeto pessoal em paralelo.', next: 'second_personal', minutes: 15, metrics: { trust: 1 } },
+        { id: 'romanticize', text: 'Dizer que ela não deveria se vender.', next: 'second_personal', minutes: 15, metrics: { respect: -1 } },
+      ],
+    },
+
+    second_rafael: {
+      title: 'Mensagens com a tela virada para baixo',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        '“Não.”',
+        'O telefone vibra sobre a mesa. Clara olha para a tela e a vira para baixo.',
+        '“Quer dizer... ainda não.”',
+        'Ela percebe que a própria resposta disse mais do que pretendia.',
+        '“A gente brigou.”',
+      ],
+      choices: [
+        { id: 'listen', text: 'Deixar que ela decida se quer continuar.', next: 'second_personal', minutes: 10, metrics: { trust: 2, respect: 1 } },
+        { id: 'safe', text: 'Perguntar se ela se sente segura, sem pedir detalhes da briga.', next: 'second_safety_seed', minutes: 10, metrics: { trust: 2, respect: 2 }, flags: { askedSafetyEarly: true } },
+      ],
+    },
+
+    second_safety_seed: {
+      title: 'Uma pergunta que muda o tom',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara demora para responder.',
+        '“Aqui? Sim.”',
+        'Ela olha para Duda no balcão.',
+        '“Em casa... ele tem uma chave. Mas não é como se...”',
+        'A frase morre.',
+        '“Desculpa. Eu não quero transformar isso em sessão de terapia.”',
+      ],
+      choices: [
+        { id: 'respect', text: '“Não precisa explicar nada que não queira.”', next: 'second_personal', minutes: 5, metrics: { trust: 2, respect: 2 }, flags: { knowsRafaelHasKey: true } },
+        { id: 'duda', text: 'Lembrar que Duda parece disposta a ajudar se Clara pedir.', next: 'second_personal', minutes: 5, metrics: { trust: 1, respect: 1 }, flags: { suggestedDudaSupport: true, knowsRafaelHasKey: true } },
+      ],
+    },
+
+    second_personal: {
+      title: 'O assunto muda para você',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Depois de algum tempo, Clara apoia o queixo na mão.',
+        '“Eu falei um monte e ainda não sei quase nada sobre você.”',
+        'Ela aponta para você com uma caneta.',
+        '“Você não posta foto, não aparece de dia, não come nada quando está aqui e some no meio da noite.”',
+        'Ela sorri.',
+        '“Ou você é muito misterioso ou muito chato.”',
+      ],
+      choices: [
+        { id: 'truth', text: 'Contar algo verdadeiro sobre sua vida que não revele a Máscara.', next: 'second_connection', minutes: 15, metrics: { trust: 2, affinity: 1 }, flags: { sharedPersonalTruth: true } },
+        { id: 'flirt', text: '“E mesmo assim você continua tentando descobrir.”', next: 'second_connection', minutes: 10, metrics: { affinity: 2 } },
+        { id: 'closed', text: 'Dizer que prefere não falar de si.', next: 'second_connection', minutes: 5, metrics: { trust: -1, respect: 1 }, flags: { guardedWithClara: true } },
+      ],
+    },
+
+    second_connection: {
+      title: 'Sem palco entre vocês',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'A conversa continua sem que nenhum dos dois perceba imediatamente quanto tempo passou.',
+        'Quando Duda aumenta as luzes por alguns segundos para avisar que uma parte do salão será limpa, Clara pisca e olha em volta.',
+        '“Eu devia estar editando.”',
+        'Ela não abre o notebook.',
+        'O telefone vibra de novo. Desta vez, o nome de Rafael aparece antes que ela vire a tela.',
+      ],
+      choices: [
+        { id: 'dont_compete', text: 'Não transformar a mensagem dele em uma disputa.', next: 'third_night', minutes: 5, delayDays: 2, metrics: { trust: 1, respect: 2 } },
+        { id: 'ask_stay', text: 'Perguntar se ela quer continuar conversando apesar da mensagem.', next: 'third_night', minutes: 10, delayDays: 2, metrics: { affinity: 1, trust: 1 } },
+      ],
+    },
+
+    third_night: {
+      title: 'Ele veio buscá-la',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Na noite seguinte em que você encontra Clara, Rafael aparece antes da meia-noite.',
+        'Ele não entra imediatamente. Fica do lado de fora, visível pela porta, mandando mensagens.',
+        'Clara vê a tela, guarda o telefone e continua conversando com Íris perto do palco.',
+        'Minutos depois, Rafael entra.',
+        'Ele fala baixo no começo. Você não escuta as palavras, apenas vê Clara cruzar os braços.',
+        'Então ele segura seu antebraço.',
+        'Ela puxa o braço de volta.',
+      ],
+      choices: [
+        { id: 'observe', text: 'Observar por alguns segundos antes de decidir se é necessário intervir.', next: 'third_observe', minutes: 5, metrics: { respect: 1 } },
+        { id: 'duda', text: 'Chamar Duda, que conhece Clara e o funcionamento do bar.', next: 'third_duda', minutes: 5, metrics: { trust: 2, respect: 2 }, flags: { involvedDuda: true } },
+        { id: 'intervene', text: 'Aproximar-se e pedir que Rafael solte Clara.', next: 'third_intervene', minutes: 5, metrics: { trust: 1 } },
+      ],
+    },
+
+    third_observe: {
+      title: 'A linha que ele atravessa',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara diz alguma coisa. Rafael aproxima o rosto do dela.',
+        'Ela tenta passar.',
+        'Ele bloqueia o caminho com o corpo.',
+        'Duda já percebeu a situação do balcão.',
+        'Quando Rafael tenta pegar o telefone da mão de Clara, ela dá um passo para trás e diz, agora alto o bastante para você ouvir:',
+        '“Não encosta em mim.”',
+      ],
+      choices: [
+        { id: 'support', text: 'Aproximar-se ao lado de Duda, sem falar por Clara.', next: 'third_duda', minutes: 5, metrics: { trust: 2, respect: 2 } },
+        {
+          id: 'rage',
+          text: 'A visão dele tocando nela faz a Besta exigir uma resposta.',
+          test: {
+            label: 'Autocontrole',
+            trait: 'selfControl',
+            difficulty: 6,
+            success: {
+              next: 'third_control_success',
+              result: 'A raiva chega, mas não toma sua boca nem suas mãos.',
+              metrics: { respect: 1 },
+              flags: { controlledRafaelAnger: true },
+            },
+            failure: {
+              next: 'third_control_failure',
+              result: 'Você se aproxima com uma agressividade que todos percebem.',
+              flags: { rafaelAngerVisible: true },
+            },
+            botch: {
+              next: 'third_control_botch',
+              result: 'Por um instante, ferir Rafael parece mais importante do que ajudar Clara.',
+              metrics: { respect: -2 },
+              flags: { beastFocusedOnRafael: true },
+            },
+          },
+        },
+      ],
+    },
+
+    third_duda: {
+      title: 'O bar não é território dele',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Duda chega primeiro.',
+        '“Solta.”',
+        'Não há grito. Há autoridade.',
+        'Rafael solta Clara, mas começa a dizer que aquilo é “coisa de casal”.',
+        'Clara responde antes de qualquer outra pessoa:',
+        '“Não. É você me segurando quando eu pedi para soltar.”',
+        'Algumas pessoas perto do palco estão olhando. Rafael percebe que perdeu o controle da situação e sai dizendo que espera Clara lá fora.',
+      ],
+      choices: [
+        { id: 'ask_clara', text: 'Perguntar a Clara o que ela quer fazer agora.', next: 'third_after', minutes: 10, metrics: { trust: 2, respect: 2 } },
+        { id: 'follow', text: 'Sair atrás de Rafael para “resolver”.', next: 'third_follow_bad', minutes: 10, metrics: { trust: -1, respect: -2 }, flags: { followedRafaelAgainstClaraFocus: true } },
+      ],
+    },
+
+    third_intervene: {
+      title: 'Solta',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Você se aproxima.',
+        '“Solta ela.”',
+        'Rafael olha para você e aperta a mandíbula.',
+        'Clara puxa o braço novamente.',
+        '“Eu já mandei soltar.”',
+        'Duda começa a vir do balcão.',
+      ],
+      choices: [
+        { id: 'step_back', text: 'Deixar Clara e Duda conduzirem a situação.', next: 'third_duda', minutes: 5, metrics: { respect: 2, trust: 1 } },
+        { id: 'threaten', text: 'Ameaçar Rafael.', next: 'third_control_failure', minutes: 5, metrics: { respect: -1 }, flags: { threatenedRafael: true } },
+      ],
+    },
+
+    third_control_success: {
+      title: 'A pessoa antes da raiva',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Você percebe a diferença entre duas vontades.',
+        'Uma quer que Clara fique segura.',
+        'A outra quer que Rafael sofra.',
+        'Você escolhe a primeira.',
+        'Duda chega ao lado de Clara e manda Rafael soltar seu braço.',
+      ],
+      choices: [
+        { id: 'help', text: 'Apoiar Duda e Clara sem ameaçá-lo.', next: 'third_after', minutes: 10, metrics: { trust: 2, respect: 2 }, flags: { choseClaraOverRage: true } },
+      ],
+    },
+
+    third_control_failure: {
+      title: 'Todos percebem',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Sua aproximação muda a temperatura da conversa.',
+        'Rafael solta Clara e se vira para você.',
+        '“Ah. Então é isso.”',
+        'Clara olha para os dois com irritação.',
+        '“Não. Isso não é sobre vocês dois.”',
+        'A frase o atinge de um jeito que ameaça não consegue.',
+      ],
+      choices: [
+        { id: 'listen', text: 'Ouvir Clara e recuar.', next: 'third_after', minutes: 5, metrics: { trust: 1, respect: 2 }, flags: { listenedAfterAnger: true } },
+        { id: 'keep', text: 'Continuar confrontando Rafael.', next: 'third_follow_bad', minutes: 10, metrics: { trust: -2, respect: -2 }, flags: { ignoredClaraForConflict: true } },
+      ],
+    },
+
+    third_control_botch: {
+      title: 'O alvo errado',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'A Besta reduz a cena a uma conta simples: ameaça, rival, alvo.',
+        'Você dá um passo.',
+        'Depois outro.',
+        'Clara diz seu nome — não para pedir ajuda, mas para fazer você parar.',
+        'Duda já está entre ela e Rafael.',
+        'A pergunta agora é se você ainda consegue lembrar por que se aproximou.',
+      ],
+      choices: [
+        {
+          id: 'last_control',
+          text: 'Parar. Clara não precisa que você transforme a agressão dele na sua.',
+          test: {
+            label: 'Autocontrole',
+            trait: 'selfControl',
+            difficulty: 7,
+            success: {
+              next: 'third_after',
+              result: 'Você para antes de tocar em Rafael.',
+              metrics: { respect: 1 },
+              flags: { stoppedBeforeViolence: true },
+            },
+            failure: {
+              next: 'third_shove',
+              result: 'Você o empurra com força demais para que pareça apenas uma discussão.',
+              metrics: { trust: -1, respect: -2 },
+              flags: { shovedRafael: true },
+            },
+            botch: {
+              next: 'third_shove',
+              result: 'A raiva vence o último intervalo entre impulso e ação.',
+              metrics: { trust: -2, respect: -3 },
+              flags: { beastViolence: true, shovedRafael: true },
+            },
+          },
+        },
+        { id: 'leave', text: 'Sair do bar imediatamente para não piorar a situação.', next: 'third_after', minutes: 10, metrics: { respect: 1 }, flags: { leftToControlBeast: true } },
+      ],
+    },
+
+    third_shove: {
+      title: 'Força demais',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Rafael bate contra uma mesa e derruba duas cadeiras.',
+        'O silêncio em volta dura pouco, mas é suficiente.',
+        'Você sabe exatamente quanta força usou.',
+        'Para qualquer mortal olhando, foi força demais.',
+        'Duda se coloca entre vocês.',
+        'Clara olha para você com uma expressão nova: não gratidão. Cautela.',
+      ],
+      choices: [
+        { id: 'stop', text: 'Parar imediatamente e não tentar justificar a violência.', next: 'third_after', minutes: 5, metrics: { trust: -1, respect: 1 }, flags: { strengthSuspicionSeed: true } },
+        { id: 'justify', text: 'Dizer que Rafael mereceu.', next: 'third_after', minutes: 5, metrics: { trust: -2, respect: -2 }, flags: { justifiedViolence: true, strengthSuspicionSeed: true } },
+      ],
+    },
+
+    third_follow_bad: {
+      title: 'A rua lateral',
+      place: 'Último Gole · calçada · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Rafael para perto de um carro e percebe que você o seguiu.',
+        '“Sabia.”',
+        'Ele sorri sem humor.',
+        '“Você quer ela.”',
+        'Talvez seja verdade. Talvez não. O problema é que Clara ficou dentro do bar enquanto vocês dois transformam a vida dela numa disputa.',
+      ],
+      choices: [
+        { id: 'realize', text: 'Perceber o erro e voltar para o bar.', next: 'third_after', minutes: 10, metrics: { respect: 1 }, flags: { recognizedRivalryTrap: true } },
+        { id: 'threat', text: 'Mandar Rafael ficar longe dela.', next: 'third_after', minutes: 10, metrics: { trust: -1, respect: -1 }, flags: { privateThreatToRafael: true } },
+      ],
+    },
+
+    third_after: {
+      title: '“Eu quero ir embora.”',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Rafael sai do bar.',
+        'Clara fica alguns segundos olhando para a porta.',
+        'Depois pega a câmera e a bolsa.',
+        '“Eu quero ir embora.”',
+        'Duda pergunta se ela quer que chame Bia. Clara olha para o telefone.',
+        '“Ela está trabalhando.”',
+        'Então olha para você.',
+        'Não há pedido ainda. Apenas uma decisão que ela está tentando tomar.',
+      ],
+      choices: [
+        { id: 'ride', text: 'Oferecer uma carona sem presumir que ela aceitará.', next: 'ride_choice', minutes: 5, metrics: { trust: 1, respect: 1 }, flags: { offeredRide: true } },
+        { id: 'wait', text: 'Esperar com ela até Bia, um carro de aplicativo ou alguém do bar poder acompanhá-la.', next: 'safe_wait', minutes: 20, metrics: { trust: 2, respect: 2 }, flags: { waitedSafely: true } },
+        { id: 'duda', text: 'Deixar Duda ajudá-la e não transformar a noite numa aproximação.', next: 'fourth_night', minutes: 5, delayDays: 2, metrics: { respect: 2 } },
+      ],
+    },
+
+    safe_wait: {
+      title: 'Vinte minutos',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Vocês esperam perto do balcão.',
+        'Clara não fala sobre Rafael durante os primeiros minutos.',
+        'Fala de uma lente que precisa consertar. De Bia reclamando que ela trabalha de graça. De um gato que aparece na janela do apartamento.',
+        'Só depois diz:',
+        '“Obrigada por não fazer eu ter que cuidar da sua raiva também.”',
+      ],
+      choices: [
+        { id: 'answer', text: '“Você já tinha coisa suficiente para resolver.”', next: 'fourth_night', minutes: 5, delayDays: 2, metrics: { trust: 3, respect: 2 }, flags: { claraFeltSafe: true } },
+      ],
+    },
+
+    ride_choice: {
+      title: 'A escolha é dela',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara olha para Duda. Duda não responde por ela.',
+        '“Pode ser.”',
+        'Ela pega o capacete emprestado do bar.',
+        '“Mas eu vou te passar o endereço da minha irmã. Não quero ir para casa hoje.”',
+      ],
+      choices: [
+        { id: 'bia', text: 'Levá-la até o endereço de Bia, sem mudar o destino.', next: 'ride_to_bia', minutes: 30, metrics: { trust: 3, respect: 3 }, flags: { tookClaraToBia: true } },
+        { id: 'haven', text: 'Sugerir que ela fique em seu refúgio em vez de ir para Bia.', next: 'ride_boundary', minutes: 5, metrics: { affinity: 1, respect: -2 }, flags: { suggestedHavenAfterConflict: true } },
+      ],
+    },
+
+    ride_boundary: {
+      title: 'Não esta noite',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara balança a cabeça.',
+        '“Não esta noite.”',
+        'Não há espaço para interpretar a resposta como convite para insistir.',
+        '“Na Bia.”',
+      ],
+      choices: [
+        { id: 'respect', text: 'Aceitar imediatamente e levá-la para Bia.', next: 'ride_to_bia', minutes: 30, metrics: { respect: 2, trust: 1 }, flags: { respectedRideBoundary: true, tookClaraToBia: true } },
+      ],
+    },
+
+    ride_to_bia: {
+      title: 'A cidade entre dois sinais',
+      place: 'Ruas de São Paulo · Pinheiros',
+      venueId: 'pinheiros_streets',
+      locations: ['pinheiros'],
+      text: [
+        'No primeiro sinal vermelho, Clara bate duas vezes de leve em seu ombro para chamar sua atenção.',
+        '“Obrigada.”',
+        'No segundo, ela pergunta se você sempre está acordado a essa hora.',
+        'A pergunta parece casual, mas não é a primeira vez que ela nota seus horários.',
+        'Quando chegam, Bia espera no portão de um prédio. Clara desce, devolve o capacete e permanece um instante ao seu lado.',
+        '“Eu te mando mensagem.”',
+      ],
+      choices: [
+        { id: 'goodnight', text: 'Desejar boa noite e ir embora.', next: 'message_after_ride', minutes: 5, delayDays: 1, metrics: { trust: 2, respect: 1 } },
+      ],
+    },
+
+    message_after_ride: {
+      title: '02:17',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Na noite seguinte, há uma mensagem de Clara.',
+        '“Desculpa por ontem.”',
+        'Outra chega menos de um minuto depois.',
+        '“Na verdade, não. Eu não fiz nada para pedir desculpa.”',
+        'Depois:',
+        '“Obrigada pela carona.”',
+      ],
+      choices: [
+        { id: 'agree', text: 'Responder que ela realmente não tem por que pedir desculpas.', next: 'fourth_night', minutes: 5, delayDays: 1, metrics: { trust: 2, respect: 2 }, flags: { reinforcedNoBlame: true } },
+        { id: 'light', text: 'Responder algo leve e deixar o assunto descansar.', next: 'fourth_night', minutes: 5, delayDays: 1, metrics: { affinity: 1, respect: 1 } },
+      ],
+    },
+
+    fourth_night: {
+      title: 'Sem Rafael à mesa',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara volta duas noites depois.',
+        'Está sozinha.',
+        'Ela não parece aliviada. Parece cansada.',
+        '“Eu terminei.”',
+        'A frase vem antes do cumprimento.',
+        '“Ou tentei. Ele acha que terminar é uma negociação.”',
+        'Ela deixa a bolsa no chão.',
+        '“Ele ainda tem uma chave da minha casa.”',
+      ],
+      choices: [
+        { id: 'plan', text: 'Perguntar o que ela já pensou em fazer.', next: 'safety_plan_seed', minutes: 15, metrics: { trust: 2, respect: 2 } },
+        { id: 'lock', text: 'Oferecer ajuda para trocar a fechadura, se ela quiser.', next: 'safety_plan_seed', minutes: 15, metrics: { trust: 2, respect: 2 }, flags: { offeredLockHelp: true } },
+        { id: 'violence', text: 'Prometer que Rafael nunca mais vai encostar nela.', next: 'possession_warning', minutes: 10, metrics: { trust: -2, respect: -3 }, flags: { promisedViolence: true, possessive: true } },
+      ],
+    },
+
+    possession_warning: {
+      title: 'A frase errada',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara fica em silêncio.',
+        '“Eu sei que você acha que isso ajuda.”',
+        'Ela esfrega os olhos.',
+        '“Mas eu acabei de sair de uma conversa com um homem que acha que pode decidir tudo porque está ‘me protegendo’.”',
+        'Ela olha diretamente para você.',
+        '“Não faz a mesma coisa com outra embalagem.”',
+      ],
+      choices: [
+        { id: 'accept', text: 'Reconhecer que passou do limite.', next: 'safety_plan_seed', minutes: 5, metrics: { trust: 1, respect: 2 }, flags: { acceptedProtectionBoundary: true } },
+        { id: 'insist', text: 'Insistir que ela não entende o perigo.', next: 'warning', minutes: 5, metrics: { trust: -2, respect: -2 } },
+      ],
+    },
+
+    safety_plan_seed: {
+      title: 'Um plano feito com ela',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara enumera o que já sabe que precisa fazer: trocar a fechadura, deixar parte do equipamento com Bia, avisar Duda e guardar as mensagens.',
+        '“Eu não quero desaparecer da minha própria vida porque ele não aceita uma palavra de duas letras.”',
+        'Ela quer continuar trabalhando.',
+        'Quer apenas fazer isso sem ter que olhar por cima do ombro a cada esquina.',
+      ],
+      choices: [
+        { id: 'support', text: 'Ajudar no plano que ela escolheu.', next: 'warning', minutes: 30, delayDays: 1, metrics: { trust: 3, respect: 3 }, flags: { sister: true, staff: true, safetyPlanStarted: true } },
+        { id: 'iris', text: 'Sugerir pedir apoio à rede de Íris.', next: 'warning', minutes: 20, delayDays: 1, requires: { npc: 'iris', metric: 'trust', min: 3 }, metrics: { trust: 2, respect: 2 }, flags: { irisSupportSuggested: true, safetyPlanStarted: true } },
+        { id: 'space', text: 'Dizer que respeitará se ela preferir resolver isso sem você.', next: 'warning', minutes: 10, delayDays: 1, metrics: { respect: 2 } },
+      ],
+    },
+
+    warning: {
+      title: 'Ele esperou na calçada',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Na noite seguinte, Rafael espera do lado de fora.',
+        'Ele não tenta entrar. Apenas permanece perto de um carro até Clara sair para falar com Duda na porta.',
+        'Quando percebe que foi visto, ergue o telefone e tira uma fotografia.',
+        'Mais tarde, Clara mostra uma mensagem recebida de um número novo:',
+        '“Pode trocar fechadura. Pode dormir na sua irmã. Uma hora você vai ter que voltar.”',
+        'Ela não tenta rir desta vez.',
+        '“Eu quero levar isso a sério.”',
+      ],
+      choices: [
+        { id: 'plan', text: 'Tratar a ameaça como concreta e concluir a proteção agora.', next: 'protection', minutes: 15, deadlineDays: 3, metrics: { trust: 2, respect: 1 } },
+        { id: 'threaten', text: 'Ir até Rafael e ameaçá-lo na frente do bar.', next: 'protection', minutes: 15, deadlineDays: 2, metrics: { trust: -1, respect: -1 }, flags: { provoked: true }, result: 'Rafael recua, mas registra seu rosto e vai embora. A ameaça não terminou; agora ele também incluiu você no conflito.' },
+        { id: 'dismiss', text: 'Dizer que Rafael só está tentando assustá-la.', next: 'protection', minutes: 10, deadlineDays: 3, metrics: { trust: -3, respect: -1 }, result: 'Clara não concorda. Ela procura Bia e Duda por conta própria. A ameaça continua ativa.' },
+      ],
+    },
+
+    protection: {
+      title: 'Setenta e duas horas',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'O prazo não é uma regra de Rafael. É a janela em que vocês ainda sabem onde Clara estará e podem mudar sua rotina antes que ele tente cumprir a ameaça.',
+        'As mensagens podem ser preservadas. Duda tem gravações do bar. Bia pode recebê-la. A fechadura pode ser trocada.',
+        'Clara repete uma condição:',
+        '“Eu quero ajuda. Não quero desaparecer.”',
+      ],
+      choices: [
+        {
+          id: 'network',
+          text: 'Executar o plano com Clara, Bia e Duda: provas, fechadura, transporte e locais seguros.',
+          next: 'aftermath',
+          minutes: 90,
+          delayDays: 5,
+          flags: { protected: true },
+          clearDeadline: true,
+          metrics: { trust: 3, respect: 3 },
+          result: 'Clara escolhe onde ficará. Duda preserva as gravações, Bia recebe uma cópia das mensagens e a rotina é alterada sem cortar Clara do trabalho.',
+        },
+        {
+          id: 'iris',
+          text: 'Somar a rede de Íris ao plano escolhido por Clara.',
+          next: 'aftermath',
+          requires: { npc: 'iris', metric: 'trust', min: 3 },
+          minutes: 75,
+          delayDays: 5,
+          flags: { protected: true },
+          clearDeadline: true,
+          metrics: { trust: 3, respect: 3 },
+        },
+        {
+          id: 'confront',
+          text: 'Abandonar o plano e encontrar Rafael sozinho.',
+          next: 'attack',
+          minutes: 20,
+          metrics: { trust: -2, respect: -2 },
+          result: 'Você transforma a proteção de Clara em um confronto particular. Nenhuma medida concreta foi concluída.',
+        },
+      ],
+    },
+
+    attack: {
+      title: 'A rua sem plateia',
+      place: 'Ruas de Pinheiros',
+      venueId: 'pinheiros_streets',
+      locations: ['pinheiros'],
+      text: [
+        'Rafael aceita o encontro, mas não veio para conversar.',
+        'Ele surge entre dois carros com uma lâmina curta. O primeiro movimento deixa claro que a ameaça não era apenas linguagem.',
+        'O bar ainda está perto. Há luz, câmeras e pessoas na esquina.',
+        'Clara continua sem a proteção que pediu.',
+      ],
+      choices: [
+        {
+          id: 'escape',
+          text: 'Recuar para o bar, buscar testemunhas e voltar ao plano de proteção.',
+          next: 'aftermath',
+          minutes: 60,
+          delayDays: 5,
+          damage: 1,
+          flags: { protected: true },
+          clearDeadline: true,
+          metrics: { trust: 1, respect: 1 },
+          result: 'Você sofre um ferimento ao recuar. Duda chama ajuda e o plano de Clara finalmente é executado.',
+        },
+        {
+          id: 'restrain',
+          text: 'Conter Rafael sem transformar a rua num massacre.',
+          next: 'aftermath',
+          minutes: 60,
+          delayDays: 5,
+          requires: { skill: 'brawl', min: 2 },
+          flags: { protected: true },
+          clearDeadline: true,
+          metrics: { trust: 1 },
+          result: 'Você o contém até que outras pessoas cheguem. A agressão é registrada e o plano de segurança de Clara é executado.',
+        },
+        {
+          id: 'beast',
+          text: 'A lâmina e a raiva fazem a Besta pedir que você pare de se conter.',
+          test: {
+            label: 'Autocontrole',
+            trait: 'selfControl',
+            difficulty: 7,
+            success: {
+              next: 'attack_controlled',
+              result: 'Você mantém Rafael como um agressor a ser contido, não como presa.',
+              metrics: { respect: 1 },
+              flags: { controlledAttackBeast: true },
+            },
+            failure: {
+              next: 'attack_uncontrolled',
+              result: 'Você o fere mais do que seria necessário para escapar.',
+              metrics: { trust: -2, respect: -2 },
+              flags: { excessiveViolenceRafael: true },
+            },
+            botch: {
+              next: 'attack_uncontrolled',
+              result: 'Por alguns segundos, a Besta não distingue defesa de punição.',
+              metrics: { trust: -3, respect: -3 },
+              flags: { beastAttackRafael: true },
+            },
+          },
+        },
+      ],
+    },
+
+    attack_controlled: {
+      title: 'Ainda é uma escolha',
+      place: 'Ruas de Pinheiros',
+      venueId: 'pinheiros_streets',
+      locations: ['pinheiros'],
+      text: [
+        'Você consegue manter a violência dentro de um limite.',
+        'Rafael termina no chão, vivo e consciente o bastante para entender que perdeu.',
+        'O que importa agora não é fazê-lo sofrer.',
+        'É voltar para Clara e executar o plano que você abandonou para vir até aqui.',
+      ],
+      choices: [
+        {
+          id: 'return',
+          text: 'Voltar imediatamente e concluir a proteção.',
+          next: 'aftermath',
+          minutes: 60,
+          delayDays: 5,
+          flags: { protected: true },
+          clearDeadline: true,
+          metrics: { trust: 1, respect: 2 },
+        },
+      ],
+    },
+
+    attack_uncontrolled: {
+      title: 'Quando a raiva termina',
+      place: 'Ruas de Pinheiros',
+      venueId: 'pinheiros_streets',
+      locations: ['pinheiros'],
+      text: [
+        'Quando você recupera a dimensão da rua, Rafael está no chão e há sangue demais para chamar aquilo de simples contenção.',
+        'Ele ainda respira.',
+        'A percepção não produz alívio imediato.',
+        'Você saiu para “proteger” Clara e terminou sozinho numa rua, punindo um homem que ela não pediu que você punisse.',
+      ],
+      choices: [
+        {
+          id: 'stop',
+          text: 'Parar, chamar ajuda de forma segura e voltar ao plano de Clara.',
+          next: 'aftermath',
+          minutes: 75,
+          delayDays: 7,
+          flags: { protected: true, rafaelSeriouslyInjured: true },
+          clearDeadline: true,
+          metrics: { trust: -2, respect: -1 },
+        },
+      ],
+    },
+
+    aftermath: {
+      title: 'Depois do problema que não desaparece',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Cinco noites depois, Clara volta ao Último Gole com Bia.',
+        'Rafael está afastado de sua rotina, mas isso não apaga o hábito de Clara olhar para a rua quando um carro reduz a velocidade.',
+        'Ela veio buscar parte do equipamento e conversar com Íris sobre trabalho.',
+        '“Eu não quero que tudo o que eu sou vire a história daquele relacionamento.”',
+        'Ela coloca uma pasta de fotografias sobre a mesa.',
+        '“Então vamos falar de outra coisa.”',
+      ],
+      choices: [
+        { id: 'work', text: 'Perguntar sobre o trabalho novo com Íris.', next: 'after_work', minutes: 20, metrics: { trust: 2, respect: 2 } },
+        { id: 'feelings', text: 'Perguntar como ela está sem transformar a pergunta em interrogatório sobre Rafael.', next: 'after_feelings', minutes: 15, metrics: { trust: 2 } },
+        { id: 'pressure', text: 'Perguntar se agora, sem Rafael, vocês podem finalmente ficar juntos.', next: 'after_pressure', minutes: 10, metrics: { affinity: 1, trust: -2, respect: -3 }, flags: { pressuredAfterBreakup: true } },
+      ],
+    },
+
+    after_work: {
+      title: 'Uma cidade que só existe de madrugada',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Íris conseguiu dois trabalhos pagos e deixou Clara usar uma das noites para começar o projeto pessoal.',
+        'Ela mostra imagens de um padeiro chegando às três da manhã, uma enfermeira esperando ônibus e dois garis dividindo café num posto.',
+        '“Ainda quero fazer aquela série.”',
+        'Ela olha para você.',
+        '“Você continua sendo uma das pessoas mais noturnas que eu conheço.”',
+      ],
+      choices: [
+        { id: 'help', text: 'Oferecer ajuda para encontrar personagens e lugares, sem prometer aparecer nas fotos.', next: 'portrait_request', minutes: 20, metrics: { trust: 2, affinity: 1, respect: 1 }, flags: { supportsNightProject: true } },
+        { id: 'portrait', text: 'Dizer que ela pode tentar fazer um retrato seu.', next: 'portrait_request', minutes: 15, metrics: { affinity: 2, trust: 1 }, flags: { acceptsPortrait: true } },
+      ],
+    },
+
+    after_feelings: {
+      title: 'Não é uma linha reta',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        '“Melhor e pior.”',
+        'Clara dá de ombros.',
+        '“Melhor porque não tenho que explicar cada mensagem. Pior porque agora eu percebo quantas coisas eu parei de fazer para evitar discussão.”',
+        'Ela olha para a câmera.',
+        '“Estou tentando descobrir quais coisas ainda são minhas.”',
+      ],
+      choices: [
+        { id: 'time', text: 'Dizer que ela não precisa decidir nada sobre vocês agora.', next: 'portrait_request', minutes: 10, metrics: { trust: 2, respect: 3 } },
+        { id: 'interest', text: 'Admitir que existe interesse, sem pedir uma resposta naquela noite.', next: 'portrait_request', minutes: 10, metrics: { affinity: 2, trust: 1, respect: 2 }, flags: { admittedInterest: true } },
+      ],
+    },
+
+    after_pressure: {
+      title: 'Não era uma fila',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara fecha a pasta.',
+        '“Eu não terminei com ele para chegar a sua vez.”',
+        'A frase não é cruel. É precisa.',
+        '“Se acontecer alguma coisa entre a gente, eu quero que seja porque eu escolhi você. Não porque você ficou esperando o outro sair.”',
+      ],
+      choices: [
+        { id: 'accept', text: 'Reconhecer a pressão e recuar.', next: 'portrait_request', minutes: 5, metrics: { respect: 2, trust: 1 }, flags: { acceptedNoQueue: true } },
+        { id: 'insist', text: 'Insistir que ela já demonstrou interesse.', next: 'distance_ending', minutes: 5, metrics: { trust: -3, respect: -3 } },
+      ],
+    },
+
+    portrait_request: {
+      title: 'Fica parado',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara ergue a câmera.',
+        '“Fica parado.”',
+        'A lente aponta diretamente para você desta vez.',
+        'Por um instante, o gesto parece íntimo de um jeito inesperado.',
+        'Então surge outro problema: fotografias permanecem.',
+        'Ela já reparou em seus horários. Em sua ausência durante o dia. Em como você evita certas situações.',
+        'Um retrato pode ser apenas um retrato.',
+        'Ou mais uma peça de um padrão.',
+      ],
+      choices: [
+        { id: 'allow', text: 'Deixar que ela tire a foto.', next: 'portrait_taken', minutes: 10, metrics: { trust: 2, affinity: 2 }, flags: { claraHasPortrait: true } },
+        { id: 'refuse', text: 'Recusar com leveza, sem inventar uma grande explicação.', next: 'portrait_refused', minutes: 5, metrics: { respect: 1 }, flags: { portraitRefused: true } },
+      ],
+    },
+
+    portrait_taken: {
+      title: 'Finalmente em foco',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'O obturador dispara.',
+        'Clara olha o visor e sorri.',
+        '“Finalmente.”',
+        'Ela vira a câmera para você.',
+        'Na fotografia, você parece pertencer ao bar e ao mesmo tempo estar separado de tudo ao redor.',
+        '“Essa eu gostei.”',
+        'Ela não sabe que, para você, a imagem tem outro peso: prova de presença, memória e risco.',
+      ],
+      choices: [
+        { id: 'keep', text: 'Deixar que ela guarde a fotografia.', next: 'late_connection', minutes: 10, delayDays: 4, metrics: { trust: 2, affinity: 1 }, flags: { portraitKept: true } },
+        { id: 'private', text: 'Pedir que não publique a foto, sem exigir que apague.', next: 'late_connection', minutes: 10, delayDays: 4, metrics: { trust: 1, respect: 1 }, flags: { portraitPrivate: true } },
+      ],
+    },
+
+    portrait_refused: {
+      title: 'Outra coincidência',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara abaixa a câmera.',
+        '“Você é realmente estranho com foto.”',
+        'Ela diz sorrindo, mas observa sua reação.',
+        '“Tudo bem. Sem foto.”',
+        'Ela respeita a recusa.',
+        'A curiosidade, porém, não desaparece.',
+      ],
+      choices: [
+        { id: 'continue', text: 'Continuar a conversa.', next: 'late_connection', minutes: 10, delayDays: 4, metrics: { trust: 1, respect: 2 } },
+      ],
+    },
+
+    late_connection: {
+      title: 'Uma noite sem crise',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Quatro noites depois, vocês conseguem passar quase uma hora juntos sem falar de Rafael.',
+        'Clara conta histórias de trabalhos ruins, clientes que pedem “foto espontânea” depois de ensaiar pose e bandas que oferecem divulgação como pagamento.',
+        'Ela ri bastante.',
+        'Em algum momento, a proximidade deixa de parecer apenas consequência de uma situação ruim.',
+        'Quando o bar esvazia, Clara permanece sentada ao seu lado.',
+        'O silêncio não é desconfortável.',
+      ],
+      choices: [
+        { id: 'romance', text: 'Aproximar-se devagar e deixar espaço para que ela corresponda ou recue.', next: 'first_kiss', minutes: 10, requires: { metric: 'affinity', min: 5 }, metrics: { affinity: 1, respect: 1 }, flags: { romanticMoment: true } },
+        { id: 'friendship', text: 'Não transformar a intimidade em romance. Aproveitar a companhia.', next: 'friend_path', minutes: 15, metrics: { trust: 2, respect: 2 }, flags: { friendship: true } },
+        { id: 'truth', text: 'Perguntar o que ela acha que sabe sobre você.', next: 'suspicion', minutes: 15, metrics: { trust: 1 } },
+      ],
+    },
+
+    first_kiss: {
+      title: 'O espaço entre a intenção e a fome',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara percebe a aproximação e não recua.',
+        'O beijo começa humano.',
+        'Então a proximidade muda outras coisas.',
+        'O pulso no pescoço dela deixa de ser detalhe. O cheiro de sangue sob a pele atravessa o resto do mundo.',
+        'Desejo e fome ocupam o mesmo espaço por um instante.',
+        'A diferença entre querer Clara e querer o sangue de Clara precisa continuar existindo.',
+      ],
+      choices: [
+        {
+          id: 'control_hunger',
+          text: 'Interromper a fome antes que ela se torne parte do beijo.',
+          test: {
+            label: 'Autocontrole',
+            trait: 'selfControl',
+            difficulty: 6,
+            success: {
+              next: 'kiss_control_success',
+              result: 'Você mantém o beijo separado da fome.',
+              metrics: { affinity: 2, trust: 1, respect: 2 },
+              flags: { didNotFeedOnClara: true, controlledIntimateHunger: true },
+            },
+            failure: {
+              next: 'kiss_control_failure',
+              result: 'Você se afasta tarde demais para esconder completamente que algo mudou em você.',
+              metrics: { affinity: 1 },
+              flags: { claraNoticedStrangeHunger: true },
+            },
+            botch: {
+              next: 'kiss_control_botch',
+              result: 'Por um segundo, seus dentes encostam onde não deveriam.',
+              metrics: { trust: -2, respect: -1 },
+              flags: { claraNoticedFangsSeed: true },
+            },
+          },
+        },
+        { id: 'stop', text: 'Afastar-se antes que a fome cresça.', next: 'kiss_stop', minutes: 5, metrics: { trust: 1, respect: 2 }, flags: { stoppedKissForHunger: true } },
+      ],
+    },
+
+    kiss_control_success: {
+      title: 'Um beijo não é alimentação',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'A fome continua presente, mas não atravessa a decisão.',
+        'Quando o beijo termina, Clara permanece perto.',
+        '“Você está gelado.”',
+        'Ela diz como uma observação, não acusação.',
+        'Depois sorri.',
+        '“E eu vou fingir que isso não é a coisa mais estranha da noite.”',
+      ],
+      choices: [
+        { id: 'goodnight', text: 'Encerrar a noite sem pressionar por mais.', next: 'suspicion', minutes: 10, delayDays: 3, metrics: { trust: 2, affinity: 1, respect: 2 }, flags: { firstKissGood: true } },
+      ],
+    },
+
+    kiss_control_failure: {
+      title: '“O que foi?”',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Você se afasta abruptamente.',
+        'Clara percebe.',
+        '“O que foi?”',
+        'Ela procura alguma explicação no seu rosto.',
+        'O problema não é que ela tenha visto a verdade.',
+        'É que ela viu uma mudança real e agora sabe que existe alguma coisa para explicar.',
+      ],
+      choices: [
+        { id: 'overwhelmed', text: 'Dizer que se deixou levar e precisava parar.', next: 'suspicion', minutes: 10, delayDays: 3, metrics: { trust: 1, respect: 2 }, flags: { explainedKissStop: true } },
+        { id: 'lie', text: 'Inventar uma desculpa apressada.', next: 'suspicion', minutes: 10, delayDays: 3, metrics: { trust: -1 }, flags: { suspiciousKissExcuse: true } },
+      ],
+    },
+
+    kiss_control_botch: {
+      title: 'Perto demais',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara recua um centímetro.',
+        '“Você me mordeu?”',
+        'Não houve perfuração. Não houve sangue.',
+        'Mas houve contato suficiente para que a pergunta exista.',
+        'Ela passa a língua pelo próprio lábio e olha para você com uma mistura de curiosidade e cautela.',
+      ],
+      choices: [
+        { id: 'apologize', text: 'Pedir desculpas e encerrar a aproximação imediatamente.', next: 'suspicion', minutes: 10, delayDays: 4, metrics: { trust: 1, respect: 2 }, flags: { apologizedFangContact: true } },
+        { id: 'joke', text: 'Tentar transformar a situação em piada.', next: 'suspicion', minutes: 10, delayDays: 4, metrics: { trust: -2 }, flags: { dismissedFangContact: true } },
+      ],
+    },
+
+    kiss_stop: {
+      title: 'Parar também é uma escolha',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Você se afasta antes de perder a capacidade de fingir que a fome não existe.',
+        'Clara não parece ofendida. Apenas surpresa.',
+        '“Tudo bem?”',
+        'A pergunta é simples.',
+        'A resposta não precisa ser.',
+      ],
+      choices: [
+        { id: 'limit', text: 'Dizer que precisava ir devagar.', next: 'suspicion', minutes: 10, delayDays: 3, metrics: { trust: 2, respect: 2 } },
+      ],
+    },
+
+    suspicion: {
+      title: 'Coisas que não combinam',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Em outro encontro, Clara chega com duas cervejas por hábito e para antes de entregar uma delas.',
+        '“Você nunca bebe.”',
+        'Ela coloca as duas na mesa.',
+        '“Também nunca come.”',
+        'O tom ainda é leve, mas a lista continua.',
+        '“Você não aparece durante o dia. Sua pele está sempre fria. E tem outras pequenas coisas que não combinam.”',
+        'Ela inclina a cabeça.',
+        '“Eu não estou perguntando se você é vampiro.”',
+        'Pausa.',
+        '“Ainda.”',
+      ],
+      choices: [
+        { id: 'partial', text: 'Admitir que existe algo importante que você ainda não pode explicar.', next: 'suspicion_partial', minutes: 15, requires: { metric: 'trust', min: 5 }, metrics: { trust: 2, respect: 2 }, flags: { admittedSecret: true } },
+        { id: 'deflect', text: 'Dar explicações plausíveis separadamente e evitar o quadro completo.', next: 'suspicion_deflect', minutes: 15, metrics: { trust: -1 }, flags: { maskDeflection: true } },
+        { id: 'distance', text: 'Perceber o risco para a Máscara e se afastar dela.', next: 'distance_ending', minutes: 10, metrics: { respect: 1 }, flags: { choseMasqueradeDistance: true } },
+      ],
+    },
+
+    suspicion_partial: {
+      title: 'Uma verdade sem nome',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara não gosta da resposta.',
+        'Mas acredita que ela é, pelo menos, parcialmente verdadeira.',
+        '“Então não me faz achar que eu estou ficando louca.”',
+        'Ela toca a própria câmera.',
+        '“Se existe alguma coisa, eu prefiro saber que existe uma porta fechada do que você ficar pintando uma parede onde eu consigo ver a maçaneta.”',
+      ],
+      choices: [
+        { id: 'promise', text: 'Prometer que não vai negar o que ela realmente perceber.', next: 'close', minutes: 15, delayDays: 5, metrics: { trust: 3, respect: 3 }, flags: { noGaslightPromise: true } },
+      ],
+    },
+
+    suspicion_deflect: {
+      title: 'Explicações demais',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Cada explicação funciona sozinha.',
+        'Juntas, funcionam pior.',
+        'Clara não discute.',
+        '“Tá.”',
+        'Ela muda de assunto.',
+        'A curiosidade deixa de ser brincadeira. Agora existe uma pequena distância onde antes havia confiança.',
+      ],
+      choices: [
+        { id: 'continue', text: 'Não insistir na mentira e deixar o assunto descansar.', next: 'close', minutes: 10, delayDays: 7, metrics: { respect: 1 } },
+      ],
+    },
+
+    friend_path: {
+      title: 'Uma relação que não precisa virar romance',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'A proximidade continua sem que vocês a transformem em namoro.',
+        'Clara manda fotografias ruins de placas engraçadas de madrugada. Pede opinião sobre trabalhos. Às vezes simplesmente ocupa a mesma mesa enquanto edita.',
+        'Ela se torna uma das poucas pessoas mortais com quem você consegue passar uma noite sem precisar representar alguma coisa o tempo todo.',
+        'Isso também é intimidade.',
+      ],
+      choices: [
+        {
+          id: 'keep',
+          text: 'Manter a amizade e os limites.',
+          next: null,
+          ending: 'Clara se torna uma amiga próxima e uma ligação real com a cena musical e fotográfica de São Paulo. A relação não precisa de romance para importar.',
+          metrics: { trust: 2, respect: 3 },
+          flags: { friendship: true },
+        },
+      ],
+    },
+
+    close: {
+      title: 'Uma fotografia sem dívida',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Clara coloca uma fotografia impressa sobre a mesa.',
+        'É uma imagem do Último Gole quase vazio. Você aparece ao fundo, ou apenas a cadeira onde costuma sentar se nunca permitiu o retrato.',
+        '“Eu gosto porque não parece que ninguém está tentando impressionar ninguém.”',
+        'Ela passa o dedo pela borda do papel.',
+        '“Eu ainda não sei tudo sobre você.”',
+        'Depois sorri.',
+        '“Mas acho que finalmente sei quando você está me deixando escolher.”',
+      ],
+      choices: [
+        {
+          id: 'romance',
+          text: 'Admitir que quer construir um romance, devagar e sem transformar proteção em dívida.',
+          next: null,
+          requires: { metric: 'affinity', min: 5, notFlag: 'friendship' },
+          ending: 'Vocês começam um romance sem promessa de normalidade. Clara preserva o trabalho, a irmã, os amigos e a própria casa. Você preserva segredos que ainda terão consequências. O que existe entre vocês nasce de repetidas escolhas, não de uma noite de crise.',
+          metrics: { trust: 1, respect: 3 },
+          flags: { romance: true },
+        },
+        {
+          id: 'friend',
+          text: 'Dizer que prefere manter a amizade que vocês construíram.',
+          next: null,
+          ending: 'Clara se torna uma amiga próxima. Ela continua fotografando a cidade noturna, e você continua aparecendo nas bordas de algumas histórias que ela conta.',
+          metrics: { trust: 2, respect: 2 },
+          flags: { friendship: true },
+        },
+        {
+          id: 'space',
+          text: 'Reconhecer que sua vida pode colocá-la em perigo e manter distância.',
+          next: null,
+          ending: 'Vocês se despedem sem transformar a relação em fracasso. Clara continua seu trabalho; você preserva a distância por escolha.',
+          metrics: { respect: 2 },
+        },
+      ],
+    },
+
+    distance_ending: {
+      title: 'A distância também responde',
+      place: 'Último Gole · Pinheiros',
+      venueId: 'ultimo_gole',
+      locations: ['pinheiros'],
+      text: [
+        'Algumas relações terminam antes de receber um nome.',
+        'Clara não insiste.',
+        'Quando vocês se encontram no bar, ela cumprimenta. Às vezes conversa. Às vezes não.',
+        'A vida dela continua sem depender da sua presença.',
+        'Talvez seja exatamente isso que você escolheu preservar.',
+      ],
+      choices: [
+        {
+          id: 'end',
+          text: 'Aceitar a distância.',
+          next: null,
+          ending: 'Clara segue trabalhando e reconstruindo sua rotina. Vocês permanecem conhecidos, sem romance e sem dívida.',
+          metrics: { respect: 1 },
+        },
+      ],
+    },
+
+    loss: {
+      title: 'A notícia e a perseguição',
+      place: 'Ruas de Pinheiros',
+      venueId: 'pinheiros_streets',
+      locations: ['pinheiros'],
+      text: [
+        'Bia é quem traz a notícia.',
+        'Rafael encontrou Clara antes que as medidas de proteção fossem concluídas.',
+        'As mensagens preservadas deixam claro que a ameaça era deliberada.',
+        'Não aconteceu porque Clara terminou. Não aconteceu porque você falhou num romance. Rafael escolheu persegui-la e atacá-la.',
+        'Dias depois, você reconhece o carro dele na rua. Desta vez, ele também está procurando você.',
+      ],
+      choices: [
+        {
+          id: 'cover',
+          text: 'Buscar abrigo, alertar as pessoas e preservar as provas.',
+          next: null,
+          damage: 2,
+          minutes: 15,
+          ending: 'Você sobrevive à tentativa de ataque. Bia mantém distância. Duda entrega as gravações. A ausência de Clara permanece no bar.',
+        },
+        {
+          id: 'witnesses',
+          text: 'Usar as ruas movimentadas para escapar e identificar o agressor.',
+          next: null,
+          requires: { skill: 'streetwise', min: 2 },
+          minutes: 20,
+          ending: 'Você alcança testemunhas e escapa. A investigação continua. Clara não volta.',
+        },
+      ],
+    },
+  },
+}

@@ -1,212 +1,108 @@
 .haven-screen {
   position: relative;
-
-  min-height: 100vh;
-
+  z-index: 2;
+  min-height: calc(100vh - 90px);
+  padding: 44px max(24px, calc((100vw - 1180px) / 2)) 120px;
   color: #e9dfdd;
-
-  background: #080607;
+  background: radial-gradient(ellipse at 90% 5%, #56243424, transparent 55%), #0a080bea;
 }
-
-.haven-background {
-  position: fixed;
-
-  inset: 0;
-
-  background:
-    radial-gradient(
-      circle at 60% 35%,
-      rgba(
-        84,
-        28,
-        39,
-        0.2
-      ),
-      transparent 30%
-    ),
-    linear-gradient(
-      180deg,
-      #160e10,
-      #060506
-    );
-}
-
-.haven-overlay {
-  position: fixed;
-
-  inset: 0;
-
-  pointer-events: none;
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(
-        0,
-        0,
-        0,
-        0.15
-      ),
-      rgba(
-        0,
-        0,
-        0,
-        0.55
-      )
-    );
-}
-
 .haven-header {
-  position: relative;
-
-  z-index: 2;
-
-  padding:
-    24px
-    35px;
-
   display: flex;
-
-  justify-content:
-    space-between;
-
-  align-items: center;
-
-  border-bottom:
-    1px solid #37252a;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid #3a2b33;
 }
-
-.haven-header span {
-  color: #a53c4b;
-
-  font-size: 9px;
-
-  letter-spacing: 0.2em;
+.haven-eyebrow {
+  color: #c78b94;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
 }
-
-.haven-header h1 {
-  margin:
-    5px
-    0
-    0;
-
-  font-family:
-    Georgia,
-    serif;
-
-  font-size: 28px;
-
-  font-weight: 400;
+.haven-header h1 { margin: 10px 0 12px; font: 400 clamp(28px, 4vw, 42px)/1.15 Georgia, serif; }
+.haven-screen p { color: #b4a8ad; font-size: 14px; line-height: 1.7; margin: 12px 0; }
+.haven-header p { max-width: 640px; margin-bottom: 0; }
+.haven-sunrise { flex-shrink: 0; display: grid; gap: 8px; text-align: right; padding-top: 6px; }
+.haven-sunrise span { color: #b4a8ad; font-size: 11px; }
+.haven-sunrise strong { color: #dbb99c; font-size: 18px; font-weight: 400; }
+.haven-content { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 32px; padding-top: 32px; }
+.haven-screen h2 { font: 400 22px/1.3 Georgia, serif; margin: 8px 0 12px; }
+.haven-screen h3 { font: 400 23px/1.3 Georgia, serif; margin: 10px 0; }
+.haven-screen button { font: inherit; cursor: pointer; transition: background .15s, border-color .15s; }
+.haven-screen button:disabled { opacity: .45; cursor: not-allowed; }
+.haven-screen button:focus-visible, .haven-screen summary:focus-visible { outline: 2px solid #e5b795; outline-offset: 4px; }
+.haven-focus { padding: 24px; background: linear-gradient(115deg, #39212bdd, #1e161bdd); border: 1px solid #73404f; border-radius: 10px; }
+.haven-focus h2 { font-size: 27px; margin-top: 12px; }
+.haven-primary { display: inline-flex; align-items: center; justify-content: space-between; gap: 16px; background: #713443; color: #fff1ec; border: 1px solid #a25b6a; border-radius: 5px; padding: 12px 16px; font-size: 13px !important; text-align: left; }
+.haven-primary:hover:not(:disabled) { background: #874557; }
+.haven-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 30px 0 12px; }
+.haven-section-heading h2 { margin: 0; }
+.haven-text-action { background: transparent; color: #db9da8; padding: 8px 0; border: 0; font-size: 12px !important; text-align: left; }
+.haven-text-action:hover:not(:disabled) { color: #ffe4db; }
+.haven-mission { border: 1px solid #42313c; border-radius: 8px; padding: 22px; background: #171217; margin-bottom: 14px; }
+.haven-card-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.haven-progress { color: #b2a79a; font-size: 11px; white-space: nowrap; }
+.haven-screen .haven-next-step { color: #d6c4bd; border-left: 2px solid #986575; padding-left: 12px; }
+.haven-checklist { border-top: 1px solid #382832; padding-top: 12px; margin: 18px 0 8px; }
+.haven-screen summary { color: #bcaab1; font-size: 12px; cursor: pointer; padding: 4px 0; }
+.haven-checklist ul { list-style: none; padding: 4px 0 0; margin: 0; }
+.haven-checklist li { display: flex; align-items: baseline; gap: 10px; color: #d5c5cd; font-size: 12px; padding: 8px 0; }
+.haven-checklist li.is-complete { color: #93ad9b; }
+.haven-step-state { font-size: 10px; margin-left: auto; }
+.haven-completed { margin: 16px 0; }
+.haven-completed > summary { margin-bottom: 12px; }
+.haven-empty { padding: 16px; border: 1px dashed #48363e; border-radius: 8px; }
+.haven-room-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.haven-room { display: flex; flex-direction: column; gap: 10px; min-height: 180px; padding: 18px; border: 1px solid #44333c; border-radius: 8px; background: #141014; text-align: left; }
+.haven-room:hover:not(:disabled) { border-color: #8d5665; background: #251a22; }
+.haven-room strong { color: #e1d2d5; font-size: 14px; line-height: 1.5; font-weight: 500; }
+.haven-room > span:not(.haven-eyebrow) { color: #b1a0a9; font-size: 12px; line-height: 1.6; }
+.haven-room small { color: #c6a584; font-size: 10px; margin-top: auto; }
+.haven-sidebar { display: flex; flex-direction: column; gap: 18px; }
+.haven-panel { background: #141015; padding: 22px; border: 1px solid #3f3039; border-radius: 8px; }
+.haven-secondary { display: flex; width: 100%; justify-content: space-between; gap: 10px; text-align: left; margin-top: 10px; padding: 12px; background: #211821; border: 1px solid #56404b; border-radius: 5px; color: #ded0d7; font-size: 12px !important; line-height: 1.5 !important; }
+.haven-secondary:hover:not(:disabled) { background: #322130; }
+.haven-secondary small { white-space: nowrap; color: #c3a78b; }
+.haven-screen .haven-warning { color: #edb79d; }
+.haven-screen .haven-clean-state { color: #a0b7a4; }
+.haven-screen .haven-hint { font-size: 12px; color: #ad9aa4; }
+.haven-sleep-confirm { border-top: 1px solid #543943; margin-top: 16px; }
+.haven-sleep-confirm .haven-text-action { display: block; margin-top: 8px; }
+.haven-feedback { border-left: 2px solid #9ab29e; padding-left: 10px; }
+.haven-departure .haven-primary { width: 100%; }
+@media (max-width: 950px) {
+  .haven-content { grid-template-columns: minmax(0, 1fr); }
+  .haven-sidebar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .haven-departure { grid-column: 1 / -1; }
 }
-
-.haven-header strong {
-  color: #c84b5b;
-
-  font-size: 19px;
+@media (max-width: 560px) {
+  .haven-screen { padding: 28px 16px 110px; }
+  .haven-header { display: block; }
+  .haven-sunrise { text-align: left; margin-top: 20px; }
+  .haven-content { padding-top: 24px; gap: 24px; }
+  .haven-focus, .haven-mission, .haven-panel { padding: 18px; }
+  .haven-room-grid, .haven-sidebar { grid-template-columns: 1fr; }
+  .haven-room { min-height: 140px; }
+  .haven-section-heading { align-items: flex-start; }
+  .haven-step-state { display: none; }
 }
-
-.haven-content {
-  position: relative;
-
-  z-index: 2;
-
-  width:
-    min(
-      950px,
-      calc(100% - 40px)
-    );
-
-  margin: 0 auto;
-
-  padding:
-    70px
-    0;
-
-  display: grid;
-
-  grid-template-columns:
-    1.4fr
-    0.8fr;
-
-  gap: 60px;
-}
-
-.haven-description p {
-  color: #a89d9c;
-
-  font-family:
-    Georgia,
-    serif;
-
-  font-size: 16px;
-
-  line-height: 1.8;
-}
-
-.haven-description blockquote {
-  margin:
-    30px
-    0
-    0;
-
-  padding:
-    16px
-    20px;
-
-  color: #bdafb0;
-
-  background:
-    rgba(
-      18,
-      12,
-      14,
-      0.8
-    );
-
-  border-left:
-    2px solid #8e3542;
-}
-
-.haven-actions {
-  display: grid;
-
-  gap: 9px;
-
-  align-content: start;
-}
-
-.haven-actions button {
-  min-height: 52px;
-
-  padding:
-    0
-    16px;
-
-  color: #b4a9a8;
-
-  background: #0d0a0b;
-
-  border:
-    1px solid #3b292e;
-
-  cursor: pointer;
-
-  text-align: left;
-}
-
-.haven-actions button:hover {
-  color: #eee4e2;
-
-  background: #211116;
-
-  border-color: #823542;
-}
-
-@media (
-  max-width: 750px
-) {
-  .haven-content {
-    grid-template-columns:
-      1fr;
-  }
+.haven-interactive { margin-top: 24px; }
+.haven-room-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.haven-room-nav button { padding: 12px 18px; border: 1px solid #56404b; border-radius: 5px; background: #211821; color: #ded0d7; }
+.haven-room-nav button[aria-current] { background: #713443; border-color: #c78b94; }
+.haven-room-image { position: relative; max-width: 980px; margin: auto; border: 1px solid #56404b; border-radius: 8px; overflow: hidden; }
+.haven-room-image img { width: 100%; display: block; }
+.haven-screen .haven-hotspot { position: absolute; transform: translate(-50%, -50%); padding: 10px 12px; min-height: 44px; max-width: 32%; border: 1px solid #c6a584; border-radius: 5px; color: #fff1ec; background: #100b10e8; font-size: 12px; box-shadow: 0 2px 16px #0009; }
+.haven-hotspot:hover:not(:disabled), .haven-hotspot[aria-pressed="true"] { background: #713443; }
+.haven-screen .haven-room-caption { font-size: 12px; }
+.haven-storage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.haven-panel .haven-section-heading { margin-top: 0; }
+.haven-details { margin-top: 24px; border-top: 1px solid #56404b; padding-top: 16px; }
+.haven-screen .haven-details > summary { font-size: 16px; padding: 12px 0; }
+.haven-feedback:empty { display: none; }
+@media (max-width: 560px) {
+  .haven-screen .haven-hotspot { font-size: 10px; padding: 5px 6px; }
+  .haven-storage-grid { grid-template-columns: 1fr; gap: 12px; }
 }

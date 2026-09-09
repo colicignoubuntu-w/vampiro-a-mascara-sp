@@ -128,14 +128,35 @@ test(
 test(
   'o julgamento acontece antes do apartamento de Lívia',
   () => {
-    assert.equal(
-      scenes.door.choices.find(
-        (choice) =>
-          choice.id === 'ask_livia'
-      )?.nextScene,
-      'jack_intro',
-      'Perguntar por Lívia não pode pular o julgamento.'
-    )
+    function targets(value) {
+      if (!value || typeof value !== 'object') return []
+      return Object.entries(value).flatMap(([key, entry]) =>
+        typeof entry === 'string' && /scene/i.test(key) && scenes[entry]
+          ? [entry]
+          : targets(entry)
+      )
+    }
+    function reachesApartment(start, blockedScene) {
+      const pending = [start]
+      const visited = new Set()
+      while (pending.length) {
+        const id = pending.pop()
+        if (id === blockedScene || visited.has(id)) continue
+        visited.add(id)
+        const scene = scenes[id]
+        if (scene?.location?.id === 'livia_apartment') return true
+        pending.push(...targets(scene))
+        for (const choice of scene?.choices ?? []) {
+          pending.push(...targets(getChoiceTest(id, choice.id)))
+        }
+      }
+      return false
+    }
+    const askLivia = scenes.door.choices.find(choice => choice.id === 'ask_livia')
+    assert.ok(askLivia?.nextScene, 'A pergunta por Lívia precisa continuar a história.')
+    assert.ok(reachesApartment(askLivia.nextScene), 'O caminho de Lívia precisa alcançar o apartamento.')
+    assert.equal(reachesApartment('door', 'prologue_end'), false, 'Nenhuma escolha pode chegar ao apartamento sem encerrar o julgamento.')
+    assert.equal(reachesApartment('door', 'judgment_livia_death'), false, 'A execução de Lívia deve acontecer antes da chegada ao apartamento.')
 
     assert.equal(
       scenes.prologue_end.choices.find(

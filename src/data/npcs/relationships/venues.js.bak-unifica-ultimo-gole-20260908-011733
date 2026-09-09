@@ -1,0 +1,16 @@
+export const RELATIONSHIP_VENUES = {
+  ultimo_gole: { name: 'Último Gole', location: 'pinheiros', description: 'Um bar de rock de luz baixa, paredes cobertas de cartazes e um pequeno palco. Duda acompanha o movimento atrás do balcão.', exit: 'Sair do bar' },
+  pinheiros_streets: { name: 'Ruas de Pinheiros', location: 'pinheiros', description: 'O som dos bares se perde entre carros estacionados e portas fechadas. Algumas pessoas ainda circulam pelas calçadas.', exit: 'Voltar a Pinheiros' },
+  ritual_alley: { name: 'Beco da Liberdade', location: 'liberdade', description: 'Um corredor entre lojas fechadas. A luz da rua mal alcança as marcas de giz junto ao muro.', exit: 'Sair do beco' },
+  sueli_books: { name: 'Livraria de Sueli', location: 'liberdade', description: 'Sueli organiza livros usados e cadernos de pesquisa. Uma luminária permanece acesa sobre o balcão.', exit: 'Sair da livraria' },
+  hospital_ward: { name: 'Ala de internação', location: 'hospital_victor', description: 'Passos baixos, portas entreabertas e a equipe de plantão. As conversas precisam respeitar o descanso dos pacientes.', exit: 'Voltar ao hospital' },
+  asylum_floor: { name: 'Pista e bastidores do Asylum', location: 'asylum', description: 'A pista pulsa diante da cabine de som. Entre um set e outro, a equipe cruza o salão carregando cabos e equipamentos.', exit: 'Voltar à entrada' },
+  art_museum: { name: 'Museu de artes', location: 'bela_vista', description: 'Na visita noturna, o saguão fica silencioso entre pequenos grupos. As salas e o arquivo guardam histórias além das legendas.', exit: 'Sair do museu' },
+  central_cafe: { name: 'Café do Centro', location: 'centro', description: 'Um café aberto até tarde, com mesas próximas à janela e espaço para conversar sem a música dos bares.', exit: 'Sair do café' },
+  central_streets: { name: 'Caminhar pelas ruas', location: 'centro', description: 'As luzes das lojas se apagam aos poucos. Pessoas passam entre pontos de ônibus e esquinas movimentadas.', exit: 'Voltar ao Centro' },
+  central_square: { name: 'Praça do Centro', location: 'centro', description: 'Bancos sob a iluminação pública e o movimento das ruas ao redor. Um lugar aberto para uma conversa combinada.', exit: 'Sair da praça' },
+}
+
+export function venuesAt(locationId) {
+  return Object.entries(RELATIONSHIP_VENUES).filter(([, venue]) => venue.location === locationId).map(([id, venue]) => ({ id, ...venue }))
+}

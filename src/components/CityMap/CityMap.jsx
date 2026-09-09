@@ -4,7 +4,7 @@ import {
 } from 'react'
 
 import {
-  getAllLocations,
+  getMapDistricts,
 } from '../../data/world/locations'
 
 import transports from '../../data/world/transports'
@@ -42,14 +42,7 @@ export default function CityMap({
     'walking'
   )
 
- const locations =
-  getAllLocations(
-    game
-  ).filter(
-    (location) =>
-      location.showOnMap !==
-      false
-  )
+ const locations = getMapDistricts(game)
 
   const currentLocationId =
     game.world

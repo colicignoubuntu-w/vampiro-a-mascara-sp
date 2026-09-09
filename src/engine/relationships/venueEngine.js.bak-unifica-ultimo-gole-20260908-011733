@@ -1,0 +1,19 @@
+import { RELATIONSHIP_NPCS } from '../../data/npcs/relationships/index.js'
+import { RELATIONSHIP_VENUES } from '../../data/npcs/relationships/venues.js'
+import { relationshipState, relationshipAvailability, performRelationshipChoice } from './relationshipEngine'
+import { reconcileRelationships } from './relationshipClock'
+
+export function encountersAtVenue(input, venueId) {
+  const game = reconcileRelationships(input)
+  const venue = RELATIONSHIP_VENUES[venueId]
+  if (!venue || venue.location !== game.world?.location?.id) return []
+  return Object.values(RELATIONSHIP_NPCS).filter(npc => {
+    const state = relationshipState(game, npc.id)
+    return npc.scenes[state.node]?.venueId === venueId && !relationshipAvailability(game, npc.id)
+  })
+}
+
+export function performVenueChoice(game, venueId, npcId, nodeId, choiceId) {
+  if (!encountersAtVenue(game, venueId).some(npc => npc.id === npcId)) throw new Error('Este encontro não está disponível neste local.')
+  return performRelationshipChoice(game, npcId, nodeId, choiceId)
+}

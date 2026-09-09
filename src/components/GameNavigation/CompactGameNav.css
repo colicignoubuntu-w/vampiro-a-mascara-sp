@@ -1,0 +1,220 @@
+.compact-game-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  position: relative;
+  z-index: 90;
+}
+
+.compact-game-nav-button,
+.compact-game-nav-phone > button {
+  min-height: 34px;
+  padding: 7px 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  color: #aa9c98;
+  background: rgba(11, 9, 9, 0.72);
+  border: 1px solid #493537;
+
+  cursor: pointer;
+
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  transition:
+    color 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+.compact-game-nav-button:hover:not(:disabled),
+.compact-game-nav-button.is-active,
+.compact-game-nav-phone > button:hover:not(:disabled) {
+  color: #ead8d4;
+  background: rgba(49, 23, 27, 0.88);
+  border-color: #7a454c;
+}
+
+.compact-game-nav-button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.compact-game-nav-icon {
+  color: #86515a;
+  font-size: 10px;
+}
+
+.compact-game-nav-group {
+  position: relative;
+}
+
+.compact-game-nav-popover {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  z-index: 200;
+
+  width: 270px;
+  padding: 13px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20, 15, 16, 0.99),
+      rgba(10, 8, 9, 0.99)
+    );
+
+  border: 1px solid #493336;
+
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.58);
+}
+
+.compact-game-nav-popover::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: 19px;
+
+  width: 9px;
+  height: 9px;
+
+  background: #151011;
+  border-left: 1px solid #493336;
+  border-top: 1px solid #493336;
+
+  transform: rotate(45deg);
+}
+
+.compact-game-nav-popover header {
+  display: grid;
+  gap: 3px;
+  padding: 2px 2px 11px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.compact-game-nav-popover header span,
+.compact-game-nav-subsection > span {
+  color: #815d61;
+  font-size: 7px;
+  letter-spacing: 0.14em;
+}
+
+.compact-game-nav-popover header strong {
+  color: #d7c7c3;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.compact-game-nav-section {
+  display: grid;
+  gap: 6px;
+  padding-top: 10px;
+}
+
+.compact-game-nav-section > button,
+.compact-game-nav-section > span > button,
+.compact-game-nav-section button,
+.compact-game-nav-subsection button,
+.compact-game-nav-main-menu {
+  min-height: 35px;
+  width: 100%;
+  padding: 8px 10px;
+
+  color: #b9aaa6;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid #36292b;
+
+  cursor: pointer;
+  text-align: left;
+
+  font-size: 9px;
+}
+
+.compact-game-nav-section button:hover:not(:disabled),
+.compact-game-nav-subsection button:hover:not(:disabled),
+.compact-game-nav-main-menu:hover:not(:disabled) {
+  color: #ead8d4;
+  background: rgba(91, 38, 47, 0.14);
+  border-color: #684047;
+}
+
+.compact-game-nav-popover p {
+  margin: 10px 1px 2px;
+  color: #716766;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.compact-game-nav-subsection {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.compact-game-nav-main-menu {
+  margin-top: 10px;
+  color: #c08b8b;
+  border-color: #523234;
+}
+
+.compact-game-nav-popover-menu {
+  width: 290px;
+}
+
+.compact-game-nav-phone {
+  display: flex;
+  align-items: center;
+}
+
+/*
+  O Smartphone pode usar sua própria classe.
+  Forçamos apenas o launcher a acompanhar
+  a aparência dos outros cinco botões.
+*/
+.compact-game-nav-phone > *:first-child {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .compact-game-nav {
+    gap: 4px;
+  }
+
+  .compact-game-nav-button,
+  .compact-game-nav-phone > button {
+    padding-inline: 8px;
+  }
+
+  .compact-game-nav-icon {
+    display: none;
+  }
+}
+
+@media (max-width: 650px) {
+  .compact-game-nav-button > span:last-child {
+    font-size: 7px;
+  }
+
+  .compact-game-nav-popover {
+    position: fixed;
+    top: 72px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+
+  .compact-game-nav-popover::before {
+    display: none;
+  }
+}

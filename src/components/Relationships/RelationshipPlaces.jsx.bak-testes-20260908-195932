@@ -1,0 +1,799 @@
+import {
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+
+import {
+  createPortal,
+} from 'react-dom'
+
+import {
+  venuesAt,
+} from '../../data/npcs/relationships/venues.js'
+
+import {
+  relationshipState,
+  relationshipChoiceReason,
+} from '../../engine/relationships/relationshipEngine'
+
+import {
+  encountersAtVenue,
+  performVenueChoice,
+} from '../../engine/relationships/venueEngine'
+
+import {
+  reconcileRelationships,
+} from '../../engine/relationships/relationshipClock'
+
+import './Relationships.css'
+
+function venueBackground(
+  venue,
+  scene
+) {
+  const id =
+    String(
+      venue?.id ??
+      ''
+    ).toLowerCase()
+
+  const place =
+    String(
+      scene?.place ??
+      venue?.name ??
+      ''
+    ).toLowerCase()
+
+  if (
+    id.includes(
+      'ultimo'
+    ) ||
+    place.includes(
+      'último gole'
+    ) ||
+    place.includes(
+      'ultimo gole'
+    )
+  ) {
+    return '/images/locations/ultimo-gole/main.jpg'
+  }
+
+  if (
+    id.includes(
+      'vesuvius'
+    ) ||
+    place.includes(
+      'vesuvius'
+    )
+  ) {
+    return '/images/locations/vesuvius.jpg'
+  }
+
+  if (
+    id.includes(
+      'asylum'
+    ) ||
+    place.includes(
+      'asylum'
+    )
+  ) {
+    return '/images/locations/asylum.jpg'
+  }
+
+  if (
+    place.includes(
+      'pinheiros'
+    )
+  ) {
+    return '/images/locations/pinheiros.jpg'
+  }
+
+  return null
+}
+
+function VenueOverview({
+  game,
+  venue,
+  encounters,
+  selectedNpc,
+  feedback,
+  error,
+  onSelect,
+  onClose,
+}) {
+  return (
+    <section className="relationship-place-overview">
+      <header>
+        <div>
+          <small>
+            {game.world?.location?.name}
+          </small>
+
+          <h2>
+            {venue.name}
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          onClick={
+            onClose
+          }
+        >
+          {venue.exit}
+        </button>
+      </header>
+
+      <p>
+        {venue.description}
+      </p>
+
+      {feedback && (
+        <p
+          className="relationships-result"
+          role="status"
+        >
+          {feedback}
+        </p>
+      )}
+
+      {!encounters.length && (
+        <p>
+          Nenhum encontro disponível por aqui nesta noite. Você pode permanecer observando o movimento ou voltar para a cidade.
+        </p>
+      )}
+
+      {encounters.length >
+        0 && (
+        <>
+          <small className="relationship-place-overview-label">
+            PESSOAS PRESENTES
+          </small>
+
+          <div className="relationship-place-overview-people">
+            {encounters.map(
+              person => (
+                <button
+                  type="button"
+                  key={
+                    person.id
+                  }
+                  aria-pressed={
+                    selectedNpc?.id ===
+                    person.id
+                  }
+                  onClick={() =>
+                    onSelect(
+                      person.id
+                    )
+                  }
+                >
+                  {person.portrait && (
+                    <img
+                      src={
+                        person.portrait
+                      }
+                      alt=""
+                    />
+                  )}
+
+                  <span>
+                    {
+                      person.name
+                    }
+                  </span>
+                </button>
+              )
+            )}
+          </div>
+        </>
+      )}
+
+      {error && (
+        <p
+          role="alert"
+          className="relationships-alert"
+        >
+          {error}
+        </p>
+      )}
+    </section>
+  )
+}
+
+function VenueScene({
+  game,
+  venue,
+  npc,
+  state,
+  scene,
+  blocked,
+  feedback,
+  error,
+  onChoose,
+  onBack,
+  onClose,
+}) {
+  const background =
+    venueBackground(
+      venue,
+      scene
+    )
+
+  return (
+    <section
+      className="relationship-place-scene"
+      style={
+        background
+          ? {
+              '--relationship-place-background':
+                `url("${background}")`,
+            }
+          : undefined
+      }
+    >
+      <div className="relationship-place-scene-background" />
+      <div className="relationship-place-scene-overlay" />
+
+      <header className="relationship-place-scene-top">
+        <button
+          type="button"
+          onClick={
+            onBack
+          }
+          className="relationship-place-scene-back"
+        >
+          ← Voltar
+        </button>
+
+        <span>
+          {scene.place}
+        </span>
+
+        <button
+          type="button"
+          onClick={
+            onClose
+          }
+          className="relationship-place-scene-close"
+          aria-label="Fechar"
+        >
+          ×
+        </button>
+      </header>
+
+      {(scene.portrait ?? npc.portrait) && (
+        <img
+          key={
+            scene.portrait ??
+            npc.portrait
+          }
+          className="relationship-place-scene-character"
+          src={
+            scene.portrait ??
+            npc.portrait
+          }
+          alt=""
+          onError={event => {
+            event.currentTarget.hidden =
+              true
+          }}
+        />
+      )}
+
+      <div className="relationship-place-scene-content">
+        <div className="relationship-place-scene-heading">
+          <span>
+            {npc.name}
+          </span>
+
+          <h1>
+            {scene.title}
+          </h1>
+        </div>
+
+        <div className="relationship-place-scene-text">
+          {scene.text.map(
+            (
+              text,
+              index
+            ) => (
+              <p
+                key={
+                  `${state.node}:${index}`
+                }
+              >
+                {text}
+              </p>
+            )
+          )}
+        </div>
+
+        {feedback && (
+          <div className="relationship-place-scene-feedback">
+            {feedback}
+          </div>
+        )}
+
+        <div className="relationship-place-scene-choices">
+          {scene.choices.map(
+            choice => {
+              const reason =
+                relationshipChoiceReason(
+                  game,
+                  npc.id,
+                  choice
+                )
+
+              return (
+                <div
+                  key={
+                    choice.id
+                  }
+                  className="relationship-place-scene-choice"
+                >
+                  <button
+                    type="button"
+                    disabled={
+                      Boolean(
+                        reason
+                      ) ||
+                      blocked
+                    }
+                    onClick={() =>
+                      onChoose(
+                        choice
+                      )
+                    }
+                  >
+                    <span>
+                      {
+                        choice.text
+                      }
+                    </span>
+
+                    <small>
+                      {
+                        choice.minutes ??
+                        15
+                      }
+                      {' '}
+                      min
+                    </small>
+                  </button>
+
+                  {reason && (
+                    <small className="relationship-place-scene-reason">
+                      {reason}
+                    </small>
+                  )}
+                </div>
+              )
+            }
+          )}
+        </div>
+
+        {error && (
+          <p
+            role="alert"
+            className="relationships-alert relationship-place-scene-error"
+          >
+            {error}
+          </p>
+        )}
+      </div>
+    </section>
+  )
+}
+
+export default function RelationshipPlaces({
+  game,
+  onChange,
+  blocked = false,
+  peopleOnly = false,
+}) {
+  const [
+    opened,
+    setOpened,
+  ] = useState(
+    null
+  )
+
+  const [
+    selected,
+    setSelected,
+  ] = useState(
+    null
+  )
+
+  const [
+    feedback,
+    setFeedback,
+  ] = useState(
+    ''
+  )
+
+  const [
+    error,
+    setError,
+  ] = useState(
+    ''
+  )
+
+  const dialog =
+    useRef(
+      null
+    )
+
+  const current =
+    reconcileRelationships(
+      game
+    )
+
+  /*
+    Locais que possuem componente próprio não devem
+    ser abertos pelo sistema antigo RelationshipPlaces.
+
+    O Último Gole possui navegação interna própria em:
+    components/UltimoGole/UltimoGole.jsx
+  */
+  const venues =
+    venuesAt(
+      current.world
+        ?.location
+        ?.id
+    ).filter(
+      place =>
+        peopleOnly ||
+        place.id !==
+          'ultimo_gole'
+    )
+
+  const venue =
+    venues.find(
+      item =>
+        item.id ===
+        opened
+    )
+
+  const visible =
+    Boolean(
+      venue &&
+      !blocked
+    )
+
+  const encounters =
+    venue
+      ? encountersAtVenue(
+          current,
+          venue.id
+        )
+      : []
+
+  const npc =
+    encounters.find(
+      person =>
+        person.id ===
+        selected
+    ) ??
+    (
+      encounters.length ===
+      1
+        ? encounters[0]
+        : null
+    )
+
+  const state =
+    npc &&
+    relationshipState(
+      current,
+      npc.id
+    )
+
+  const scene =
+    npc?.scenes[
+      state?.node
+    ]
+
+  const showScene =
+    Boolean(
+      npc &&
+      state &&
+      scene
+    )
+
+  useEffect(
+    () => {
+      if (!visible) {
+        return undefined
+      }
+
+      const element =
+        dialog.current
+
+      if (
+        !element?.open
+      ) {
+        element?.showModal()
+      }
+
+      return () => {
+        if (
+          element?.open
+        ) {
+          element.close()
+        }
+      }
+    },
+    [
+      visible,
+    ]
+  )
+
+  if (
+    !venues.length
+  ) {
+    return null
+  }
+
+  function closePlace() {
+    setOpened(
+      null
+    )
+
+    setSelected(
+      null
+    )
+
+    setFeedback(
+      ''
+    )
+
+    setError(
+      ''
+    )
+  }
+
+  function choose(
+    choice
+  ) {
+    if (
+      blocked ||
+      !npc ||
+      !state ||
+      !venue
+    ) {
+      return
+    }
+
+    try {
+      const updated =
+        performVenueChoice(
+          game,
+          venue.id,
+          npc.id,
+          state.node,
+          choice.id
+        )
+
+      onChange(
+        updated
+      )
+
+      setFeedback(
+        updated
+          .relationships[
+            npc.id
+          ]
+          .journal
+          .at(
+            -1
+          )
+          .text
+      )
+
+      setError(
+        ''
+      )
+    } catch (
+      err
+    ) {
+      setError(
+        err.message
+      )
+    }
+  }
+
+  return (
+    <>
+      {venues
+        .filter(
+          place =>
+            !peopleOnly ||
+            encountersAtVenue(
+              current,
+              place.id
+            ).length >
+              0
+        )
+        .map(
+          place => {
+            const present =
+              encountersAtVenue(
+                current,
+                place.id
+              )
+
+            return (
+              <button
+                className={
+                  peopleOnly
+                    ? 'game-choice-button'
+                    : undefined
+                }
+                type="button"
+                key={
+                  place.id
+                }
+                disabled={
+                  blocked
+                }
+                onClick={() => {
+                  setOpened(
+                    place.id
+                  )
+
+                  setSelected(
+                    present.length ===
+                      1
+                      ? present[0].id
+                      : null
+                  )
+
+                  setFeedback(
+                    ''
+                  )
+
+                  setError(
+                    ''
+                  )
+                }}
+              >
+                <strong>
+                  {peopleOnly
+                    ? `Conversar com ${present
+                        .map(
+                          person =>
+                            person.name.split(
+                              ' '
+                            )[0]
+                        )
+                        .join(
+                          ' e '
+                        )}.`
+                    : place.name}
+                </strong>
+
+                {!peopleOnly && (
+                  <span>
+                    Entrar e explorar
+                  </span>
+                )}
+              </button>
+            )
+          }
+        )}
+
+      {visible &&
+        createPortal(
+          <dialog
+            className={[
+              'relationships-dialog',
+              'relationship-place',
+              showScene
+                ? 'relationship-place-story-mode'
+                : 'relationship-place-overview-mode',
+            ]
+              .filter(
+                Boolean
+              )
+              .join(
+                ' '
+              )}
+            ref={
+              dialog
+            }
+            onCancel={(
+              event
+            ) => {
+              event.preventDefault()
+
+              closePlace()
+            }}
+            onClose={() =>
+              setOpened(
+                null
+              )
+            }
+            aria-labelledby="relationship-place-title"
+          >
+            {showScene ? (
+              <VenueScene
+                game={
+                  current
+                }
+                venue={
+                  venue
+                }
+                npc={
+                  npc
+                }
+                state={
+                  state
+                }
+                scene={
+                  scene
+                }
+                blocked={
+                  blocked
+                }
+                feedback={
+                  feedback
+                }
+                error={
+                  error
+                }
+                onChoose={
+                  choose
+                }
+                onBack={() => {
+                  if (
+                    encounters.length >
+                    1
+                  ) {
+                    setSelected(
+                      null
+                    )
+                  } else {
+                    closePlace()
+                  }
+                }}
+                onClose={
+                  closePlace
+                }
+              />
+            ) : (
+              <VenueOverview
+                game={
+                  current
+                }
+                venue={
+                  venue
+                }
+                encounters={
+                  encounters
+                }
+                selectedNpc={
+                  npc
+                }
+                feedback={
+                  feedback
+                }
+                error={
+                  error
+                }
+                onSelect={
+                  setSelected
+                }
+                onClose={
+                  closePlace
+                }
+              />
+            )}
+          </dialog>,
+          document.body
+        )}
+    </>
+  )
+}

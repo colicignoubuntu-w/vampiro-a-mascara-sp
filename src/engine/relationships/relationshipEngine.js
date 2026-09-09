@@ -1,0 +1,878 @@
+import { RELATIONSHIP_NPCS } from '../../data/npcs/relationships/index.js'
+import { advanceGameTime, crossesSunrise, isDaytime } from '../time/timeEngine'
+import { addDamage } from '../combat/damageEngine'
+import { rollDicePool } from '../dice/rollTest'
+import {
+  applyRelationshipEffects,
+  createRelationshipState,
+  normalizeRelationshipState,
+} from './relationshipModel'
+import { reconcileRelationships, relationshipMinutes } from './relationshipClock'
+
+export function relationshipState(game, npcId) {
+  const npc = RELATIONSHIP_NPCS[npcId]
+
+  if (!npc) {
+    return null
+  }
+
+  return normalizeRelationshipState(
+    game.relationships?.[npcId] ??
+      createRelationshipState(npcId),
+    npcId
+  )
+}
+
+const skill = (game, id) =>
+  game.abilities?.[id] ??
+  Object.values(game.attributes ?? {})
+    .find(group => group?.[id] !== undefined)
+    ?.[id] ??
+  0
+
+const trait = (game, id) => {
+  if (
+    ['selfControl', 'conscience', 'courage']
+      .includes(id)
+  ) {
+    return game.virtues?.[id] ?? 1
+  }
+
+  if (id === 'willpower') {
+    return game.willpower?.current ?? 0
+  }
+
+  return skill(game, id)
+}
+
+const traitLabel = id => ({
+  selfControl: 'Autocontrole',
+  conscience: 'Consciência',
+  courage: 'Coragem',
+  willpower: 'Força de Vontade',
+  brawl: 'Briga',
+  streetwise: 'Manha',
+  empathy: 'Empatia',
+  intimidation: 'Intimidação',
+}[id] ?? id ?? 'Teste')
+
+const clampLegacyMetric = (
+  key,
+  value
+) =>
+  key === 'bond'
+    ? Math.max(
+        0,
+        Math.min(3, value)
+      )
+    : Math.max(
+        -10,
+        Math.min(10, value)
+      )
+
+function applyLegacyMetrics(
+  state,
+  changes = {}
+) {
+  const metrics = {
+    trust: 0,
+    affinity: 0,
+    respect: 0,
+    bond: 0,
+    ...(state.metrics ?? {}),
+  }
+
+  for (
+    const [key, amount]
+    of Object.entries(changes)
+  ) {
+    metrics[key] =
+      clampLegacyMetric(
+        key,
+        (metrics[key] ?? 0) +
+          Number(amount ?? 0)
+      )
+  }
+
+  return metrics
+}
+
+function completeScheduledMeeting(
+  game,
+  npcId,
+  now
+) {
+  const appointments =
+    game
+      .relationshipAppointments ??
+    []
+
+  let completed = false
+
+  const updated =
+    appointments.map(
+      appointment => {
+        if (
+          appointment.npcId !==
+            npcId ||
+          appointment.status !==
+            'scheduled'
+        ) {
+          return appointment
+        }
+
+        const earlyWindow =
+          appointment.start -
+          120
+
+        if (
+          now >= earlyWindow &&
+          now <= appointment.end
+        ) {
+          completed = true
+
+          return {
+            ...appointment,
+            status:
+              'completed',
+            completedAt:
+              now,
+          }
+        }
+
+        return appointment
+      }
+    )
+
+  if (!completed) {
+    return game
+  }
+
+  return {
+    ...game,
+    relationshipAppointments:
+      updated,
+  }
+}
+
+
+export function relationshipChoiceReason(game, npcId, choice) {
+  if (choice?.requiresDiscipline) {
+    const requirement = choice.requiresDiscipline
+    const level = Number(game?.disciplines?.[requirement.id] ?? 0)
+    if (level < Number(requirement.level ?? 1)) {
+      return requirement.reason ?? `Exige ${requirement.label ?? requirement.id}.`
+    }
+  }
+
+
+  const state = relationshipState(game, npcId)
+  const r = choice.requires ?? {}
+
+  if (r.flag && !state.flags[r.flag]) {
+    return 'Esta opção depende de uma descoberta anterior.'
+  }
+
+  if (r.notFlag && state.flags[r.notFlag]) {
+    return 'Esta opção não corresponde ao caminho escolhido.'
+  }
+
+  if (r.skill && skill(game, r.skill) < r.min) {
+    return `Requer ${traitLabel(r.skill)} ${r.min}.`
+  }
+
+  if (
+    r.discipline &&
+    (game.disciplines?.[r.discipline] ?? 0) < (r.min ?? 1)
+  ) {
+    const disciplineLabel =
+      r.discipline === 'auspex'
+        ? 'Auspícios'
+        : r.discipline === 'dementia'
+          ? 'Demência'
+          : r.discipline
+
+    return `Requer ${disciplineLabel} ${r.min ?? 1}.`
+  }
+
+  const target = r.npc
+    ? relationshipState(game, r.npc)
+    : state
+
+  if (
+    r.metric &&
+    (target?.metrics?.[r.metric] ?? 0) < r.min
+  ) {
+    return r.npc
+      ? `É preciso construir mais confiança com ${RELATIONSHIP_NPCS[r.npc].name}.`
+      : 'A relação ainda não permite essa aproximação.'
+  }
+
+  if (
+    (game.blood?.current ?? 0) <= (choice.bloodCost ?? 0) &&
+    choice.bloodCost
+  ) {
+    return 'Você precisa conservar pelo menos um ponto de sangue para continuar consciente.'
+  }
+
+  return null
+}
+
+export function relationshipAvailability(
+  game,
+  npcId
+) {
+  const state =
+    relationshipState(
+      game,
+      npcId
+    )
+
+  const scene =
+    RELATIONSHIP_NPCS[npcId]
+      ?.scenes[
+        state?.node
+      ]
+
+  if (
+    !scene ||
+    state.completed
+  ) {
+    return 'História concluída.'
+  }
+
+  if (
+    game.flags?.inTorpor ||
+    game.vampireState?.torpor ||
+    game.health?.currentLevel >= 7
+  ) {
+    return 'Você não está em condições de conversar.'
+  }
+
+  if (
+    game.flags?.humanityCheckRequired ||
+    game.livelihood?.active ||
+    game.livelihood?.crime ||
+    game.livelihood?.workEvent
+  ) {
+    return 'Resolva a atividade em andamento primeiro.'
+  }
+
+  if (
+    isDaytime(game.world)
+  ) {
+    return 'Os encontros acontecem à noite.'
+  }
+
+  if (
+    relationshipMinutes(
+      game.world
+    ) < state.readyAt
+  ) {
+    return 'O próximo encontro ainda não está disponível.'
+  }
+
+  if (
+    !scene.locations.includes(
+      game.world?.location?.id
+    )
+  ) {
+    return `Próximo encontro: ${scene.place}.`
+  }
+
+  return null
+}
+
+function validateChoice(
+  game,
+  npcId,
+  nodeId,
+  choiceId
+) {
+  const npc =
+    RELATIONSHIP_NPCS[npcId]
+
+  const state =
+    relationshipState(
+      game,
+      npcId
+    )
+
+  if (
+    !npc ||
+    state.completed ||
+    state.node !== nodeId
+  ) {
+    throw new Error(
+      'Este encontro já mudou. Consulte o diário atualizado.'
+    )
+  }
+
+  const scene =
+    npc.scenes[nodeId]
+
+  const choice =
+    scene.choices.find(
+      entry =>
+        entry.id === choiceId
+    )
+
+  if (!choice) {
+    throw new Error(
+      'Escolha desconhecida.'
+    )
+  }
+
+  const reason =
+    relationshipAvailability(
+      game,
+      npcId
+    ) ||
+    relationshipChoiceReason(
+      game,
+      npcId,
+      choice
+    )
+
+  if (reason) {
+    throw new Error(reason)
+  }
+
+  return {
+    npc,
+    state,
+    scene,
+    choice,
+  }
+}
+
+export function prepareRelationshipTest(input, npcId, nodeId, choiceId) {
+  const game = reconcileRelationships(input)
+  const { choice } = validateChoice(game, npcId, nodeId, choiceId)
+
+  if (!choice.test) return null
+
+  const test = choice.test
+  const traitId = test.trait ?? null
+
+  let pool = 1
+  let traitName = traitId ?? 'selfControl'
+  let label = test.label ?? traitLabel(traitName)
+
+  if (test.attribute && test.ability) {
+    const group = test.attributeGroup ?? 'social'
+
+    const attributeValue =
+      Number(
+        game.attributes?.[group]?.[test.attribute] ?? 0
+      ) || 0
+
+    const abilityValue =
+      Number(
+        game.abilities?.[test.ability] ?? 0
+      ) || 0
+
+    pool = Math.max(
+      1,
+      attributeValue +
+        abilityValue +
+        Number(test.modifier ?? 0)
+    )
+
+    traitName = `${test.attribute}+${test.ability}`
+    label = test.label ?? traitName
+  } else {
+    pool = Math.max(
+      1,
+      Number(trait(game, traitName)) || 1
+    )
+  }
+
+  return {
+    npcId,
+    nodeId,
+    choiceId,
+    label,
+    trait: traitName,
+    traitLabel: label,
+    pool,
+    difficulty: Math.max(
+      2,
+      Math.min(
+        10,
+        Number(test.difficulty ?? 6) || 6
+      )
+    ),
+  }
+}
+
+export function rollRelationshipTest(
+  game,
+  preparedTest
+) {
+  if (!preparedTest) {
+    throw new Error(
+      'Nenhum teste de relação foi preparado.'
+    )
+  }
+
+  const roll =
+    rollDicePool({
+      pool:
+        preparedTest.pool,
+
+      difficulty:
+        preparedTest.difficulty,
+    })
+
+  return {
+    ...roll,
+
+    label:
+      preparedTest.label,
+
+    trait:
+      preparedTest.trait,
+
+    traitLabel:
+      preparedTest.traitLabel,
+  }
+}
+
+function applyOutcome(
+  input,
+  npcId,
+  nodeId,
+  choice,
+  outcome,
+  testRoll = null
+) {
+  let game =
+    reconcileRelationships(
+      input
+    )
+
+  const npc =
+    RELATIONSHIP_NPCS[npcId]
+
+  const state =
+    relationshipState(
+      game,
+      npcId
+    )
+
+  const scene =
+    npc.scenes[nodeId]
+
+  const minutes =
+    outcome.minutes ??
+    choice.minutes ??
+    15
+
+  if (
+    crossesSunrise({
+      world:
+        game.world,
+
+      minutes,
+    })
+  ) {
+    throw new Error(
+      'A conversa alcançaria o amanhecer. Volte na próxima noite.'
+    )
+  }
+
+  const now =
+    relationshipMinutes(
+      game.world
+    )
+
+  game =
+    completeScheduledMeeting(
+      game,
+      npcId,
+      now
+    )
+
+  if (
+    state.deadlineAt &&
+    now + minutes >=
+      state.deadlineAt
+  ) {
+    throw new Error(
+      'Não há tempo para concluir essa ação antes da ameaça. Escolha uma alternativa mais rápida.'
+    )
+  }
+
+  const legacyChanges =
+    outcome.metrics ??
+    choice.metrics ??
+    {}
+
+  const metrics =
+    applyLegacyMetrics(
+      state,
+      legacyChanges
+    )
+
+  const flags = {
+    ...(state.flags ?? {}),
+    ...(choice.flags ?? {}),
+    ...(outcome.flags ?? {}),
+  }
+
+  const enrichedState =
+    applyRelationshipEffects(
+      {
+        ...state,
+        metrics,
+        flags,
+      },
+      {
+        legacy:
+          legacyChanges,
+
+        relationshipMetrics:
+          outcome.relationshipMetrics ??
+          choice.relationshipMetrics ??
+          {},
+
+        emotions:
+          outcome.emotions ??
+          choice.emotions ??
+          {},
+
+        status:
+          outcome.status ??
+          choice.status,
+
+        influence:
+          {
+            ...(
+              choice.influence ??
+              {}
+            ),
+            ...(
+              outcome.influence ??
+              {}
+            ),
+          },
+
+        contact:
+          {
+            ...(
+              choice.contact ??
+              {}
+            ),
+            ...(
+              outcome.contact ??
+              {}
+            ),
+          },
+
+        memory:
+          outcome.memory ??
+          choice.memory,
+
+        memories: [
+          ...(
+            choice.memories ??
+            []
+          ),
+          ...(
+            outcome.memories ??
+            []
+          ),
+        ],
+
+        flags,
+      }
+    )
+
+  const next =
+    outcome.next !== undefined
+      ? outcome.next
+      : choice.next
+
+  const ending =
+    outcome.ending ??
+    choice.ending ??
+    null
+
+  const text =
+    outcome.result ??
+    choice.result ??
+    ending ??
+    choice.text
+
+  const entry = {
+    id:
+      `${npcId}:${nodeId}`,
+
+    npcId,
+    nodeId,
+
+    choiceId:
+      choice.id,
+
+    at:
+      now + minutes,
+
+    title:
+      scene.title,
+
+    text,
+
+    ...(testRoll
+      ? {
+          test: {
+            label:
+              testRoll.label,
+
+            trait:
+              testRoll.trait,
+
+            pool:
+              testRoll.pool,
+
+            difficulty:
+              testRoll.difficulty,
+
+            dice:
+              testRoll.dice,
+
+            successes:
+              testRoll.successes,
+
+            result:
+              testRoll.result,
+          },
+        }
+      : {}),
+  }
+
+  const nextState = {
+    ...enrichedState,
+
+    metrics,
+
+    flags,
+
+    node:
+      next ??
+      nodeId,
+
+    completed:
+      !next,
+
+    ending,
+
+    readyAt:
+      now +
+      minutes +
+      (
+        outcome.delayDays ??
+        choice.delayDays ??
+        0
+      ) *
+        1440,
+
+    deadlineAt:
+      (
+        outcome.clearDeadline ??
+        choice.clearDeadline
+      )
+        ? null
+        : (
+            outcome.deadlineDays ??
+            choice.deadlineDays
+          )
+          ? now +
+            minutes +
+            (
+              outcome.deadlineDays ??
+              choice.deadlineDays
+            ) *
+              1440
+          : state.deadlineAt ??
+            null,
+
+    journal: [
+      ...(state.journal ?? []),
+      entry,
+    ],
+  }
+
+  let updated = {
+    ...game,
+
+    relationships: {
+      ...(game.relationships ??
+        {}),
+      [npcId]:
+        nextState,
+    },
+
+    history: [
+      ...(game.history ?? []),
+      {
+        ...entry,
+
+        type:
+          testRoll
+            ? 'relationship-test'
+            : 'relationship-choice',
+      },
+    ],
+  }
+
+  const bloodCost =
+    outcome.bloodCost ??
+    choice.bloodCost
+
+  if (bloodCost) {
+    updated = {
+      ...updated,
+
+      blood: {
+        ...game.blood,
+
+        current:
+          game.blood.current -
+          bloodCost,
+      },
+    }
+  }
+
+  const damage =
+    outcome.damage ??
+    choice.damage
+
+  if (damage) {
+    updated = {
+      ...updated,
+
+      health:
+        addDamage({
+          health:
+            game.health,
+
+          amount:
+            damage,
+
+          damageType:
+            'lethal',
+        }),
+    }
+  }
+
+  return reconcileRelationships(
+    advanceGameTime(
+      updated,
+      minutes,
+      {
+        reason:
+          `Encontro com ${npc.name}: ${scene.title}`,
+      }
+    )
+  )
+}
+
+export function resolveRelationshipTest(input, preparedTest, roll) {
+  if (!preparedTest || !roll) {
+    throw new Error('O teste de relação ainda não foi concluído.')
+  }
+
+  const game = reconcileRelationships(input)
+
+  const { choice } = validateChoice(
+    game,
+    preparedTest.npcId,
+    preparedTest.nodeId,
+    preparedTest.choiceId
+  )
+
+  if (!choice.test) {
+    throw new Error('Esta escolha não possui teste.')
+  }
+
+  let outcome = null
+
+  if (roll.result === 'success') {
+    const successes = Math.max(
+      1,
+      Number(roll.successes ?? 1)
+    )
+
+    for (
+      let amount = successes;
+      amount >= 1;
+      amount -= 1
+    ) {
+      const keyed =
+        choice.test[`success${amount}`]
+
+      if (keyed) {
+        outcome = keyed
+        break
+      }
+    }
+
+    outcome =
+      outcome ??
+      choice.test.success
+  } else {
+    outcome =
+      choice.test[roll.result] ??
+      choice.test.failure
+  }
+
+  if (!outcome) {
+    throw new Error(
+      `O teste não possui resultado configurado para ${roll.result}.`
+    )
+  }
+
+  return applyOutcome(
+    game,
+    preparedTest.npcId,
+    preparedTest.nodeId,
+    choice,
+    outcome,
+    roll
+  )
+}
+
+export function performRelationshipChoice(
+  input,
+  npcId,
+  nodeId,
+  choiceId
+) {
+  let game =
+    reconcileRelationships(
+      input
+    )
+
+  const { choice } =
+    validateChoice(
+      game,
+      npcId,
+      nodeId,
+      choiceId
+    )
+
+  if (choice.test) {
+    throw new Error(
+      'Esta escolha exige um teste.'
+    )
+  }
+
+  return applyOutcome(
+    game,
+    npcId,
+    nodeId,
+    choice,
+    choice
+  )
+}

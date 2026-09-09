@@ -1,0 +1,633 @@
+import {
+  useMemo,
+  useState,
+} from 'react'
+
+import {
+  advanceGameTime,
+} from '../../engine/time/timeEngine'
+
+import CityMap from '../CityMap/CityMap'
+
+import {
+  canEnterUltimoGoleArea,
+  getUltimoGoleArea,
+  getUltimoGolePresentRelationships,
+  currentRelationshipAppointmentsAtUltimoGole,
+  beginUltimoGoleMeeting,
+  resolveUltimoGoleMeetingChoice,
+} from '../../engine/venues/ultimoGoleEngine'
+
+import './UltimoGole.css'
+
+function pad(value) {
+  return String(
+    value ?? 0
+  ).padStart(
+    2,
+    '0'
+  )
+}
+
+export default function UltimoGole({
+  game,
+  onGameChange,
+  onTravel,
+}) {
+  const [
+    areaId,
+    setAreaId,
+  ] = useState(
+    game?.venueState
+      ?.ultimoGoleArea ??
+    'main'
+  )
+
+  const [
+    message,
+    setMessage,
+  ] = useState(
+    null
+  )
+
+  const [
+    mapOpen,
+    setMapOpen,
+  ] = useState(
+    false
+  )
+
+  const [
+    encounter,
+    setEncounter,
+  ] = useState(
+    null
+  )
+
+  const area =
+    getUltimoGoleArea(
+      areaId
+    )
+
+  const presentRelationships =
+    useMemo(
+      () =>
+        getUltimoGolePresentRelationships(
+          game,
+          areaId
+        ),
+      [
+        game,
+        areaId,
+      ]
+    )
+
+  const activeAppointments =
+    useMemo(
+      () =>
+        currentRelationshipAppointmentsAtUltimoGole(
+          game
+        ),
+      [game]
+    )
+
+  function persistArea(
+    nextAreaId,
+    nextGame =
+      game
+  ) {
+    const updated = {
+      ...nextGame,
+
+      venueState: {
+        ...(nextGame
+          .venueState ??
+          {}),
+
+        ultimoGoleArea:
+          nextAreaId,
+      },
+    }
+
+    setAreaId(
+      nextAreaId
+    )
+
+    onGameChange(
+      updated
+    )
+
+    return updated
+  }
+
+  function moveTo(
+    nextAreaId
+  ) {
+    const access =
+      canEnterUltimoGoleArea(
+        game,
+        nextAreaId
+      )
+
+    if (
+      !access.allowed
+    ) {
+      setMessage(
+        access.reason
+      )
+
+      return
+    }
+
+    const nextArea =
+      getUltimoGoleArea(
+        nextAreaId
+      )
+
+    let updated =
+      advanceGameTime(
+        game,
+        2,
+        {
+          reason:
+            `Circulando pelo Último Gole · ${nextArea.name}`,
+        }
+      )
+
+    updated =
+      persistArea(
+        nextAreaId,
+        updated
+      )
+
+    setMessage(
+      null
+    )
+  }
+
+  function leaveBar() {
+    const updated = {
+      ...game,
+
+      world: {
+        ...(game.world ??
+          {}),
+
+        location: {
+          id:
+            'pinheiros',
+
+          name:
+            'Pinheiros',
+
+          district:
+            'Pinheiros',
+        },
+      },
+
+      venueState: {
+        ...(game
+          .venueState ??
+          {}),
+
+        ultimoGoleArea:
+          'main',
+      },
+
+      history: [
+        ...(game.history ??
+          []),
+
+        {
+          type:
+            'venue-exit',
+
+          venueId:
+            'ultimo_gole',
+
+          to:
+            'pinheiros',
+
+          timestamp:
+            new Date()
+              .toISOString(),
+        },
+      ],
+    }
+
+    onGameChange(
+      updated
+    )
+  }
+
+  function startMeeting(
+    entry
+  ) {
+    const result =
+      beginUltimoGoleMeeting(
+        game,
+        entry.npcId,
+        entry.appointment.id
+      )
+
+    if (
+      result.game !==
+      game
+    ) {
+      onGameChange(
+        result.game
+      )
+    }
+
+    setEncounter(
+      result.encounter
+    )
+
+    setMessage(
+      null
+    )
+  }
+
+  function chooseMeeting(
+    choiceId
+  ) {
+    if (!encounter) {
+      return
+    }
+
+    const result =
+      resolveUltimoGoleMeetingChoice(
+        game,
+        encounter,
+        choiceId
+      )
+
+    onGameChange(
+      result.game
+    )
+
+    if (
+      result.areaId &&
+      result.areaId !==
+        areaId
+    ) {
+      persistArea(
+        result.areaId,
+        result.game
+      )
+    }
+
+    setEncounter(
+      result.encounter
+    )
+  }
+
+  return (
+    <main
+      className="ultimo-gole-screen"
+      style={{
+        '--ultimo-gole-background':
+          `url("${area.background}")`,
+      }}
+    >
+      <div className="ultimo-gole-background" />
+      <div className="ultimo-gole-overlay" />
+
+      <header className="ultimo-gole-header">
+        <div>
+          <span className="ultimo-gole-kicker">
+            ÚLTIMO GOLE
+          </span>
+
+          <h1>
+            {area.name}
+          </h1>
+
+          <small>
+            Pinheiros · São Paulo
+          </small>
+        </div>
+
+        <div className="ultimo-gole-clock">
+          <span>
+            DIA {game.world?.day ?? 1}
+          </span>
+
+          <strong>
+            {pad(
+              game.world?.hour
+            )}
+            :
+            {pad(
+              game.world?.minute
+            )}
+          </strong>
+        </div>
+      </header>
+
+      <section className="ultimo-gole-layout">
+        <div className="ultimo-gole-main">
+          <section className="ultimo-gole-description">
+            <span>
+              {area.subtitle}
+            </span>
+
+            <p>
+              {area.description}
+            </p>
+
+            {message && (
+              <blockquote>
+                {message}
+              </blockquote>
+            )}
+
+            {activeAppointments.length > 0 &&
+              presentRelationships.length === 0 &&
+              !encounter && (
+              <blockquote>
+                Você tem um encontro marcado aqui.
+                {activeAppointments.some(
+                  appointment =>
+                    appointment.npcId === 'clara'
+                )
+                  ? ' Clara costuma ficar perto do palco quando está trabalhando.'
+                  : ' Circule pelo bar para encontrar a pessoa.'}
+              </blockquote>
+            )}
+          </section>
+
+          {presentRelationships.length >
+            0 &&
+            !encounter && (
+            <section className="ultimo-gole-presence">
+              <span className="ultimo-gole-section-label">
+                QUEM ESTÁ AQUI
+              </span>
+
+              {presentRelationships.map(
+                entry => (
+                  <article
+                    key={
+                      entry
+                        .appointment
+                        .id
+                    }
+                    className="ultimo-gole-person"
+                  >
+                    <div className="ultimo-gole-person-avatar">
+                      {entry.npc
+                        .portrait ? (
+                        <img
+                          src={
+                            entry
+                              .npc
+                              .portrait
+                          }
+                          alt=""
+                        />
+                      ) : (
+                        entry.npc.name
+                          .slice(
+                            0,
+                            1
+                          )
+                      )}
+                    </div>
+
+                    <div>
+                      <strong>
+                        {
+                          entry.npc
+                            .name
+                        }
+                      </strong>
+
+                      <span>
+                        Ela marcou de encontrar você aqui.
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        startMeeting(
+                          entry
+                        )
+                      }
+                    >
+                      Ir até ela
+                    </button>
+                  </article>
+                )
+              )}
+            </section>
+          )}
+
+          {encounter && (
+            <section className="ultimo-gole-dialogue-scene">
+              {encounter.portrait && (
+                <img
+                  className="ultimo-gole-scene-character"
+                  src={encounter.portrait}
+                  alt={encounter.speaker ?? ''}
+                  onError={(event) => {
+                    event.currentTarget.hidden = true
+                  }}
+                />
+              )}
+
+              <div className="ultimo-gole-dialogue-content">
+                <div className="ultimo-gole-dialogue-box">
+                  <span className="ultimo-gole-dialogue-speaker">
+                    {encounter.speaker}
+                  </span>
+
+                  <p>
+                    {encounter.line}
+                  </p>
+                </div>
+
+                {encounter.finished ? (
+                  <button
+                    type="button"
+                    className="ultimo-gole-secondary"
+                    onClick={() =>
+                      setEncounter(
+                        null
+                      )
+                    }
+                  >
+                    Continuar no bar
+                  </button>
+                ) : (
+                  <div className="ultimo-gole-encounter-choices">
+                    {encounter.choices.map(
+                      choice => (
+                        <button
+                          type="button"
+                          key={choice.id}
+                          onClick={() =>
+                            chooseMeeting(
+                              choice.id
+                            )
+                          }
+                        >
+                          {choice.text}
+                        </button>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {!encounter && (
+            <section className="ultimo-gole-navigation">
+              <span className="ultimo-gole-section-label">
+                CIRCULAR PELO BAR
+              </span>
+
+              <div className="ultimo-gole-navigation-grid">
+                {area.exits.map(
+                  exitId => {
+                    const exit =
+                      getUltimoGoleArea(
+                        exitId
+                      )
+
+                    const access =
+                      canEnterUltimoGoleArea(
+                        game,
+                        exitId
+                      )
+
+                    return (
+                      <button
+                        type="button"
+                        key={
+                          exitId
+                        }
+                        onClick={() =>
+                          moveTo(
+                            exitId
+                          )
+                        }
+                        className={
+                          access.allowed
+                            ? ''
+                            : 'locked'
+                        }
+                      >
+                        <strong>
+                          {
+                            exit.name
+                          }
+                        </strong>
+
+                        <span>
+                          {
+                            access.allowed
+                              ? exit.subtitle
+                              : access.reason
+                          }
+                        </span>
+                      </button>
+                    )
+                  }
+                )}
+              </div>
+            </section>
+          )}
+        </div>
+
+        <aside className="ultimo-gole-sidebar">
+          <section>
+            <span>
+              LOCAL
+            </span>
+
+            <strong>
+              Último Gole
+            </strong>
+
+            <small>
+              {area.name}
+            </small>
+          </section>
+
+          <section>
+            <span>
+              ACESSO
+            </span>
+
+            <strong>
+              {
+                area.vampireOnly
+                  ? 'Membros'
+                  : 'Público'
+              }
+            </strong>
+          </section>
+
+          <section>
+            <span>
+              AMBIENTE
+            </span>
+
+            <strong>
+              Rock · lotado
+            </strong>
+          </section>
+
+          <button
+            type="button"
+            className="ultimo-gole-leave"
+            onClick={
+              leaveBar
+            }
+          >
+            Sair para Pinheiros
+          </button>
+
+          {onTravel && (
+            <button
+              type="button"
+              className="ultimo-gole-map"
+              onClick={() =>
+                setMapOpen(
+                  true
+                )
+              }
+            >
+              Mapa
+            </button>
+          )}
+        </aside>
+      </section>
+
+      {mapOpen && (
+        <CityMap
+          game={game}
+          onClose={() =>
+            setMapOpen(
+              false
+            )
+          }
+          onTravel={(
+            travel
+          ) => {
+            setMapOpen(
+              false
+            )
+
+            onTravel(
+              travel
+            )
+          }}
+        />
+      )}
+    </main>
+  )
+}

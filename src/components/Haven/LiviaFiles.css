@@ -1,0 +1,28 @@
+.livia-files { position: relative; z-index: 2; max-width: 1080px; margin: 0 auto; padding: 40px 24px 120px; color: #e9dce0; }
+.livia-files-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 24px; border-bottom: 1px solid #49313e; }
+.livia-files h1 { font: 400 36px/1.2 Georgia, serif; margin: 12px 0; }
+.livia-files h2 { font: 400 25px/1.3 Georgia, serif; margin: 10px 0; }
+.livia-files p { color: #bbaab1; line-height: 1.75; font-size: 14px; }
+.livia-files button { color: #ead8de; background: #231820; border: 1px solid #654552; border-radius: 6px; padding: 12px 16px; font: inherit; font-size: 12px; cursor: pointer; text-align: left; line-height: 1.5; }
+.livia-files button:disabled { opacity: .45; cursor: not-allowed; }
+.livia-files button:hover:not(:disabled) { background: #35212e; border-color: #a87085; }
+.livia-files button:focus-visible, .livia-files summary:focus-visible { outline: 2px solid #efc3a0; outline-offset: 4px; }
+.livia-files-header > button { flex-shrink: 0; }
+.livia-files-main { margin-top: 28px; padding: 24px; border: 1px solid #85515d; border-radius: 10px; background: linear-gradient(105deg, #38202adb, #191118ee); }
+.livia-files-main button { margin: 6px 12px 0 0; }
+.livia-files .is-primary { background: #713443; border-color: #a26677; }
+.livia-files-section { margin-top: 34px; }
+.livia-files-group { margin: 24px 0; }
+.livia-files-group h3 { color: #c4a3af; font-size: 12px; font-weight: 500; letter-spacing: .06em; }
+.livia-files-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.livia-files .livia-file { display: flex; flex-direction: column; gap: 10px; padding: 20px; background: #191218; border-color: #44313d; }
+.livia-file strong { font: 400 22px/1.3 Georgia, serif; }
+.livia-file > span { color: #b6a3ad; }
+.livia-file > .livia-file-read { color: #a4bba5; font-size: 10px; }
+.livia-file > .livia-file-new { color: #d5ae86; font-size: 10px; }
+.livia-file small { color: #daa0b0; }
+.livia-files-notes { border-top: 1px solid #4b3440; padding-top: 20px; margin-top: 32px; }
+.livia-files-notes summary { cursor: pointer; color: #b9a2ac; font-size: 13px; }
+.livia-files-notes p { white-space: pre-line; }
+.livia-files-next { color: #dbc0ac !important; }
+@media(max-width:600px) { .livia-files { padding: 28px 16px 110px; }.livia-files-header { flex-direction: column; }.livia-files-grid { grid-template-columns: 1fr; }.livia-files-main { padding: 18px; } }

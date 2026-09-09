@@ -509,7 +509,7 @@ Mas é suficiente para perceber que ela não estava seguindo apenas um hospital.
       {
         id: 'continue_after_apartment_investigation',
         text: 'Continuar procurando.',
-        nextScene: 'livia_apartment_inside',
+        nextScene: 'free_roam',
         timeMinutes: 1,
       },
     ],
@@ -533,7 +533,7 @@ Mas é suficiente para perceber que ela não estava seguindo apenas um hospital.
       {
         id: 'continue_after_failed_apartment_investigation',
         text: 'Continuar procurando.',
-        nextScene: 'livia_apartment_inside',
+        nextScene: 'free_roam',
         timeMinutes: 1,
       },
     ],
@@ -566,7 +566,7 @@ Mas é suficiente para perceber que ela não estava seguindo apenas um hospital.
       {
         id: 'continue_search_after_jack_explanation',
         text: 'Continuar procurando.',
-        nextScene: 'livia_apartment_inside',
+        nextScene: 'free_roam',
         timeMinutes: 1,
       },
     ],
@@ -632,7 +632,7 @@ Isso significa que ela já sabia quem você era.`,
 
         text: 'Voltar para a sala.',
 
-        nextScene: 'livia_apartment_inside',
+        nextScene: 'free_roam',
 
         timeMinutes: 1,
       },
@@ -717,7 +717,7 @@ Seu nome.`,
 
         text: 'Voltar para a sala.',
 
-        nextScene: 'livia_apartment_inside',
+        nextScene: 'free_roam',
 
         timeMinutes: 1,
       },
@@ -792,7 +792,7 @@ Hospital.`,
 
         text: 'Guardar os cadernos e continuar procurando.',
 
-        nextScene: 'livia_apartment_inside',
+        nextScene: 'free_roam',
 
         timeMinutes: 2,
       },
@@ -866,7 +866,7 @@ Elas parecem familiares.`,
 
         text: 'Deixar o computador por enquanto.',
 
-        nextScene: 'livia_apartment_inside',
+        nextScene: 'free_roam',
 
         timeMinutes: 1,
       },
@@ -1117,7 +1117,7 @@ Uma anotação resume a suspeita dela: “Eles não estão procurando pessoas de
 
         text: 'Voltar e procurar outras pistas.',
 
-        nextScene: 'livia_apartment_inside',
+        nextScene: 'free_roam',
 
         timeMinutes: 2,
 

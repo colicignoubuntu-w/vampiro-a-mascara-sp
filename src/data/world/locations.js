@@ -1,3 +1,4 @@
+import { PLACE_DISTRICTS } from './districtLayout.js'
 const locations = {
   /*
     ========================================
@@ -673,6 +674,80 @@ const locations = {
 
       description:
         'Bares, casas noturnas e ruas movimentadas oferecem várias oportunidades de caça.',
+    },
+  },
+
+  /*
+    ========================================
+    ÚLTIMO GOLE
+    ========================================
+  */
+
+  ultimo_gole: {
+    id:
+      'ultimo_gole',
+
+    name:
+      'Último Gole',
+
+    district:
+      'Pinheiros',
+
+    parentLocationId:
+      'pinheiros',
+
+    description:
+      'Um bar de rock de Pinheiros conhecido por shows, noites cheias e uma clientela que mistura músicos, habitués e gente que prefere não fazer perguntas demais. Para o público comum, é apenas um bar. Para alguns Membros, o prédio possui outros usos.',
+
+    type:
+      'venue',
+
+    showOnMap:
+      false,
+
+    coordinates: {
+      x: 31,
+      y: 64,
+    },
+
+    danger:
+      0.4,
+
+    policePresence:
+      0.35,
+
+    crowdLevel:
+      0.9,
+
+    exposure: {
+      publicAccess:
+        true,
+
+      crowdLevel:
+        0.9,
+
+      policePresence:
+        0.35,
+
+      soundIsolation:
+        0.55,
+
+      hostilePresence:
+        0.05,
+    },
+
+    hunting: {
+      enabled:
+        true,
+
+      preyLocation:
+        'rock_bar',
+
+      baseDifficulty:
+        6,
+
+      description:
+        'Clientes, fumantes na área externa e pessoas que se afastam do salão criam oportunidades, embora o bar seja território observado.',
     },
   },
 
@@ -1684,6 +1759,34 @@ const locations = {
   LOCAL INDIVIDUAL
   ========================================
 */
+
+// District markers replace clustered establishment markers.
+for (const [id, name, x, y, description] of [
+  ['consolacao', 'Consolação', 39, 49, 'Bares, antigos teatros e casas noturnas ocupam as ruas da Consolação. O Asylum funciona em um dos teatros do bairro.'],
+  ['jardins', 'Jardins', 38, 61, 'Galerias de arte, restaurantes e edifícios residenciais ocupam ruas arborizadas dos Jardins.'],
+  ['limao', 'Limão', 35, 14, 'Galpões e oficinas dividem as ruas do Limão com casas e pequenos comércios.'],
+  ['santos', 'Santos', 84, 90, 'A viagem até o litoral termina entre a orla e ruas antigas. Hotéis e estabelecimentos locais guardam pistas da sua investigação.'],
+]) {
+  locations[id] = {
+    id, name, district: name, type: 'district', coordinates: { x, y }, description,
+    danger: 0.4, policePresence: 0.4, crowdLevel: 0.5,
+    exposure: { publicAccess: true, crowdLevel: 0.5, policePresence: 0.4, soundIsolation: 0.1, hostilePresence: 0 },
+    hunting: { enabled: true, preyLocation: 'centro_street', baseDifficulty: 6, description: 'Observar o movimento das ruas.' },
+  }
+}
+for (const [id, parentDistrictId] of Object.entries(PLACE_DISTRICTS)) {
+  locations[id] = { ...locations[id], parentDistrictId, showOnMap: false }
+}
+// Separate the clubs geographically as well as in the district menus.
+locations.asylum.coordinates = { x: 39, y: 49 }
+
+export function getDistrictPlaces(game, districtId) {
+  return getAllLocations(game).filter(place => place.parentDistrictId === districtId)
+}
+
+export function getMapDistricts(game) {
+  return getAllLocations(game).filter(place => place.type === 'district' && !place.parentDistrictId && place.showOnMap !== false)
+}
 
 export function getLocation(
   locationId

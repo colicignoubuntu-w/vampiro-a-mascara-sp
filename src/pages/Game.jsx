@@ -1,3 +1,13 @@
+import { getAsylumConversation, rememberAsylumConversation, leaveAsylum, getAsylumScene } from '../engine/travel/asylumVisit'
+import RelationshipPlaces from '../components/Relationships/RelationshipPlaces'
+import { getTravelArrivalScene } from '../engine/travel/arrivalScene'
+import Relationships from '../components/Relationships/Relationships'
+import RelationshipDevPanel from '../components/Relationships/RelationshipDevPanel'
+import LiviaFiles from '../components/Haven/LiviaFiles'
+import { getHavenDestination } from '../engine/haven/havenEngine'
+import NightLife from '../components/NightLife/NightLife'
+import Smartphone from '../components/Phone/Smartphone'
+import { reconcileSchedule } from '../engine/work/scheduleEngine'
 import {
   createPoliceResponse,
   updatePoliceResponse,
@@ -15,6 +25,8 @@ import {
 } from '../engine/police/policeWantedEngine'
 import Haven from '../components/Haven/Haven'
 import FreeRoam from '../components/FreeRoam/FreeRoam'
+import CompactGameNav from '../components/GameNavigation/CompactGameNav'
+import UltimoGole from '../components/UltimoGole/UltimoGole'
 import {
   useQuestStoryProgress,
 } from '../engine/quests/useQuestStoryProgress'
@@ -30,6 +42,7 @@ import {
 
 import {
   useEffect,
+  useReducer,
   useState,
 } from 'react'
 
@@ -238,7 +251,11 @@ export default function Game({
   const [
     game,
     setGame,
-  ] = useState(
+  ] = useReducer(
+    (current, update) => reconcileSchedule(
+      typeof update === 'function' ? update(current) : update
+    ),
+    null,
     () => {
       const loaded =
         loadGame()
@@ -630,7 +647,7 @@ const [
     'awakening'
 
   const scene =
-    scenes[sceneId]
+    getAsylumScene(game, scenes[sceneId])
 
  const locationVisual =
   scene?.location?.visual ??
@@ -2681,40 +2698,22 @@ function handleFreeRoamGameChange(
   }
 }
 
-function handleHavenComputer() {
-  const updatedGame =
-    transitionToScene(
-      game,
-      'livia_computer',
-      {
-        timeMinutes: 1,
-
-        historyItem: {
-          type:
-            'haven-computer',
-
-          locationId:
-            'livia_apartment',
-
-          timestamp:
-            new Date()
-              .toISOString(),
-        },
-      }
-    )
-
-  saveGame(
-    updatedGame
-  )
-
-  setGame(
-    updatedGame
-  )
-
+function handleHavenExplore(sceneId) {
+  if (interactionBlocked || pendingTest) return
+  const destination = getHavenDestination(game, sceneId)
+  if (!destination) return
+  const updatedGame = transitionToScene(game, destination.sceneId, {
+    timeMinutes: destination.minutes,
+    historyItem: {
+      type: 'haven-explore',
+      locationId: 'livia_apartment',
+      destination: destination.sceneId,
+      timestamp: new Date().toISOString(),
+    },
+  })
+  persist(updatedGame)
   resetSceneSystems()
-
   clearTest()
-
   goToTop()
 }
   /*
@@ -3105,6 +3104,8 @@ function handleHavenDaySleep() {
       return
     }
 
+    if (choice.asylumAction) { handleAsylumNavigation(choice.asylumAction); return }
+
     if (import.meta.env.DEV) {
       const snapshot =
         structuredClone(game)
@@ -3449,7 +3450,22 @@ if (
     ========================================
   */
 
- function handleOpenTravel() {
+ function handleAsylumNavigation(action) {
+  if (interactionBlocked || pendingTest || game.livelihood?.active || game.livelihood?.crime || game.livelihood?.workEvent || game.flags?.humanityCheckRequired || game.vampireState?.torpor) return
+  if (action === 'leave') {
+    handleFreeRoamGameChange(leaveAsylum(game))
+
+  } else {
+    const target = getAsylumConversation(game)
+    if (!target) return
+    persist(transitionToScene({ ...game, flags: { ...game.flags, asylumResumeScene: null } }, target))
+  }
+  resetSceneSystems()
+  clearTest()
+  goToTop()
+}
+
+function handleOpenTravel() {
   if (
     game?.flags
       ?.policeChase
@@ -3475,69 +3491,6 @@ if (
     true
   )
 }
-function getLiviaApartmentScene(
-  currentGame
-) {
-  const questStatus =
-    currentGame?.quests
-      ?.livia_legacy
-      ?.status
-
-  const hospitalDiscovered =
-    Boolean(
-      currentGame?.flags
-        ?.discoveredHospitalConnection ||
-      currentGame?.flags
-        ?.liviaHospitalConnection
-    )
-
-  const alreadyVisited =
-    Boolean(
-      currentGame?.flags
-        ?.visitedLiviaApartment
-    )
-
-  /*
-    ========================================
-    REFÚGIO JÁ ESTABELECIDO
-    ========================================
-
-    Depois que a investigação principal
-    avançou, não usamos mais a cena
-    narrativa livia_apartment_haven.
-
-    Vamos direto para free_roam mantendo
-    a localização no apartamento.
-
-    O Game.jsx então renderiza o componente
-    Haven automaticamente.
-  */
-
-  if (
-    questStatus ===
-      'completed' ||
-    hospitalDiscovered
-  ) {
-    return 'free_roam'
-  }
-
-  /*
-    O jogador já entrou anteriormente,
-    mas ainda não terminou a investigação.
-  */
-
-  if (
-    alreadyVisited
-  ) {
-    return 'livia_apartment_inside'
-  }
-
-  /*
-    Primeira visita.
-  */
-
-  return 'livia_apartment_arrival'
-}
 function handleTravel(
   travel
 ) {
@@ -3558,7 +3511,7 @@ function handleTravel(
 
   const result =
     performTravel(
-      game,
+      rememberAsylumConversation(game),
       {
         ...travel,
 
@@ -3834,9 +3787,7 @@ function transitionToTravelArrival(
   ) {
     return transitionToScene(
       currentGame,
-      getLiviaApartmentScene(
-        currentGame
-      ),
+      getTravelArrivalScene(currentGame, destination),
       {
         flags: {
           visitedLiviaApartment: true,
@@ -3854,47 +3805,7 @@ function transitionToTravelArrival(
     )
   }
 
-  let arrivalScene =
-    destination.arrivalScene
-
-  if (
-    destination.id === 'mercurio_apartment' &&
-    currentGame?.flags?.astroliteRecovered
-  ) {
-    arrivalScene = 'mercurio_return'
-  }
-
-  if (
-    destination.id === 'asylum' &&
-    currentGame?.flags?.jeanetteAgreedToMeet &&
-    !currentGame?.flags?.voermanReconciliationResolved
-  ) {
-    arrivalScene = 'therese_reconciliation_return'
-  } else if (
-    destination.id === 'asylum' &&
-    currentGame?.flags?.oceanSpiritObjectRecovered &&
-    !currentGame?.flags?.oceanHouseReturned
-  ) {
-    arrivalScene = 'voerman_ocean_return'
-  } else if (
-    destination.id === 'asylum' &&
-    currentGame?.flags?.gallerySabotageResolved &&
-    !currentGame?.flags?.gallerySabotageReported
-  ) {
-    arrivalScene = 'therese_gallery_confrontation'
-  }
-
-  if (
-    destination.id === 'vesuvius' &&
-    currentGame?.flags?.adderIdentified &&
-    !currentGame?.flags?.hatterScriptDestroyed
-  ) {
-    arrivalScene = 'vesuvius_hatter_return'
-  }
-
-  if (!arrivalScene) {
-    return currentGame
-  }
+  const arrivalScene = getTravelArrivalScene(currentGame, destination)
 
   return transitionToScene(
     currentGame,
@@ -7288,54 +7199,50 @@ window.alert(
         </div>
 
         <div className="game-topbar-actions">
-          <AudioControls />
-
-          {import.meta.env.DEV && (
-            <button
-              type="button"
-              className="game-dev-button"
-              onClick={() =>
-                setDevOpen(
-                  (current) =>
-                    !current
-                )
-              }
-            >
-              DEV
-            </button>
-          )}
-
-          {availableDisciplineChoices.length > 0 && (
-            <button type="button" onClick={handleOpenDisciplines} disabled={interactionBlocked}>
-              Poderes ({availableDisciplineChoices.length})
-            </button>
-          )}
-
-          <button type="button" onClick={() => setMasqueradeOpen(true)} disabled={interactionBlocked}>
-            Máscara
-          </button>
-<button
-  type="button"
-  onClick={() =>
-    setQuestOpen(true)
-  }
-  disabled={
-    interactionBlocked
-  }
->
-  Missões
-</button>
-          <button
-            type="button"
-            onClick={onOpenSheet}
-            disabled={interactionBlocked}
-          >
-            Ficha
-          </button>
-
-          <button type="button" onClick={onMenu} disabled={interactionBlocked}>
-            Menu
-          </button>
+          <CompactGameNav
+            game={game}
+            onGameChange={
+              handleFreeRoamGameChange
+            }
+            blocked={
+              interactionBlocked ||
+              Boolean(
+                pendingTest
+              )
+            }
+            onOpenSheet={
+              onOpenSheet
+            }
+            onOpenQuests={() =>
+              setQuestOpen(
+                true
+              )
+            }
+            onOpenMasquerade={() =>
+              setMasqueradeOpen(
+                true
+              )
+            }
+            onOpenDisciplines={
+              handleOpenDisciplines
+            }
+            disciplineCount={
+              availableDisciplineChoices
+                .length
+            }
+            onToggleDev={() =>
+              setDevOpen(
+                current =>
+                  !current
+              )
+            }
+            onMenu={
+              onMenu
+            }
+            onTravel={
+              handleTravel
+            }
+          />
         </div>
       </header>
 
@@ -7791,13 +7698,18 @@ window.alert(
                 Mostrar Save
               </button>
             </div>
-          </aside>
+                      <RelationshipDevPanel
+              game={game}
+              onChange={persist}
+            />
+</aside>
         )}
 
       {/* ================================
           HISTÓRIA
       ================================ */}
-{scene.id === 'free_roam' &&
+{scene.id !== 'free_roam' && game.world?.location?.id !== 'asylum' && <section className="relationship-local-actions" aria-label="Explorar locais próximos"><RelationshipPlaces game={game} onChange={handleFreeRoamGameChange} blocked={interactionBlocked || Boolean(pendingTest)} /></section>}
+{['free_roam', 'livia_apartment_haven'].includes(scene.id) &&
 game.world?.location?.id ===
   'livia_apartment' ? (
   <Haven
@@ -7811,16 +7723,36 @@ game.world?.location?.id ===
     handleTravel
   }
 
-  onComputer={
-    handleHavenComputer
-  }
+  onExplore={handleHavenExplore}
+  onQuests={() => setQuestOpen(true)}
+  blocked={interactionBlocked || Boolean(pendingTest)}
 
   onSleep={
     handleHavenDaySleep
   }
 />
+ ) : scene.id === 'livia_computer_unlocked' ? (
+  <LiviaFiles
+    game={game}
+    scene={scene}
+    onChoice={handleChoice}
+    onExplore={handleHavenExplore}
+    blocked={interactionBlocked || Boolean(pendingTest)}
+  />
+) : game.world?.location?.id === 'ultimo_gole' &&
+    scene.id === 'free_roam' ? (
+  <UltimoGole
+    game={game}
+    onGameChange={
+      handleFreeRoamGameChange
+    }
+    onTravel={
+      handleTravel
+    }
+  />
 ) : scene.id === 'free_roam' ? (
   <FreeRoam
+    blocked={interactionBlocked || Boolean(pendingTest)}
     game={game}
 
     onGameChange={
@@ -8040,6 +7972,7 @@ game.world?.location?.id ===
                 )
               }
             )}
+        {scene.id === 'asylum_lobby' && <RelationshipPlaces game={game} onChange={handleFreeRoamGameChange} blocked={interactionBlocked || Boolean(pendingTest)} peopleOnly />}
           </div>
         ) : (
           !scene.frenzyTrigger &&

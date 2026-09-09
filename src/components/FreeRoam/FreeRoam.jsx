@@ -1,3 +1,5 @@
+import { calculateTravel } from '../../engine/travel/travelEngine'
+import RelationshipPlaces from '../Relationships/RelationshipPlaces'
 import {
   useEffect,
   useState,
@@ -13,6 +15,7 @@ import MasqueradeEvent from '../MasqueradeEvent/MasqueradeEvent'
 
 import {
   getLocation,
+  getDistrictPlaces,
 } from '../../data/world/locations'
 
 import {
@@ -119,6 +122,7 @@ export default function FreeRoam({
   onTravel,
   onOpenSheet,
   onMenu,
+  blocked = false,
 }) {
   const [
     mapOpen,
@@ -1370,25 +1374,6 @@ export default function FreeRoam({
           </small>
         </div>
 
-        <div className="free-roam-header-actions">
-          <button
-            type="button"
-            onClick={
-              onOpenSheet
-            }
-          >
-            Ficha
-          </button>
-
-          <button
-            type="button"
-            onClick={
-              onMenu
-            }
-          >
-            Menu
-          </button>
-        </div>
       </header>
 
       <section className="free-roam-layout">
@@ -1492,6 +1477,7 @@ export default function FreeRoam({
                   </span>
                 </button>
 
+
                 {canHunt && (
                   <button
                     type="button"
@@ -1508,6 +1494,97 @@ export default function FreeRoam({
                     </span>
                   </button>
                 )}
+                {locationId === 'pinheiros' && (
+                  <button
+                    type="button"
+                    disabled={
+                      blocked ||
+                      Boolean(
+                        prey ||
+                        pendingHumanity ||
+                        stoppingFeeding ||
+                        frenzyActive ||
+                        masqueradeEvent
+                      )
+                    }
+                    onClick={() => {
+                      const travel =
+                        calculateTravel(
+                          game,
+                          'ultimo_gole',
+                          'walking'
+                        )
+
+                      if (travel.allowed) {
+                        onTravel(
+                          travel
+                        )
+                      } else {
+                        setMessage(
+                          travel.reason
+                        )
+                      }
+                    }}
+                  >
+                    <strong>
+                      Entrar no Último Gole
+                    </strong>
+
+                    <span>
+                      Entrar e explorar o bar
+                    </span>
+                  </button>
+                )}
+
+                {getDistrictPlaces(game, locationId).map(place => {
+                  const travel = calculateTravel(
+                    game,
+                    place.id,
+                    'walking'
+                  )
+
+                  const isVenue =
+                    place.type === 'venue'
+
+                  return (
+                    <button
+                      type="button"
+                      key={place.id}
+                      disabled={
+                        blocked ||
+                        Boolean(
+                          prey ||
+                          pendingHumanity ||
+                          stoppingFeeding ||
+                          frenzyActive ||
+                          masqueradeEvent
+                        )
+                      }
+                      onClick={() => {
+                        if (travel.allowed) {
+                          onTravel(travel)
+                        } else {
+                          setMessage(
+                            travel.reason
+                          )
+                        }
+                      }}
+                    >
+                      <strong>
+                        {isVenue
+                          ? `Entrar no ${place.name}`
+                          : place.name}
+                      </strong>
+
+                      <span>
+                        {isVenue
+                          ? `Entrar no local · ${travel.minutes} min a pé`
+                          : `Ir até o local · ${travel.minutes} min a pé`}
+                      </span>
+                    </button>
+                  )
+                })}
+                <RelationshipPlaces game={game} onChange={onGameChange} blocked={blocked || Boolean(prey || pendingHumanity || stoppingFeeding || frenzyActive || masqueradeEvent)} />
               </>
             )}
           </section>

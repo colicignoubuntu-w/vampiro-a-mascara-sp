@@ -1,7 +1,7 @@
 import {
   getArmor,
   getWeapon,
-} from '../data/items'
+} from '../data/items/index.js'
 
 export function normalizeInventory(
   game

@@ -1,3 +1,5 @@
+import { reconcileRelationships } from '../engine/relationships/relationshipClock'
+import { reconcileSchedule } from '../engine/work/scheduleEngine'
 import {
   GAME_SAVE_KEY,
   loadFinalCharacter,
@@ -44,7 +46,7 @@ export function saveGame(
     localStorage.setItem(
       GAME_SAVE_KEY,
       JSON.stringify(
-        game
+        reconcileRelationships(reconcileSchedule(game))
       )
     )
 
@@ -87,6 +89,84 @@ export function loadGame() {
     day começam no Dia 1.
   */
 
+  /*
+    ========================================
+    MIGRAÇÃO ÚNICA — CLARA
+    ========================================
+
+    Reseta somente o relacionamento com Clara
+    para o início da nova árvore de diálogos.
+
+    Todo o restante do save permanece intacto.
+
+    Depois de executada uma vez, a flag
+    claraDialogueMigrationV2 impede que o
+    reset aconteça novamente.
+  */
+
+  if (!game.flags?.claraDialogueMigrationV2) {
+    const migratedGame = {
+      ...game,
+
+      relationships: {
+        ...(game.relationships ?? {}),
+
+        clara: {
+          node: 'arrival',
+          readyAt: 0,
+
+          metrics: {
+            trust: 0,
+            affinity: 0,
+            respect: 0,
+            bond: 0,
+          },
+
+          status: 'unknown',
+
+          relationshipMetrics: {
+            affection: 0,
+            trust: 0,
+            happiness: 0,
+            anger: 0,
+            fear: 0,
+            safety: 0,
+            attraction: 0,
+            dependency: 0,
+          },
+
+          influence: {
+            bloodBond: 0,
+            domination: 'none',
+            presence: 'none',
+          },
+
+          contact: {
+            known: false,
+            number: null,
+            blocked: false,
+          },
+
+          memories: [],
+          flags: {},
+          journal: [],
+          completed: false,
+          ending: null,
+          deadlineAt: null,
+        },
+      },
+
+      flags: {
+        ...(game.flags ?? {}),
+        claraDialogueMigrationV2: true,
+      },
+    }
+
+    saveGame(migratedGame)
+
+    return loadGame()
+  }
+
   const savedLocation =
     game.world?.location
 
@@ -97,7 +177,7 @@ export function loadGame() {
         ?.policeReturnLocation
     )
 
-  return {
+  return reconcileSchedule({
     ...game,
 
     world: {
@@ -149,7 +229,7 @@ export function loadGame() {
       )
         ? game.history
         : [],
-  }
+  })
 }
 
 /*

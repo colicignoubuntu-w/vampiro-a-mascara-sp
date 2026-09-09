@@ -1,3 +1,6 @@
+import { reconcileRelationships } from '../relationships/relationshipClock'
+import { reconcileSchedule } from '../work/scheduleEngine'
+
 function safeNumber(
   value,
   fallback = 0
@@ -551,7 +554,7 @@ export function advanceGameTime(
     options.reason ??
     'Passagem do tempo'
 
-  return {
+  return reconcileRelationships(reconcileSchedule({
     ...game,
 
     world:
@@ -621,7 +624,7 @@ export function advanceGameTime(
             .toISOString(),
       },
     ],
-  }
+  }))
 }
 
 /*

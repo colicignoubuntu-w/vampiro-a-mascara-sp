@@ -1,0 +1,1714 @@
+import { RELATIONSHIP_NPCS } from '../../data/npcs/relationships/index.js'
+
+import {
+  adjustRelationshipMetric,
+  getRelationshipState,
+  setRelationshipStatus,
+} from '../relationships/relationshipModel'
+
+import {
+  relationshipPhoneMinutes,
+} from '../relationships/relationshipPhoneEngine'
+
+import {
+  advanceGameTime,
+} from '../time/timeEngine'
+
+export const ULTIMO_GOLE_AREAS = {
+  main: {
+    id: 'main',
+    name: 'Salão principal',
+    subtitle: 'Mesas, balcão e pista',
+    background: '/images/locations/ultimo-gole/main.jpg',
+    description:
+      'O salão principal do Último Gole é estreito e comprido, tomado por mesas pequenas, jaquetas penduradas nas cadeiras e gente em pé onde já não cabe mais ninguém sentado. A música cobre boa parte das conversas. Ao fundo, o palco recebe equipamentos e cabos; perto do balcão, Duda acompanha pedidos e observa discretamente o movimento.',
+    exits: ['stage', 'bar', 'stairs'],
+  },
+
+  stage: {
+    id: 'stage',
+    name: 'Perto do palco',
+    subtitle: 'Grade e lateral do palco',
+    background: '/images/locations/ultimo-gole/stage.jpg',
+    description:
+      'Perto da grade o volume deixa de ser apenas música e vira vibração no peito. Fotógrafos se espremem nas laterais, músicos atravessam a cortina e clientes disputam os poucos espaços com visão limpa do palco. É onde Clara costuma trabalhar quando há show.',
+    exits: ['main', 'vip'],
+  },
+
+  bar: {
+    id: 'bar',
+    name: 'Balcão',
+    subtitle: 'Bebidas e conversas curtas',
+    background: '/images/locations/ultimo-gole/bar.jpg',
+    description:
+      'O balcão corre por uma das paredes do salão. Garrafas ocupam prateleiras iluminadas por lâmpadas fracas e pedidos são gritados entre uma música e outra. Duda trabalha daqui e percebe mais do que demonstra.',
+    exits: ['main', 'stairs'],
+  },
+
+  vip: {
+    id: 'vip',
+    name: 'Área VIP',
+    subtitle: 'Camarote reservado',
+    background: '/images/locations/ultimo-gole/vip.jpg',
+    description:
+      'Uma área elevada acompanha parte do palco. O som chega menos agressivo, há sofás gastos e mesas que não ficam disponíveis para qualquer cliente. Músicos, produtores, convidados de Caroline e alguns rostos recorrentes da noite passam por aqui.',
+    exits: ['stage', 'stairs'],
+  },
+
+  stairs: {
+    id: 'stairs',
+    name: 'Escadas dos fundos',
+    subtitle: 'Corredor de serviço',
+    background: '/images/locations/ultimo-gole/stairs.jpg',
+    description:
+      'Uma porta próxima aos banheiros leva a um corredor de serviço e a uma escada estreita. Para cima fica a área reservada. Para baixo, a iluminação piora e uma segunda porta separa o bar público de uma parte que a maioria dos clientes nunca vê.',
+    exits: ['main', 'bar', 'vip', 'basement'],
+  },
+
+  basement: {
+    id: 'basement',
+    name: 'Porão',
+    subtitle: 'Área reservada aos Membros',
+    background: '/images/locations/ultimo-gole/basement.jpg',
+    description:
+      'O porão não tenta parecer uma extensão do bar. As paredes de concreto permanecem expostas, o teto é baixo e o som do palco chega como uma pulsação distante. Há uma mesa grande, armários trancados, um refrigerador industrial e portas que levam a depósitos menores. Aqui, ninguém precisa fingir que certas conversas são humanas.',
+    exits: ['stairs'],
+    vampireOnly: true,
+  },
+}
+
+export function getUltimoGoleArea(areaId) {
+  return ULTIMO_GOLE_AREAS[areaId] ?? ULTIMO_GOLE_AREAS.main
+}
+
+export function canEnterUltimoGoleArea(game, areaId) {
+  const area = getUltimoGoleArea(areaId)
+
+  if (
+    area.vampireOnly &&
+    !game?.vampire &&
+    !game?.vampireState &&
+    !game?.blood
+  ) {
+    return {
+      allowed: false,
+      reason:
+        'A porta permanece fechada. Essa área não é aberta ao público.',
+    }
+  }
+
+  return {
+    allowed: true,
+    reason: null,
+  }
+}
+
+export function currentRelationshipAppointmentsAtUltimoGole(game) {
+  const now = relationshipPhoneMinutes(game?.world)
+
+  return (game?.relationshipAppointments ?? []).filter(
+    appointment =>
+      ['scheduled', 'arrived'].includes(
+        appointment.status
+      ) &&
+      now >= appointment.start - 30 &&
+      now <= appointment.end &&
+      (
+        String(appointment.place ?? '')
+          .toLowerCase()
+          .includes('último gole') ||
+        String(appointment.place ?? '')
+          .toLowerCase()
+          .includes('ultimo gole') ||
+        appointment.locationId === 'ultimo_gole'
+      )
+  )
+}
+
+export function getUltimoGolePresentRelationships(game, areaId) {
+  return currentRelationshipAppointmentsAtUltimoGole(game)
+    .map(appointment => {
+      const npc = RELATIONSHIP_NPCS[appointment.npcId]
+
+      if (!npc) {
+        return null
+      }
+
+      const preferredArea =
+        appointment.areaId ??
+        (appointment.npcId === 'clara' ? 'stage' : 'main')
+
+      if (areaId !== preferredArea) {
+        return null
+      }
+
+      return {
+        npcId: appointment.npcId,
+        appointment,
+        npc,
+      }
+    })
+    .filter(Boolean)
+}
+
+function updateAppointment(game, appointmentId, patch) {
+  return {
+    ...game,
+    relationshipAppointments: (
+      game.relationshipAppointments ?? []
+    ).map(appointment =>
+      appointment.id === appointmentId
+        ? {
+            ...appointment,
+            ...patch,
+          }
+        : appointment
+    ),
+  }
+}
+
+function updateRelationship(game, npcId, updater) {
+  const state = getRelationshipState(game, npcId)
+
+  if (!state) {
+    return game
+  }
+
+  return {
+    ...game,
+    relationships: {
+      ...(game.relationships ?? {}),
+      [npcId]: updater(state),
+    },
+  }
+}
+
+function applyMetricPatch(game, npcId, patch = {}) {
+  let next = game
+
+  for (const [key, amount] of Object.entries(patch)) {
+    next = adjustRelationshipMetric(
+      next,
+      npcId,
+      key,
+      amount
+    )
+  }
+
+  return next
+}
+
+function addRelationshipMemory(
+  game,
+  npcId,
+  {
+    type = 'meeting',
+    title,
+    text,
+    weight = 1,
+    tags = [],
+  }
+) {
+  const now = relationshipPhoneMinutes(game?.world)
+
+  return updateRelationship(
+    game,
+    npcId,
+    state => ({
+      ...state,
+      memories: [
+        ...(state.memories ?? []),
+        {
+          id: `${npcId}:ultimo-gole:${now}:${Math.random()
+            .toString(36)
+            .slice(2, 8)}`,
+          type,
+          title,
+          text,
+          weight,
+          tags,
+          at: now,
+          resolved: false,
+        },
+      ],
+    })
+  )
+}
+
+function addHistory(game, entry) {
+  return {
+    ...game,
+    history: [
+      ...(game.history ?? []),
+      {
+        ...entry,
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  }
+}
+
+function meetingMood(game, npcId) {
+  const state = getRelationshipState(game, npcId)
+  const metrics = state?.relationshipMetrics ?? {}
+
+  if ((metrics.anger ?? 0) >= 70) return 'angry'
+  if ((metrics.happiness ?? 0) <= -40) return 'hurt'
+  if ((metrics.affection ?? 0) >= 65) return 'warm'
+  if ((metrics.trust ?? 0) >= 40) return 'comfortable'
+  return 'neutral'
+}
+
+function shouldOfferRomanticMoment(game, npcId) {
+  const state = getRelationshipState(game, npcId)
+  const metrics = state?.relationshipMetrics ?? {}
+
+  return (
+    (metrics.affection ?? 0) >= 35 ||
+    (metrics.attraction ?? 0) >= 35 ||
+    state?.status === 'dating' ||
+    state?.flags?.romance
+  )
+}
+
+function shouldOfferPersonalTrust(game, npcId) {
+  const metrics =
+    getRelationshipState(game, npcId)?.relationshipMetrics ?? {}
+
+  return (
+    (metrics.trust ?? 0) >= 25 ||
+    (metrics.affection ?? 0) >= 30
+  )
+}
+
+function choice(id, text) {
+  return {
+    id,
+    text,
+  }
+}
+
+/*
+  O encontro marcado por telefone é separado da árvore histórica
+  de Clara. Ele representa um encontro voluntário que pode acontecer
+  em qualquer ponto posterior do relacionamento.
+
+  O estado da conversa fica no objeto "encounter", enquanto os efeitos
+  persistentes ficam no game.relationships.
+*/
+const CLARA_MEETING_NODES = {
+  opening: {
+    speaker: 'Clara Azevedo',
+    areaId: 'stage',
+    line: ({ mood }) => {
+      if (mood === 'angry') {
+        return 'Clara já está perto da lateral do palco quando você chega. Ela guarda o celular no bolso e espera você se aproximar. “Você veio.” O tom não é hostil, mas o sorriso que normalmente acompanharia a frase não aparece.'
+      }
+
+      if (mood === 'hurt') {
+        return 'Clara está conferindo algumas fotos no visor da câmera. Quando percebe você, abaixa o aparelho. “Oi.” Ela tenta sorrir. “Eu quase desmarquei. Mas achei melhor vir.”'
+      }
+
+      if (mood === 'warm') {
+        return 'Clara percebe você antes que consiga atravessar a lateral do salão. O rosto dela muda imediatamente. “Finalmente.” Ela fecha a tampa da câmera. “Eu já estava começando a achar que você ia me fazer assistir à passagem de som sozinha.”'
+      }
+
+      return 'Clara está perto da grade, com a câmera pendurada no pescoço. Quando percebe você, dá alguns passos para fora do fluxo de pessoas. “Oi. Você conseguiu chegar.”'
+    },
+    choices: [
+      choice('opening_how', '“Como você está?”'),
+      choice('opening_work', 'Perguntar se ela estava trabalhando.'),
+      choice('opening_tease', '“Você achou mesmo que eu não vinha?”'),
+      choice('opening_quiet', '“Quer ir para algum lugar onde dê para conversar?”'),
+      choice('opening_leave', 'Dizer que surgiu um problema e que você não poderá ficar.'),
+    ],
+  },
+
+  how: {
+    line: ({ mood }) => {
+      if (mood === 'angry') {
+        return 'Ela apoia a câmera contra o corpo. “Quer a resposta educada ou a verdadeira?” A pausa já responde. “Eu vim porque prefiro conversar do que ficar imaginando o que você pensa.”'
+      }
+
+      if (mood === 'hurt') {
+        return 'Clara olha para o palco em vez de responder imediatamente. “Já estive melhor.” Então volta os olhos para você. “Mas eu não queria que a gente virasse duas pessoas fingindo que não têm nada para falar.”'
+      }
+
+      return '“Cansada.” Ela sorri. “Mas é um cansaço normal. Trabalho, cliente pedindo foto para ontem, Íris me mandando áudio de quatro minutos.” Ela inclina a cabeça. “E você?”'
+    },
+    choices: [
+      choice('how_truth', 'Responder de forma sincera, sem revelar a Máscara.'),
+      choice('how_deflect', '“Minha noite ficou melhor agora.”'),
+      choice('how_ask_more', 'Perguntar o que está deixando ela cansada.'),
+      choice('how_move', 'Sugerir que vocês saiam da lateral do palco.'),
+    ],
+  },
+
+  work: {
+    line: () =>
+      'Clara ergue a câmera pela alça. “Um pouco. A banda queria foto da passagem de som e a Íris me convenceu com a frase ‘é rapidinho’.” Ela ri pelo nariz. “Nunca é rapidinho.”',
+    choices: [
+      choice('work_photos', 'Perguntar se ela gostou das fotos.'),
+      choice('work_iris', 'Perguntar como estão os trabalhos com Íris.'),
+      choice('work_interest', 'Dizer que gosta de vê-la trabalhando.'),
+      choice('work_move', 'Convidá-la para sentar e deixar o trabalho de lado por alguns minutos.'),
+    ],
+  },
+
+  photos: {
+    line: () =>
+      'Ela desbloqueia a câmera e passa algumas imagens. Não escolhe as mais óbvias. Mostra um técnico ajoelhado entre cabos, o baterista olhando para o vazio antes de subir e uma garota na primeira fila tentando prender o cabelo. “Essas eu gostei. As que provavelmente vão usar são as mais sem graça.”',
+    choices: [
+      choice('photos_notice', 'Comentar o que você percebeu em uma das fotografias.'),
+      choice('photos_project', 'Perguntar sobre o projeto dela de fotografar a cidade de madrugada.'),
+      choice('photos_flirt', '“Você presta muita atenção nas pessoas.”'),
+      choice('photos_change', 'Mudar de assunto e perguntar sobre a vida dela fora do trabalho.'),
+    ],
+  },
+
+  project: {
+    line: () =>
+      '“Eu ainda quero fazer.” Clara fecha o visor. “Não balada. A cidade que continua funcionando quando todo mundo acha que ela dormiu. Gente saindo do hospital, padeiro chegando, motorista esperando corrida, palco sendo desmontado.” Ela olha em volta. “Talvez eu esteja começando por aqui sem perceber.”',
+    choices: [
+      choice('project_support', 'Perguntar como você poderia ajudar sem controlar o projeto.'),
+      choice('project_portrait', '“E eu entro onde nessa cidade noturna?”'),
+      choice('project_real', 'Dizer que é uma das poucas ideias que você ouviu ultimamente que parece realmente dela.'),
+      choice('project_move', 'Convidá-la para continuar a conversa na área VIP.'),
+    ],
+  },
+
+  iris: {
+    line: () =>
+      '“Melhor do que eu esperava.” Clara parece genuinamente satisfeita. “Ela é caótica, mas cumpre o que promete. Conseguiu dois trabalhos pagos e não tentou transformar tudo no gosto dela.” A satisfação diminui um pouco. “Agora eu preciso descobrir se consigo viver de fotografia sem começar a odiar fotografia.”',
+    choices: [
+      choice('iris_listen', 'Perguntar o que ela teme perder se isso virar apenas trabalho.'),
+      choice('iris_practical', 'Dizer que trabalho pago e projeto pessoal não precisam ser a mesma coisa.'),
+      choice('iris_confident', '“Você vai descobrir.”'),
+      choice('iris_personal', 'Perguntar o que ela faria se dinheiro não fosse um problema.'),
+    ],
+  },
+
+  personal: {
+    line: () =>
+      'Clara demora alguns segundos. “Viajava mais.” Ela passa o polegar pela borda da câmera. “Fotografava sem precisar entregar nada para ninguém. Talvez alugasse um lugar com uma janela decente.” Ela ri. “É um sonho bem menos interessante quando eu falo em voz alta.”',
+    choices: [
+      choice('personal_validate', '“Não precisa ser interessante para os outros.”'),
+      choice('personal_share', 'Contar uma vontade sua que quase nunca diz em voz alta.'),
+      choice('personal_flirt', '“Eu gostei de ouvir.”'),
+      choice('personal_rafael', 'Perguntar se Rafael costumava apoiar esses planos.'),
+    ],
+  },
+
+  rafael: {
+    line: ({ game }) => {
+      const state = getRelationshipState(game, 'clara')
+
+      if (
+        state?.flags?.protected ||
+        state?.flags?.reinforcedNoBlame ||
+        state?.status === 'ex'
+      ) {
+        return 'O nome muda a expressão dela. “Eu não quero que toda conversa sobre mim acabe nele.” Clara fala sem agressividade, mas sem hesitar. “O que aconteceu importa. Só não quero que vire a definição da minha vida.”'
+      }
+
+      return 'Clara passa a língua pelos dentes antes de responder. “É complicado.” Ela olha para o celular sobre a mesa. “E eu sei que ‘é complicado’ normalmente significa que a pessoa não quer admitir alguma coisa.”'
+    },
+    choices: [
+      choice('rafael_listen', 'Deixar que ela decida se quer continuar.'),
+      choice('rafael_safety', 'Perguntar apenas se ela se sente segura.'),
+      choice('rafael_jealous', 'Perguntar se ela ainda gosta dele.'),
+      choice('rafael_drop', 'Dizer que vocês não precisam falar sobre Rafael.'),
+    ],
+  },
+
+  safety: {
+    line: () =>
+      'Ela não responde imediatamente. “Aqui, sim.” Clara olha na direção do balcão. “A Duda está por perto. A Íris também conhece a história.” Depois acrescenta: “Eu não quero que alguém decida minha vida por mim em nome de me proteger. Isso inclui você.”',
+    choices: [
+      choice('safety_respect', '“Se você pedir ajuda, eu ajudo. A decisão continua sendo sua.”'),
+      choice('safety_offer', 'Perguntar se existe alguma coisa concreta que ela quer que você faça.'),
+      choice('safety_possessive', 'Dizer que você não permitiria que Rafael encostasse nela novamente.'),
+      choice('safety_drop', 'Aceitar o limite e mudar de assunto.'),
+    ],
+  },
+
+  boundary: {
+    line: () =>
+      'Clara sustenta seu olhar. “Eu sei que parece diferença de palavra. Não é.” Ela fala mais baixo. “Eu não quero sair de uma relação em que alguém decide por mim para entrar em outra versão da mesma coisa.”',
+    choices: [
+      choice('boundary_accept', 'Reconhecer que ela está certa e recuar.'),
+      choice('boundary_defend', 'Tentar explicar que sua intenção era apenas protegê-la.'),
+      choice('boundary_insist', 'Insistir que ela não entende o perigo.'),
+    ],
+  },
+
+  vip_move: {
+    areaId: 'vip',
+    line: () =>
+      'Vocês sobem para a área VIP. O som continua forte, mas deixa de esmagar cada frase. Clara escolhe um canto de onde ainda consegue ver o palco. “Melhor.” Ela deixa a câmera sobre a mesa, mas mantém a alça enrolada no pulso por hábito.',
+    choices: [
+      choice('vip_drink', 'Perguntar o que ela quer beber.'),
+      choice('vip_you', 'Deixar que o assunto seja você por alguns minutos.'),
+      choice('vip_silence', 'Apenas ficar ali com ela e observar o movimento.'),
+      choice('vip_flirt', '“Agora parece mais um encontro.”'),
+    ],
+  },
+
+  stage_stay: {
+    areaId: 'stage',
+    line: () =>
+      'Vocês ficam perto da lateral do palco. Em alguns momentos não há como conversar. Clara comenta alguma coisa perto do seu ouvido e desiste quando a guitarra cobre a voz. Ela ri da tentativa. Por alguns minutos, estar ali não exige preencher o silêncio.',
+    choices: [
+      choice('stage_band', 'Perguntar o que ela achou da banda.'),
+      choice('stage_close', 'Ficar um pouco mais perto dela.'),
+      choice('stage_photo', 'Pedir para ver uma foto feita naquela noite.'),
+      choice('stage_move', 'Depois da música, sugerir um lugar mais tranquilo.'),
+    ],
+  },
+
+  about_you: {
+    line: ({ game }) => {
+      const trusted = shouldOfferPersonalTrust(game, 'clara')
+
+      return trusted
+        ? 'Clara apoia o queixo na mão. “Agora minha vez.” Ela aponta para você. “Você pergunta bastante e responde muito pouco. Me conta alguma coisa verdadeira.”'
+        : 'Clara inclina a cabeça. “Você é difícil de ler.” Não há acusação na frase. “Não sei se é porque você gosta de ser misterioso ou porque realmente não sabe o que dizer sobre você.”'
+    },
+    choices: [
+      choice('you_truth', 'Contar algo verdadeiro sobre sua vida humana sem revelar a Máscara.'),
+      choice('you_night', 'Falar sobre como sua relação com a noite mudou.'),
+      choice('you_joke', 'Responder com humor e continuar evasivo.'),
+      choice('you_refuse', 'Dizer que prefere não falar sobre si.'),
+    ],
+  },
+
+  truth_response: {
+    line: () =>
+      'Clara não interrompe. Quando você termina, ela não tenta transformar o que ouviu em conselho. “Obrigada.” A resposta é simples. “Eu sei que parece estranho agradecer alguém por responder uma pergunta. Mas você normalmente deixa uma porta fechada no meio da frase.”',
+    choices: [
+      choice('truth_ask_her', '“Então me conta alguma coisa que você também costuma esconder.”'),
+      choice('truth_light', 'Fazer uma piada para aliviar o peso da conversa.'),
+      choice('truth_flirt', '“Talvez eu esteja começando a abrir a porta.”'),
+    ],
+  },
+
+  her_secret: {
+    line: () =>
+      'Clara olha para as próprias mãos. “Às vezes eu acho que passei tempo demais tentando provar que dou conta de tudo sozinha.” Ela respira fundo. “Aí quando eu realmente preciso de alguém, parece que pedir ajuda significa que eu perdi.”',
+    choices: [
+      choice('secret_support', 'Dizer que pedir ajuda não entrega a decisão para outra pessoa.'),
+      choice('secret_no_fix', 'Não tentar consertar. Apenas ouvir.'),
+      choice('secret_touch', 'Oferecer a mão, sem puxá-la para perto.'),
+      choice('secret_flirt', 'Dizer que ela não precisa provar nada para você.'),
+    ],
+  },
+
+  flirt: {
+    line: ({ game }) => {
+      const state = getRelationshipState(game, 'clara')
+      const metrics = state?.relationshipMetrics ?? {}
+
+      if ((metrics.anger ?? 0) >= 55) {
+        return 'Clara percebe o flerte e não acompanha. “Não faz isso agora.” Ela não se afasta, mas deixa o limite claro. “Se a gente vai conversar, conversa comigo de verdade.”'
+      }
+
+      if (
+        (metrics.affection ?? 0) >= 45 ||
+        (metrics.attraction ?? 0) >= 45
+      ) {
+        return 'Clara sorri antes de conseguir esconder. “Você sabe que está fazendo isso de propósito.” Ela não se afasta. “O pior é que eu acho que você sabe exatamente quando funciona.”'
+      }
+
+      return 'Ela percebe o tom e sorri de lado. “Você é mais direto por mensagem ou isso é novidade?” A resposta não fecha a porta, mas também não entrega nada de graça.'
+    },
+    choices: [
+      choice('flirt_honest', 'Admitir que está interessado nela.'),
+      choice('flirt_slow', '“Não precisa virar nada hoje.”'),
+      choice('flirt_tease', 'Continuar a brincadeira sem pressionar.'),
+      choice('flirt_back', 'Mudar de assunto e respeitar o ritmo dela.'),
+    ],
+  },
+
+  interest: {
+    line: ({ game }) => {
+      const available = shouldOfferRomanticMoment(game, 'clara')
+
+      return available
+        ? 'Clara fica séria por um instante. “Eu sei.” Ela olha para você, não para o palco. “E eu também não estou aqui por acidente.” A frase vem sem promessa. “Só não quero correr porque alguma coisa parece intensa.”'
+        : 'Clara recebe a frase sem recuar, mas pensa antes de responder. “Eu gosto de conversar com você.” Ela escolhe as palavras. “Quero descobrir o resto sem fingir que já sei o que é.”'
+    },
+    choices: [
+      choice('interest_slow', 'Concordar em deixar as coisas acontecerem devagar.'),
+      choice('interest_kiss', 'Perguntar se ela quer que você a beije.'),
+      choice('interest_pressure', 'Perguntar por que esperar se os dois já sabem o que querem.'),
+      choice('interest_friend', 'Dizer que você não precisa transformar a noite em romance.'),
+    ],
+  },
+
+  kiss_question: {
+    line: ({ game }) => {
+      const state = getRelationshipState(game, 'clara')
+      const m = state?.relationshipMetrics ?? {}
+
+      if (
+        (m.anger ?? 0) >= 45 ||
+        (m.trust ?? 0) < 20
+      ) {
+        return 'Clara balança a cabeça devagar. “Hoje não.” Ela continua perto, mas não deixa espaço para interpretação. “Não quero que você transforme isso em um teste que eu preciso passar.”'
+      }
+
+      if (
+        (m.affection ?? 0) >= 40 ||
+        (m.attraction ?? 0) >= 40
+      ) {
+        return 'Clara olha para sua boca e depois volta aos seus olhos. “Quero.” A resposta é baixa, mas não hesita. Ela dá um passo na sua direção por vontade própria.'
+      }
+
+      return 'Ela sorri, nervosa. “Ainda não.” Depois acrescenta antes que a resposta pareça rejeição completa: “Perguntar foi melhor do que presumir.”'
+    },
+    choices: [
+      choice('kiss_respect', 'Aceitar a resposta sem tentar convencê-la.'),
+      choice('kiss_if_yes', 'Se ela disse sim, aproximar-se devagar e deixá-la fechar a distância.'),
+      choice('kiss_joke', 'Fazer uma piada e tirar a pressão do momento.'),
+    ],
+  },
+
+  kiss: {
+    line: () =>
+      'O beijo é curto no começo. Clara é quem reduz a última distância. Quando se afasta, permanece perto o bastante para que nenhum dos dois possa fingir que foi casual. “Tá.” Ela ri, um pouco sem jeito. “Agora definitivamente parece um encontro.”',
+    choices: [
+      choice('kiss_stay', 'Continuar perto dela sem apressar o resto.'),
+      choice('kiss_talk', 'Voltar a conversar como se o beijo não precisasse encerrar a noite.'),
+      choice('kiss_end_good', 'Dizer que prefere terminar a noite nesse momento bom.'),
+    ],
+  },
+
+  ordinary: {
+    line: () =>
+      'A conversa escapa dos assuntos importantes. Vocês falam de lugares ruins para estacionar, clientes estranhos, bandas que envelheceram mal e coisas que só são engraçadas porque aconteceram de madrugada. Clara ri mais do que no começo da noite.',
+    choices: [
+      choice('ordinary_personal', 'Perguntar qual foi a melhor noite que ela já teve trabalhando.'),
+      choice('ordinary_you', 'Contar uma história sua.'),
+      choice('ordinary_flirt', 'Brincar que vocês são ruins em ter um encontro normal.'),
+      choice('ordinary_end', 'Perceber que já está tarde e começar a se despedir.'),
+    ],
+  },
+
+  interruption: {
+    line: () =>
+      'O celular de Clara vibra sobre a mesa. Ela olha a tela, mas não abre a mensagem. “Desculpa.” O aparelho vibra de novo. Dessa vez ela o vira para baixo. “Eu não quero que isso mande na minha noite.”',
+    choices: [
+      choice('interrupt_space', 'Não perguntar quem é. Deixar que ela decida se quer falar.'),
+      choice('interrupt_ask', 'Perguntar se está tudo bem.'),
+      choice('interrupt_jealous', 'Perguntar se é Rafael.'),
+      choice('interrupt_ignore', 'Mudar de assunto e devolver a noite a vocês dois.'),
+    ],
+  },
+
+  jealousy: {
+    line: ({ game }) => {
+      const state = getRelationshipState(game, 'clara')
+
+      if (state?.status === 'dating') {
+        return 'Clara percebe o tom antes da pergunta terminar. “Se você quer saber alguma coisa, pergunta. Mas não começa a montar uma história sozinho e depois me cobra por ela.”'
+      }
+
+      return 'Clara ergue uma sobrancelha. “Você está com ciúme?” Ela não parece ofendida ainda. “Porque a gente pode falar sobre isso. Só não quero descobrir que eu troquei um homem fiscalizando meu telefone por outro.”'
+    },
+    choices: [
+      choice('jealous_admit', 'Admitir o ciúme sem responsabilizá-la por ele.'),
+      choice('jealous_deny', 'Negar e mudar de assunto.'),
+      choice('jealous_control', 'Perguntar com quem ela está falando e exigir uma resposta.'),
+      choice('jealous_apologize', 'Reconhecer o tom e pedir desculpas.'),
+    ],
+  },
+
+  jealousy_good: {
+    line: () =>
+      'Clara relaxa um pouco. “Sentir eu não vou controlar por você.” Ela encosta as costas na cadeira. “Mas o que você faz com isso é outra coisa.” Depois sorri de leve. “Obrigada por não transformar seu ciúme em regra para mim.”',
+    choices: [
+      choice('jealous_good_talk', 'Perguntar como ela prefere lidar com insegurança entre vocês.'),
+      choice('jealous_good_move', 'Deixar o assunto descansar.'),
+    ],
+  },
+
+  jealousy_bad: {
+    line: () =>
+      'O rosto de Clara fecha. “Não.” Ela pega o celular da mesa. “Você não tem direito de exigir meu telefone, minha conversa ou uma explicação só porque ficou desconfortável.” A distância entre vocês deixa de ser apenas física.',
+    choices: [
+      choice('jealous_bad_repair', 'Parar e reconhecer que passou do limite.'),
+      choice('jealous_bad_double', 'Insistir que quem não deve não teme.'),
+      choice('jealous_bad_end', 'Encerrar a noite antes de piorar.'),
+    ],
+  },
+
+  closing: {
+    line: ({ game }) => {
+      const state = getRelationshipState(game, 'clara')
+      const m = state?.relationshipMetrics ?? {}
+
+      if ((m.anger ?? 0) >= 65) {
+        return 'Clara coloca a câmera no ombro. “Eu vou embora.” Ela não faz cena e não espera que você a acompanhe. “A gente conversa outra hora. Se eu quiser conversar.”'
+      }
+
+      if (
+        state?.status === 'dating' ||
+        (m.affection ?? 0) >= 55
+      ) {
+        return 'Clara olha a hora no celular e faz uma careta. “Eu preciso ir antes que amanhã vire hoje de verdade.” Ela permanece ao seu lado. “Eu gostei de você ter vindo.”'
+      }
+
+      if ((m.trust ?? 0) >= 30) {
+        return 'Clara coloca a câmera na bolsa. “Foi bom.” Ela parece surpresa por ter dito de forma tão direta. “Sem crise, sem trabalho pegando fogo. Só... bom.”'
+      }
+
+      return 'Clara verifica a hora e guarda a câmera. “Eu preciso ir.” Ela sorri. “Mas foi bom conversar fora de uma mensagem de celular.”'
+    },
+    choices: [
+      choice('close_walk', 'Acompanhá-la até a saída.'),
+      choice('close_again', 'Perguntar se ela quer fazer isso de novo.'),
+      choice('close_message', 'Dizer que manda mensagem quando chegar.'),
+      choice('close_simple', 'Apenas desejar boa noite.'),
+    ],
+  },
+
+  goodbye_warm: {
+    line: () =>
+      'Na porta do Último Gole, o ruído da rua substitui o do palco. Clara ajeita a bolsa no ombro. “Me chama.” Ela dá alguns passos e olha para trás. “Não espera três dias só para parecer interessante.”',
+    choices: [
+      choice('finish_warm', 'Sorrir, despedir-se e deixar que ela vá.'),
+    ],
+  },
+
+  goodbye_neutral: {
+    line: () =>
+      'Vocês se despedem na saída. Clara levanta a mão antes de atravessar a calçada. “Boa noite.” Não há promessa grandiosa, mas também não existe a sensação de que a conversa terminou para sempre.',
+    choices: [
+      choice('finish_neutral', 'Voltar para dentro ou seguir sua noite.'),
+    ],
+  },
+
+  goodbye_bad: {
+    line: () =>
+      'Clara não prolonga a despedida. “Boa noite.” Ela guarda o celular e sai sem olhar para trás. Algumas coisas ditas durante a noite continuarão existindo depois que o bar fechar.',
+    choices: [
+      choice('finish_bad', 'Deixar que ela vá.'),
+    ],
+  },
+}
+
+function openingLine(game, npcId) {
+  const npc = RELATIONSHIP_NPCS[npcId]
+  const mood = meetingMood(game, npcId)
+
+  if (npcId === 'clara') {
+    return CLARA_MEETING_NODES.opening.line({
+      game,
+      mood,
+    })
+  }
+
+  const metrics =
+    getRelationshipState(game, npcId)?.relationshipMetrics ?? {}
+
+  if ((metrics.anger ?? 0) >= 70) {
+    return `${npc.name} já está ali quando você se aproxima. A expressão deixa claro que esse encontro não começa em terreno neutro.`
+  }
+
+  return `${npc.name} percebe sua aproximação e cumprimenta você.`
+}
+
+function buildClaraEncounter(
+  game,
+  appointmentId,
+  nodeId = 'opening',
+  previous = {}
+) {
+  const node =
+    CLARA_MEETING_NODES[nodeId] ??
+    CLARA_MEETING_NODES.opening
+
+  const mood = meetingMood(game, 'clara')
+
+  return {
+    ...previous,
+    npcId: 'clara',
+    appointmentId,
+    nodeId,
+    speaker: node.speaker ?? 'Clara Azevedo',
+    portrait:
+      RELATIONSHIP_NPCS.clara?.portrait,
+    line:
+      typeof node.line === 'function'
+        ? node.line({
+            game,
+            mood,
+          })
+        : node.line,
+    choices: node.choices ?? [],
+    finished: false,
+  }
+}
+
+export function beginUltimoGoleMeeting(
+  game,
+  npcId,
+  appointmentId
+) {
+  const state = getRelationshipState(game, npcId)
+  const npc = RELATIONSHIP_NPCS[npcId]
+
+  if (!state || !npc) {
+    return {
+      game,
+      encounter: null,
+    }
+  }
+
+  let updated = updateAppointment(
+    game,
+    appointmentId,
+    {
+      status: 'arrived',
+      arrivedAt: relationshipPhoneMinutes(game.world),
+    }
+  )
+
+  updated = addHistory(updated, {
+    type: 'relationship-meeting-start',
+    npcId,
+    appointmentId,
+    venueId: 'ultimo_gole',
+  })
+
+  if (npcId === 'clara') {
+    return {
+      game: updated,
+      encounter: buildClaraEncounter(
+        updated,
+        appointmentId
+      ),
+    }
+  }
+
+  return {
+    game: updated,
+    encounter: {
+      npcId,
+      appointmentId,
+      speaker: npc.name,
+      portrait: npc.portrait,
+      line: openingLine(updated, npcId),
+      choices: [
+        choice('generic_talk', 'Conversar um pouco.'),
+        choice('generic_end', 'Encerrar o encontro.'),
+      ],
+      nodeId: 'generic',
+      finished: false,
+    },
+  }
+}
+
+function completeMeeting(
+  game,
+  encounter,
+  {
+    outcome = 'neutral',
+    memoryTitle = 'Encontro no Último Gole',
+    memoryText = 'Vocês passaram parte da noite juntos no Último Gole.',
+  } = {}
+) {
+  let next = updateAppointment(
+    game,
+    encounter.appointmentId,
+    {
+      status: 'completed',
+      completedAt: relationshipPhoneMinutes(game.world),
+      outcome,
+    }
+  )
+
+  next = addRelationshipMemory(
+    next,
+    encounter.npcId,
+    {
+      type: 'meeting',
+      title: memoryTitle,
+      text: memoryText,
+      weight:
+        outcome === 'bad'
+          ? -2
+          : outcome === 'warm'
+            ? 2
+            : 1,
+      tags: ['ultimo_gole', outcome],
+    }
+  )
+
+  next = addHistory(next, {
+    type: 'relationship-meeting-complete',
+    npcId: encounter.npcId,
+    appointmentId: encounter.appointmentId,
+    outcome,
+    venueId: 'ultimo_gole',
+  })
+
+  return next
+}
+
+function advanceMeetingTime(game, minutes, label) {
+  if (!minutes) {
+    return game
+  }
+
+  return advanceGameTime(
+    game,
+    minutes,
+    {
+      reason:
+        `Encontro no Último Gole · ${label}`,
+    }
+  )
+}
+
+function applyClaraChoice(game, encounter, choiceId) {
+  let next = game
+  let nodeId = encounter.nodeId
+  let areaId = null
+  let finish = null
+  let minutes = 4
+
+  const effects = (
+    patch = {},
+    nextNode = nodeId,
+    time = 4
+  ) => {
+    next = applyMetricPatch(
+      next,
+      'clara',
+      patch
+    )
+    nodeId = nextNode
+    minutes = time
+  }
+
+  switch (choiceId) {
+    case 'opening_how':
+      effects({ trust: 2, happiness: 1 }, 'how', 4)
+      break
+
+    case 'opening_work':
+      effects({ trust: 1 }, 'work', 4)
+      break
+
+    case 'opening_tease':
+      effects(
+        { affection: 2, attraction: 2, happiness: 2 },
+        'flirt',
+        3
+      )
+      break
+
+    case 'opening_quiet':
+      effects({ trust: 2, safety: 2 }, 'vip_move', 5)
+      areaId = 'vip'
+      break
+
+    case 'opening_leave':
+      effects({ happiness: -8, trust: -3 }, 'goodbye_neutral', 2)
+      finish = 'neutral'
+      break
+
+    case 'how_truth':
+      effects({ trust: 4, affection: 1 }, 'truth_response', 6)
+      break
+
+    case 'how_deflect':
+      effects(
+        { affection: 2, attraction: 2, happiness: 2 },
+        'flirt',
+        3
+      )
+      break
+
+    case 'how_ask_more':
+      effects({ trust: 3 }, 'personal', 5)
+      break
+
+    case 'how_move':
+      effects({ trust: 1 }, 'vip_move', 4)
+      areaId = 'vip'
+      break
+
+    case 'work_photos':
+      effects({ trust: 2, happiness: 2 }, 'photos', 5)
+      break
+
+    case 'work_iris':
+      effects({ trust: 2 }, 'iris', 5)
+      break
+
+    case 'work_interest':
+      effects(
+        { affection: 3, attraction: 3, happiness: 2 },
+        'flirt',
+        4
+      )
+      break
+
+    case 'work_move':
+      effects({ trust: 2, happiness: 2 }, 'vip_move', 5)
+      areaId = 'vip'
+      break
+
+    case 'photos_notice':
+      effects(
+        { trust: 3, affection: 2, happiness: 3 },
+        'project',
+        6
+      )
+      break
+
+    case 'photos_project':
+      effects({ trust: 3, happiness: 2 }, 'project', 5)
+      break
+
+    case 'photos_flirt':
+      effects(
+        { attraction: 3, affection: 2 },
+        'flirt',
+        4
+      )
+      break
+
+    case 'photos_change':
+      effects({ trust: 1 }, 'personal', 5)
+      break
+
+    case 'project_support':
+      effects(
+        { trust: 4, safety: 3, happiness: 3 },
+        'personal',
+        6
+      )
+      break
+
+    case 'project_portrait':
+      effects(
+        { attraction: 2, affection: 2 },
+        'flirt',
+        4
+      )
+      break
+
+    case 'project_real':
+      effects(
+        { trust: 3, affection: 2, happiness: 3 },
+        'her_secret',
+        6
+      )
+      break
+
+    case 'project_move':
+      effects({ happiness: 1 }, 'vip_move', 4)
+      areaId = 'vip'
+      break
+
+    case 'iris_listen':
+      effects({ trust: 3 }, 'personal', 5)
+      break
+
+    case 'iris_practical':
+      effects({ trust: 2, happiness: 1 }, 'personal', 5)
+      break
+
+    case 'iris_confident':
+      effects({ happiness: 2, affection: 1 }, 'ordinary', 4)
+      break
+
+    case 'iris_personal':
+      effects({ trust: 2 }, 'personal', 5)
+      break
+
+    case 'personal_validate':
+      effects(
+        { trust: 4, safety: 3, happiness: 3 },
+        'about_you',
+        6
+      )
+      break
+
+    case 'personal_share':
+      effects(
+        { trust: 4, affection: 2 },
+        'truth_response',
+        7
+      )
+      break
+
+    case 'personal_flirt':
+      effects(
+        { attraction: 3, affection: 2 },
+        'flirt',
+        4
+      )
+      break
+
+    case 'personal_rafael':
+      effects({ trust: 1 }, 'rafael', 5)
+      break
+
+    case 'rafael_listen':
+      effects({ trust: 4, safety: 3 }, 'her_secret', 6)
+      break
+
+    case 'rafael_safety':
+      effects({ trust: 4, safety: 4 }, 'safety', 5)
+      break
+
+    case 'rafael_jealous':
+      effects(
+        { anger: 4, happiness: -3, attraction: 1 },
+        'jealousy',
+        4
+      )
+      break
+
+    case 'rafael_drop':
+      effects({ trust: 2, safety: 3 }, 'ordinary', 4)
+      break
+
+    case 'safety_respect':
+      effects(
+        { trust: 5, safety: 6, happiness: 3, anger: -3 },
+        'her_secret',
+        6
+      )
+      break
+
+    case 'safety_offer':
+      effects({ trust: 4, safety: 4 }, 'her_secret', 6)
+      break
+
+    case 'safety_possessive':
+      effects(
+        { trust: -6, safety: -8, anger: 12, happiness: -8 },
+        'boundary',
+        4
+      )
+      break
+
+    case 'safety_drop':
+      effects({ trust: 2, safety: 2 }, 'ordinary', 4)
+      break
+
+    case 'boundary_accept':
+      effects(
+        { trust: 3, safety: 5, anger: -5, happiness: 2 },
+        'ordinary',
+        5
+      )
+      break
+
+    case 'boundary_defend':
+      effects(
+        { trust: -1, anger: 3 },
+        'ordinary',
+        5
+      )
+      break
+
+    case 'boundary_insist':
+      effects(
+        { trust: -10, safety: -12, anger: 20, happiness: -12 },
+        'closing',
+        3
+      )
+      break
+
+    case 'vip_drink':
+      effects({ happiness: 2 }, 'ordinary', 5)
+      break
+
+    case 'vip_you':
+      effects({ trust: 2 }, 'about_you', 5)
+      break
+
+    case 'vip_silence':
+      effects(
+        { affection: 2, happiness: 3, safety: 2 },
+        'interruption',
+        6
+      )
+      break
+
+    case 'vip_flirt':
+      effects(
+        { attraction: 4, affection: 3, happiness: 2 },
+        'flirt',
+        4
+      )
+      break
+
+    case 'stage_band':
+      effects({ happiness: 2 }, 'ordinary', 5)
+      break
+
+    case 'stage_close':
+      effects(
+        { attraction: 3, affection: 2 },
+        'flirt',
+        4
+      )
+      break
+
+    case 'stage_photo':
+      effects({ trust: 2 }, 'photos', 5)
+      break
+
+    case 'stage_move':
+      effects({ trust: 1 }, 'vip_move', 4)
+      areaId = 'vip'
+      break
+
+    case 'you_truth':
+      effects({ trust: 5, affection: 2 }, 'truth_response', 7)
+      break
+
+    case 'you_night':
+      effects({ trust: 3, affection: 1 }, 'truth_response', 6)
+      break
+
+    case 'you_joke':
+      effects(
+        { happiness: 2, trust: -1 },
+        'ordinary',
+        4
+      )
+      break
+
+    case 'you_refuse':
+      effects(
+        { trust: -3, happiness: -1 },
+        'ordinary',
+        3
+      )
+      break
+
+    case 'truth_ask_her':
+      effects({ trust: 4 }, 'her_secret', 6)
+      break
+
+    case 'truth_light':
+      effects({ happiness: 3 }, 'ordinary', 4)
+      break
+
+    case 'truth_flirt':
+      effects(
+        { affection: 3, attraction: 3, trust: 2 },
+        'flirt',
+        4
+      )
+      break
+
+    case 'secret_support':
+      effects(
+        { trust: 5, safety: 5, happiness: 3 },
+        'interest',
+        6
+      )
+      break
+
+    case 'secret_no_fix':
+      effects(
+        { trust: 5, safety: 4, affection: 2 },
+        'interest',
+        5
+      )
+      break
+
+    case 'secret_touch':
+      effects(
+        { trust: 3, safety: 3, attraction: 3, affection: 3 },
+        'interest',
+        4
+      )
+      break
+
+    case 'secret_flirt':
+      effects(
+        { affection: 3, attraction: 3, happiness: 2 },
+        'interest',
+        4
+      )
+      break
+
+    case 'flirt_honest':
+      effects(
+        { affection: 4, attraction: 5, trust: 2 },
+        'interest',
+        4
+      )
+      break
+
+    case 'flirt_slow':
+      effects(
+        { trust: 4, safety: 4, affection: 2 },
+        'interest',
+        4
+      )
+      break
+
+    case 'flirt_tease':
+      effects(
+        { attraction: 3, happiness: 3 },
+        'ordinary',
+        4
+      )
+      break
+
+    case 'flirt_back':
+      effects({ trust: 2, safety: 2 }, 'ordinary', 3)
+      break
+
+    case 'interest_slow':
+      effects(
+        { trust: 5, safety: 4, affection: 3, happiness: 4 },
+        'interruption',
+        5
+      )
+      break
+
+    case 'interest_kiss':
+      effects({ trust: 2 }, 'kiss_question', 2)
+      break
+
+    case 'interest_pressure':
+      effects(
+        { trust: -5, safety: -6, anger: 7, happiness: -5 },
+        'ordinary',
+        4
+      )
+      break
+
+    case 'interest_friend':
+      effects(
+        { trust: 4, safety: 4, happiness: 2 },
+        'ordinary',
+        4
+      )
+      break
+
+    case 'kiss_respect':
+      effects(
+        { trust: 5, safety: 5, happiness: 3 },
+        'ordinary',
+        4
+      )
+      break
+
+    case 'kiss_if_yes': {
+      const state = getRelationshipState(next, 'clara')
+      const m = state?.relationshipMetrics ?? {}
+
+      if (
+        (m.anger ?? 0) < 45 &&
+        (m.trust ?? 0) >= 20 &&
+        (
+          (m.affection ?? 0) >= 40 ||
+          (m.attraction ?? 0) >= 40
+        )
+      ) {
+        effects(
+          {
+            affection: 7,
+            attraction: 7,
+            happiness: 6,
+            trust: 3,
+            safety: 2,
+          },
+          'kiss',
+          4
+        )
+
+        next = addRelationshipMemory(
+          next,
+          'clara',
+          {
+            type: 'romantic',
+            title: 'Primeiro beijo no Último Gole',
+            text:
+              'Clara escolheu corresponder ao beijo durante um encontro no Último Gole.',
+            weight: 3,
+            tags: ['kiss', 'consensual', 'ultimo_gole'],
+          }
+        )
+      } else {
+        effects(
+          { trust: -2, safety: -2, happiness: -2 },
+          'ordinary',
+          3
+        )
+      }
+      break
+    }
+
+    case 'kiss_joke':
+      effects({ happiness: 3, trust: 1 }, 'ordinary', 3)
+      break
+
+    case 'kiss_stay':
+      effects(
+        { affection: 4, happiness: 4, safety: 2 },
+        'interruption',
+        5
+      )
+      break
+
+    case 'kiss_talk':
+      effects(
+        { trust: 3, affection: 3 },
+        'ordinary',
+        5
+      )
+      break
+
+    case 'kiss_end_good':
+      effects(
+        { affection: 3, happiness: 4 },
+        'closing',
+        3
+      )
+      break
+
+    case 'ordinary_personal':
+      effects({ trust: 2, happiness: 2 }, 'personal', 5)
+      break
+
+    case 'ordinary_you':
+      effects({ trust: 3, affection: 1 }, 'about_you', 5)
+      break
+
+    case 'ordinary_flirt':
+      effects(
+        { attraction: 2, happiness: 3 },
+        'flirt',
+        3
+      )
+      break
+
+    case 'ordinary_end':
+      effects({}, 'closing', 2)
+      break
+
+    case 'interrupt_space':
+      effects(
+        { trust: 4, safety: 4, happiness: 2 },
+        'ordinary',
+        4
+      )
+      break
+
+    case 'interrupt_ask':
+      effects({ trust: 2 }, 'rafael', 4)
+      break
+
+    case 'interrupt_jealous':
+      effects(
+        { anger: 4, happiness: -2 },
+        'jealousy',
+        3
+      )
+      break
+
+    case 'interrupt_ignore':
+      effects({ happiness: 2, safety: 2 }, 'ordinary', 3)
+      break
+
+    case 'jealous_admit':
+      effects(
+        { trust: 4, safety: 3, anger: -3 },
+        'jealousy_good',
+        4
+      )
+      break
+
+    case 'jealous_deny':
+      effects(
+        { trust: -2, happiness: -1 },
+        'ordinary',
+        3
+      )
+      break
+
+    case 'jealous_control':
+      effects(
+        { trust: -10, safety: -12, anger: 20, happiness: -12 },
+        'jealousy_bad',
+        3
+      )
+
+      next = addRelationshipMemory(
+        next,
+        'clara',
+        {
+          type: 'boundary',
+          title: 'Ciúme virou controle',
+          text:
+            'Durante um encontro, você exigiu saber com quem Clara estava falando e tentou transformar ciúme em controle.',
+          weight: -3,
+          tags: ['jealousy', 'control', 'boundary'],
+        }
+      )
+      break
+
+    case 'jealous_apologize':
+      effects(
+        { trust: 3, safety: 3, anger: -4 },
+        'jealousy_good',
+        3
+      )
+      break
+
+    case 'jealous_good_talk':
+      effects(
+        { trust: 4, safety: 4, affection: 2 },
+        'ordinary',
+        5
+      )
+      break
+
+    case 'jealous_good_move':
+      effects({ happiness: 1 }, 'ordinary', 3)
+      break
+
+    case 'jealous_bad_repair':
+      effects(
+        { trust: 2, safety: 2, anger: -4 },
+        'closing',
+        4
+      )
+      break
+
+    case 'jealous_bad_double':
+      effects(
+        { trust: -12, safety: -15, anger: 25, happiness: -15 },
+        'goodbye_bad',
+        2
+      )
+      finish = 'bad'
+      break
+
+    case 'jealous_bad_end':
+      effects(
+        { happiness: -5, anger: 3 },
+        'goodbye_bad',
+        2
+      )
+      finish = 'bad'
+      break
+
+    case 'close_walk':
+      effects({ affection: 2, safety: 2 }, 'goodbye_warm', 4)
+      break
+
+    case 'close_again':
+      effects(
+        { affection: 3, happiness: 3, trust: 2 },
+        'goodbye_warm',
+        3
+      )
+      break
+
+    case 'close_message':
+      effects({ trust: 2, safety: 2 }, 'goodbye_warm', 2)
+      break
+
+    case 'close_simple': {
+      const state = getRelationshipState(next, 'clara')
+      const m = state?.relationshipMetrics ?? {}
+
+      nodeId =
+        (m.anger ?? 0) >= 60
+          ? 'goodbye_bad'
+          : (m.affection ?? 0) >= 35
+            ? 'goodbye_warm'
+            : 'goodbye_neutral'
+      minutes = 2
+      break
+    }
+
+    case 'finish_warm':
+      effects(
+        { happiness: 3, affection: 2 },
+        'goodbye_warm',
+        2
+      )
+      finish = 'warm'
+      break
+
+    case 'finish_neutral':
+      effects({ happiness: 1 }, 'goodbye_neutral', 2)
+      finish = 'neutral'
+      break
+
+    case 'finish_bad':
+      effects({}, 'goodbye_bad', 2)
+      finish = 'bad'
+      break
+
+    default:
+      effects({}, 'ordinary', 3)
+      break
+  }
+
+  next = advanceMeetingTime(
+    next,
+    minutes,
+    nodeId
+  )
+
+  if (finish) {
+    const state = getRelationshipState(next, 'clara')
+    const m = state?.relationshipMetrics ?? {}
+
+    if (
+      finish === 'warm' &&
+      state?.status === 'acquaintance' &&
+      (m.trust ?? 0) >= 35
+    ) {
+      next = setRelationshipStatus(
+        next,
+        'clara',
+        'friendship'
+      )
+    }
+
+    next = completeMeeting(
+      next,
+      encounter,
+      {
+        outcome: finish,
+        memoryTitle:
+          finish === 'warm'
+            ? 'Uma boa noite no Último Gole'
+            : finish === 'bad'
+              ? 'Um encontro que terminou mal'
+              : 'Encontro no Último Gole',
+        memoryText:
+          finish === 'warm'
+            ? 'O encontro com Clara terminou com vontade de se ver novamente.'
+            : finish === 'bad'
+              ? 'O encontro com Clara terminou em tensão e deixou assuntos sem resolver.'
+              : 'Você e Clara passaram parte da noite conversando no Último Gole.',
+      }
+    )
+
+    return {
+      game: next,
+      areaId,
+      encounter: {
+        ...encounter,
+        nodeId,
+        speaker: 'Clara Azevedo',
+        portrait: RELATIONSHIP_NPCS.clara?.portrait,
+        line:
+          CLARA_MEETING_NODES[nodeId]?.line instanceof Function
+            ? CLARA_MEETING_NODES[nodeId].line({
+                game: next,
+                mood: meetingMood(next, 'clara'),
+              })
+            : CLARA_MEETING_NODES[nodeId]?.line ??
+              'A noite termina.',
+        choices: [],
+        finished: true,
+      },
+    }
+  }
+
+  return {
+    game: next,
+    areaId,
+    encounter: buildClaraEncounter(
+      next,
+      encounter.appointmentId,
+      nodeId,
+      encounter
+    ),
+  }
+}
+
+export function resolveUltimoGoleMeetingChoice(
+  game,
+  encounter,
+  choiceId
+) {
+  if (!encounter) {
+    return {
+      game,
+      encounter: null,
+    }
+  }
+
+  if (encounter.npcId === 'clara') {
+    return applyClaraChoice(
+      game,
+      encounter,
+      choiceId
+    )
+  }
+
+  let next = game
+
+  if (choiceId === 'generic_talk') {
+    next = applyMetricPatch(
+      next,
+      encounter.npcId,
+      {
+        trust: 1,
+        happiness: 2,
+      }
+    )
+
+    next = advanceMeetingTime(
+      next,
+      15,
+      'conversa'
+    )
+
+    return {
+      game: next,
+      areaId: null,
+      encounter: {
+        ...encounter,
+        line:
+          'A conversa continua por alguns minutos. O encontro não muda tudo, mas deixa uma memória concreta entre vocês.',
+        choices: [
+          choice('generic_end', 'Encerrar o encontro.'),
+        ],
+      },
+    }
+  }
+
+  next = advanceMeetingTime(
+    next,
+    5,
+    'despedida'
+  )
+
+  next = completeMeeting(
+    next,
+    encounter
+  )
+
+  return {
+    game: next,
+    areaId: null,
+    encounter: {
+      ...encounter,
+      line: 'Vocês se despedem e seguem a noite.',
+      choices: [],
+      finished: true,
+    },
+  }
+}

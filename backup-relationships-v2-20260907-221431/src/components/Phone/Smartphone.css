@@ -1,0 +1,695 @@
+.game-phone-button {
+  position: relative;
+}
+
+.game-phone-button-badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  color: #fff;
+  background: #a02d3c;
+  border: 2px solid #090708;
+  font-size: 9px;
+  line-height: 1;
+}
+
+.phone-overlay {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 24px 34px;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(2px);
+}
+
+.smartphone {
+  position: relative;
+  width: min(365px, calc(100vw - 28px));
+  height: min(720px, calc(100vh - 36px));
+  padding: 12px;
+  border-radius: 40px;
+  background:
+    linear-gradient(145deg, #343234, #111012 45%, #050506 70%);
+  border: 1px solid #4b4648;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.72),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.03);
+  animation: phoneEnter 180ms ease-out;
+}
+
+.phone-speaker {
+  position: absolute;
+  z-index: 4;
+  top: 21px;
+  left: 50%;
+  width: 76px;
+  height: 6px;
+  transform: translateX(-50%);
+  border-radius: 99px;
+  background: #050506;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.08);
+}
+
+.phone-screen {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 34px 1fr 45px;
+  border-radius: 30px;
+  color: #f2eceb;
+  background:
+    radial-gradient(circle at 70% 10%, rgba(111, 24, 39, 0.45), transparent 25%),
+    linear-gradient(160deg, #1b1014 0%, #070709 55%, #120c0f 100%);
+}
+
+.phone-statusbar {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 15px 0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+.phone-status-icons {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #c9c0c1;
+  font-size: 9px;
+}
+
+.phone-status-icons i {
+  font-style: normal;
+}
+
+.phone-content {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.phone-home {
+  position: relative;
+  height: 100%;
+  padding: 32px 21px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.phone-home::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  background:
+    linear-gradient(118deg, transparent 0 35%, #63202b 35% 36%, transparent 36%),
+    linear-gradient(22deg, transparent 0 58%, #34252a 58% 59%, transparent 59%);
+}
+
+.phone-wallpaper-mark {
+  position: relative;
+  margin-top: 42px;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 27px;
+  letter-spacing: 0.1em;
+}
+
+.phone-wallpaper-mark small {
+  display: block;
+  margin-top: 6px;
+  color: #8e777c;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 8px;
+  letter-spacing: 0.25em;
+}
+
+.phone-app-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 19px 10px;
+  margin-bottom: 16px;
+}
+
+.phone-app-grid button {
+  min-width: 0;
+  padding: 0;
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  color: #ece5e5;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: 9px;
+}
+
+.phone-icon-wrap {
+  position: relative;
+}
+
+.phone-app-icon {
+  display: grid;
+  place-items: center;
+  width: 51px;
+  height: 51px;
+  border-radius: 14px;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 23px;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.18),
+    0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.phone-app-icon-contacts {
+  background: linear-gradient(145deg, #295d4b, #173a30);
+}
+
+.phone-app-icon-messages {
+  background: linear-gradient(145deg, #426b42, #1d4524);
+}
+
+.phone-app-icon-calendar {
+  background: linear-gradient(145deg, #a33b49, #68232e);
+}
+
+.phone-app-icon-internet {
+  background: linear-gradient(145deg, #315d88, #183655);
+}
+
+.phone-badge {
+  position: absolute;
+  top: -6px;
+  right: -7px;
+  display: grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  border-radius: 99px;
+  color: #fff;
+  background: #bd293d;
+  border: 2px solid #151013;
+  font-size: 9px;
+}
+
+.phone-navigation {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(3, 3, 4, 0.82);
+}
+
+.phone-navigation button {
+  height: 100%;
+  color: #8f8788;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 21px;
+}
+
+.phone-navigation button:hover,
+.phone-navigation button.active {
+  color: #fff;
+}
+
+.phone-app-screen,
+.phone-calendar {
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px 17px 28px;
+  scrollbar-width: thin;
+  scrollbar-color: #71313c transparent;
+}
+
+.phone-app-title {
+  min-height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 17px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.phone-app-title > span {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 20px;
+}
+
+.phone-app-title > strong {
+  color: #8f8486;
+  font: 11px Arial, Helvetica, sans-serif;
+}
+
+.phone-app-title button {
+  color: #b68e95;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.phone-search {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.phone-search span {
+  color: #786f70;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.phone-search input {
+  width: 100%;
+  padding: 10px 11px;
+  color: #eee6e5;
+  background: #121013;
+  border: 1px solid #33292c;
+  border-radius: 9px;
+  outline: none;
+}
+
+.phone-contact-list,
+.phone-message-list {
+  display: grid;
+  gap: 8px;
+}
+
+.phone-contact {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 11px;
+  align-items: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.035);
+  border-radius: 10px;
+}
+
+.phone-avatar {
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #d8cacc;
+  background: #38252a;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+}
+
+.phone-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.phone-contact > div:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.phone-contact strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.phone-contact span {
+  color: #8e8586;
+  font-size: 10px;
+}
+
+.phone-message {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+.phone-message-unread {
+  background: rgba(113, 36, 50, 0.18);
+  border-color: rgba(165, 55, 73, 0.28);
+}
+
+.phone-message header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 7px;
+}
+
+.phone-message header strong {
+  font-size: 12px;
+}
+
+.phone-message time {
+  color: #777071;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.phone-message p {
+  margin: 0;
+  color: #cfc5c4;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.phone-message small {
+  display: block;
+  margin-top: 8px;
+  color: #6f6668;
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.phone-calendar {
+  padding-top: 12px;
+}
+
+.phone-calendar-header {
+  display: grid;
+  grid-template-columns: 34px 1fr 34px;
+  align-items: center;
+  margin-bottom: 7px;
+}
+
+.phone-calendar-header > div {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+
+.phone-calendar-header strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.phone-calendar-header span {
+  color: #83797a;
+  font-size: 9px;
+}
+
+.phone-calendar-header button {
+  width: 32px;
+  height: 32px;
+  color: #bcaeb0;
+  background: transparent;
+  border: 1px solid #34282b;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 19px;
+}
+
+.phone-calendar-today {
+  display: block;
+  margin: 0 auto 14px;
+  padding: 5px 12px;
+  color: #a88e93;
+  background: transparent;
+  border: 1px solid #3a2d31;
+  border-radius: 99px;
+  cursor: pointer;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.phone-calendar-weekdays,
+.phone-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.phone-calendar-weekdays {
+  margin-bottom: 5px;
+}
+
+.phone-calendar-weekdays span {
+  text-align: center;
+  color: #766c6e;
+  font-size: 8px;
+}
+
+.phone-calendar-grid {
+  gap: 3px;
+}
+
+.phone-calendar-empty {
+  aspect-ratio: 1;
+}
+
+.phone-calendar-day {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  color: #bdb4b4;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.phone-calendar-day:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.phone-calendar-day-event {
+  border-color: #503238;
+}
+
+.phone-calendar-day-today {
+  color: #fff;
+  background: #762c39;
+  border-color: #b94b5d;
+  font-weight: 700;
+}
+
+.phone-calendar-day-selected {
+  box-shadow: inset 0 0 0 2px #d0b9bd;
+}
+
+.phone-calendar-day-deadline:not(.phone-calendar-day-today) {
+  border-color: #ad354a;
+}
+
+.phone-calendar-dots {
+  position: absolute;
+  bottom: 3px;
+  display: flex;
+  gap: 2px;
+}
+
+.phone-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+
+.phone-dot-work {
+  background: #7ca4c2;
+}
+
+.phone-dot-deadline {
+  background: #d84d62;
+}
+
+.phone-day-agenda {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.phone-day-agenda > header {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.phone-day-agenda > header span {
+  color: #766d6e;
+  font-size: 7px;
+  letter-spacing: 0.15em;
+}
+
+.phone-day-agenda > header strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.phone-agenda-item {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.phone-agenda-item time {
+  color: #99afc0;
+  font-size: 9px;
+}
+
+.phone-agenda-deadline time {
+  color: #da586a;
+  font-weight: 700;
+}
+
+.phone-agenda-item > div {
+  display: grid;
+  gap: 3px;
+}
+
+.phone-agenda-item strong {
+  font-size: 11px;
+}
+
+.phone-agenda-item span,
+.phone-agenda-item small {
+  color: #837a7b;
+  font-size: 9px;
+}
+
+.phone-empty {
+  padding: 20px 10px;
+  color: #776e70;
+  text-align: center;
+  font-size: 10px;
+}
+
+.phone-browser-address {
+  margin-bottom: 16px;
+  padding: 9px 10px;
+  color: #8d8586;
+  background: #111012;
+  border: 1px solid #30282a;
+  border-radius: 8px;
+  font-size: 9px;
+}
+
+.phone-browser-links {
+  display: grid;
+  gap: 9px;
+}
+
+.phone-browser-links button {
+  padding: 13px;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  color: #dfd6d5;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid #2a2325;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.phone-browser-links button:hover {
+  border-color: #71313c;
+}
+
+.phone-browser-links span {
+  color: #82797a;
+  font-size: 9px;
+}
+
+.phone-browser-back {
+  margin-bottom: 14px;
+  color: #ae8d93;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.phone-browser-page > small {
+  color: #706769;
+  font-size: 8px;
+}
+
+.phone-browser-page h3 {
+  margin: 9px 0 12px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.phone-browser-page p {
+  color: #c2b8b8;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.phone-browser-placeholder {
+  margin-top: 24px;
+  padding: 15px;
+  color: #826f72;
+  background: rgba(126, 45, 59, 0.08);
+  border: 1px dashed #58353c;
+  border-radius: 8px;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+@keyframes phoneEnter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .phone-overlay {
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.54);
+  }
+
+  .smartphone {
+    width: min(390px, calc(100vw - 16px));
+    height: min(760px, calc(100vh - 16px));
+    border-radius: 34px;
+  }
+
+  .phone-screen {
+    border-radius: 26px;
+  }
+}
