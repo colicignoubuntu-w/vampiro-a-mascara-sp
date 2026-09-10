@@ -781,45 +781,9 @@ export default function CharacterSheetView({
           group => ({
             ...group,
             items:
-              Array.isArray(group.items)
-                ? group.items
-                : Array.isArray(group.attributes)
-                  ? group.attributes
-                  : (
-                      group.items &&
-                      typeof group.items === 'object'
-                    )
-                    ? Object.entries(group.items).map(
-                        ([key, value]) =>
-                          value &&
-                          typeof value === 'object'
-                            ? {
-                                key,
-                                ...value,
-                              }
-                            : {
-                                key,
-                                label: String(value ?? key),
-                              }
-                      )
-                    : (
-                        group.attributes &&
-                        typeof group.attributes === 'object'
-                      )
-                      ? Object.entries(group.attributes).map(
-                          ([key, value]) =>
-                            value &&
-                            typeof value === 'object'
-                              ? {
-                                  key,
-                                  ...value,
-                                }
-                              : {
-                                  key,
-                                  label: String(value ?? key),
-                                }
-                        )
-                      : [],
+              group.items ||
+              group.attributes ||
+              [],
           })
         )
 
@@ -832,45 +796,9 @@ export default function CharacterSheetView({
           group => ({
             ...group,
             items:
-              Array.isArray(group.items)
-                ? group.items
-                : Array.isArray(group.abilities)
-                  ? group.abilities
-                  : (
-                      group.items &&
-                      typeof group.items === 'object'
-                    )
-                    ? Object.entries(group.items).map(
-                        ([key, value]) =>
-                          value &&
-                          typeof value === 'object'
-                            ? {
-                                key,
-                                ...value,
-                              }
-                            : {
-                                key,
-                                label: String(value ?? key),
-                              }
-                      )
-                    : (
-                        group.abilities &&
-                        typeof group.abilities === 'object'
-                      )
-                      ? Object.entries(group.abilities).map(
-                          ([key, value]) =>
-                            value &&
-                            typeof value === 'object'
-                              ? {
-                                  key,
-                                  ...value,
-                                }
-                              : {
-                                  key,
-                                  label: String(value ?? key),
-                                }
-                        )
-                      : [],
+              group.items ||
+              group.abilities ||
+              [],
           })
         )
 

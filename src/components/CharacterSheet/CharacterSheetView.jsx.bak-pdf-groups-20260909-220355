@@ -701,57 +701,6 @@ export default function CharacterSheetView({
       collection?.[key] ??
       key
 
-    // CHARACTER_SHEET_PDF_GROUPS_FIX_V1
-    const normalizeGroupCollection = collection => {
-      if (Array.isArray(collection)) {
-        return collection
-      }
-
-      if (
-        collection &&
-        typeof collection === 'object'
-      ) {
-        return Object.entries(
-          collection
-        ).map(
-          ([key, value]) => {
-            if (Array.isArray(value)) {
-              return {
-                key,
-                id: key,
-                label: key,
-                items: value,
-              }
-            }
-
-            if (
-              value &&
-              typeof value === 'object'
-            ) {
-              return {
-                key: value.key ?? key,
-                id: value.id ?? key,
-                label:
-                  value.label ??
-                  value.title ??
-                  key,
-                ...value,
-              }
-            }
-
-            return {
-              key,
-              id: key,
-              label: key,
-              items: [],
-            }
-          }
-        )
-      }
-
-      return []
-    }
-
     const backgroundEntries =
       Object.entries(
         backgrounds || {}
@@ -773,104 +722,28 @@ export default function CharacterSheetView({
         .slice(0, 6)
 
     const attributeColumns =
-      normalizeGroupCollection(
-        attributeGroups
-      )
+      attributeGroups
         .slice(0, 3)
         .map(
           group => ({
             ...group,
             items:
-              Array.isArray(group.items)
-                ? group.items
-                : Array.isArray(group.attributes)
-                  ? group.attributes
-                  : (
-                      group.items &&
-                      typeof group.items === 'object'
-                    )
-                    ? Object.entries(group.items).map(
-                        ([key, value]) =>
-                          value &&
-                          typeof value === 'object'
-                            ? {
-                                key,
-                                ...value,
-                              }
-                            : {
-                                key,
-                                label: String(value ?? key),
-                              }
-                      )
-                    : (
-                        group.attributes &&
-                        typeof group.attributes === 'object'
-                      )
-                      ? Object.entries(group.attributes).map(
-                          ([key, value]) =>
-                            value &&
-                            typeof value === 'object'
-                              ? {
-                                  key,
-                                  ...value,
-                                }
-                              : {
-                                  key,
-                                  label: String(value ?? key),
-                                }
-                        )
-                      : [],
+              group.items ||
+              group.attributes ||
+              [],
           })
         )
 
     const abilityColumns =
-      normalizeGroupCollection(
-        abilityGroups
-      )
+      abilityGroups
         .slice(0, 3)
         .map(
           group => ({
             ...group,
             items:
-              Array.isArray(group.items)
-                ? group.items
-                : Array.isArray(group.abilities)
-                  ? group.abilities
-                  : (
-                      group.items &&
-                      typeof group.items === 'object'
-                    )
-                    ? Object.entries(group.items).map(
-                        ([key, value]) =>
-                          value &&
-                          typeof value === 'object'
-                            ? {
-                                key,
-                                ...value,
-                              }
-                            : {
-                                key,
-                                label: String(value ?? key),
-                              }
-                      )
-                    : (
-                        group.abilities &&
-                        typeof group.abilities === 'object'
-                      )
-                      ? Object.entries(group.abilities).map(
-                          ([key, value]) =>
-                            value &&
-                            typeof value === 'object'
-                              ? {
-                                  key,
-                                  ...value,
-                                }
-                              : {
-                                  key,
-                                  label: String(value ?? key),
-                                }
-                        )
-                      : [],
+              group.items ||
+              group.abilities ||
+              [],
           })
         )
 
