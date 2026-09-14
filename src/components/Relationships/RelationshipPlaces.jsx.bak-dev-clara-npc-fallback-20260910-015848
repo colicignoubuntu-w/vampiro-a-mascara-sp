@@ -15,10 +15,6 @@ import {
 } from '../../data/npcs/relationships/venues.js'
 
 import {
-  RELATIONSHIP_NPCS,
-} from '../../data/npcs/relationships/index.js'
-
-import {
   relationshipState,
   relationshipChoiceReason,
   rollRelationshipTest,
@@ -1057,43 +1053,17 @@ const processedDevWarp =
         )
     )
 
-  const devClaraWarp =
-    Boolean(
-      game?.devRelationshipWarp?.token &&
-      game?.devRelationshipWarp?.venueId ===
-        'ultimo_gole' &&
-      game?.devRelationshipWarp?.npcId ===
-        'clara'
-    )
-
   const venue =
     venues.find(
       item =>
         item.id ===
         opened
-    ) ??
-    (
-      devClaraWarp &&
-      opened ===
-        'ultimo_gole'
-        ? {
-            id:
-              'ultimo_gole',
-            name:
-              'Último Gole',
-            district:
-              'Pinheiros',
-          }
-        : null
     )
 
   const visible =
     Boolean(
       venue &&
-      (
-        !blocked ||
-        devClaraWarp
-      )
+      !blocked
     )
 
   const encounters =
@@ -1104,46 +1074,12 @@ const processedDevWarp =
         )
       : []
 
-  const devWarpNpc =
-    game?.devRelationshipWarp?.token &&
-    game?.devRelationshipWarp?.venueId ===
-      'ultimo_gole' &&
-    game?.devRelationshipWarp?.npcId ===
-      'clara' &&
-    selected ===
-      'clara'
-      ? (
-          Array.isArray(
-            RELATIONSHIP_NPCS
-          )
-            ? RELATIONSHIP_NPCS.find(
-                person =>
-                  person?.id ===
-                  selected
-              )
-            : (
-                RELATIONSHIP_NPCS?.[
-                  selected
-                ] ??
-                Object.values(
-                  RELATIONSHIP_NPCS ??
-                    {}
-                ).find(
-                  person =>
-                    person?.id ===
-                    selected
-                )
-              )
-        )
-      : null
-
   const npc =
     encounters.find(
       person =>
         person.id ===
         selected
     ) ??
-    devWarpNpc ??
     (
       encounters.length ===
       1

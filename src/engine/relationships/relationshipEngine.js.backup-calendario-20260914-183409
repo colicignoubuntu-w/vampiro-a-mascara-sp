@@ -265,61 +265,6 @@ export function relationshipAvailability(
   }
 
   if (
-    scene.availableDay !== undefined &&
-    scene.availableDay !== null
-  ) {
-    const currentDay =
-      Number(game.world?.day ?? 1)
-
-    const availableDay =
-      Number(scene.availableDay)
-
-    if (
-      currentDay <
-      availableDay
-    ) {
-      return scene.calendarDate
-        ? `Próximo encontro: ${scene.calendarDate}.`
-        : 'O próximo encontro ainda não está disponível.'
-    }
-
-    if (
-      currentDay >
-      availableDay
-    ) {
-      return scene.calendarDate
-        ? `Este encontro estava marcado para ${scene.calendarDate} e já passou.`
-        : 'Este encontro já passou.'
-    }
-
-    const currentMinutes =
-      Number(game.world?.hour ?? 0) * 60 +
-      Number(game.world?.minute ?? 0)
-
-    const availableMinutes =
-      Number(scene.availableHour ?? 0) * 60 +
-      Number(scene.availableMinute ?? 0)
-
-    if (
-      currentMinutes <
-      availableMinutes
-    ) {
-      const hh =
-        String(
-          Number(scene.availableHour ?? 0)
-        ).padStart(2, '0')
-
-      const mm =
-        String(
-          Number(scene.availableMinute ?? 0)
-        ).padStart(2, '0')
-
-      return `Este encontro começa às ${hh}:${mm}.`
-    }
-  }
-
-  if (
-    scene.availableDay === undefined &&
     relationshipMinutes(
       game.world
     ) < state.readyAt
@@ -327,14 +272,8 @@ export function relationshipAvailability(
     return 'O próximo encontro ainda não está disponível.'
   }
 
-  const locations =
-    Array.isArray(scene.locations)
-      ? scene.locations
-      : []
-
   if (
-    locations.length > 0 &&
-    !locations.includes(
+    !(Array.isArray(scene.locations) ? scene.locations : []).includes(
       game.world?.location?.id
     )
   ) {

@@ -265,61 +265,6 @@ export function relationshipAvailability(
   }
 
   if (
-    scene.availableDay !== undefined &&
-    scene.availableDay !== null
-  ) {
-    const currentDay =
-      Number(game.world?.day ?? 1)
-
-    const availableDay =
-      Number(scene.availableDay)
-
-    if (
-      currentDay <
-      availableDay
-    ) {
-      return scene.calendarDate
-        ? `Próximo encontro: ${scene.calendarDate}.`
-        : 'O próximo encontro ainda não está disponível.'
-    }
-
-    if (
-      currentDay >
-      availableDay
-    ) {
-      return scene.calendarDate
-        ? `Este encontro estava marcado para ${scene.calendarDate} e já passou.`
-        : 'Este encontro já passou.'
-    }
-
-    const currentMinutes =
-      Number(game.world?.hour ?? 0) * 60 +
-      Number(game.world?.minute ?? 0)
-
-    const availableMinutes =
-      Number(scene.availableHour ?? 0) * 60 +
-      Number(scene.availableMinute ?? 0)
-
-    if (
-      currentMinutes <
-      availableMinutes
-    ) {
-      const hh =
-        String(
-          Number(scene.availableHour ?? 0)
-        ).padStart(2, '0')
-
-      const mm =
-        String(
-          Number(scene.availableMinute ?? 0)
-        ).padStart(2, '0')
-
-      return `Este encontro começa às ${hh}:${mm}.`
-    }
-  }
-
-  if (
-    scene.availableDay === undefined &&
     relationshipMinutes(
       game.world
     ) < state.readyAt
@@ -327,14 +272,8 @@ export function relationshipAvailability(
     return 'O próximo encontro ainda não está disponível.'
   }
 
-  const locations =
-    Array.isArray(scene.locations)
-      ? scene.locations
-      : []
-
   if (
-    locations.length > 0 &&
-    !locations.includes(
+    !(Array.isArray(scene.locations) ? scene.locations : []).includes(
       game.world?.location?.id
     )
   ) {
@@ -392,14 +331,8 @@ function validateChoice(
     ).startsWith(
       'clara_oct31_'
     ) &&
-    scene?.venueId ===
-      'ultimo_gole' &&
-    (
-      game?.world?.location?.id ===
-        'ultimo_gole' ||
-      game?.world?.location?.id ===
-        'pinheiros'
-    )
+    game?.world?.location?.id ===
+      'ultimo_gole'
 
   const reason =
     (
@@ -519,124 +452,6 @@ export function rollRelationshipTest(
     traitLabel:
       preparedTest.traitLabel,
   }
-}
-
-
-/*
-  Agenda narrativa por dia da semana.
-
-  world.day = 1 corresponde a domingo (11/10/2026).
-  weekday usa o mesmo padrão do JavaScript:
-    0 domingo
-    1 segunda
-    2 terça
-    3 quarta
-    4 quinta
-    5 sexta
-    6 sábado
-
-  nextSchedule:
-  {
-    weekday: 6,
-    hour: 20,
-    minute: 30,
-    minDays: 1
-  }
-*/
-function scheduledRelationshipReadyAt(
-  world,
-  schedule,
-  fallbackReadyAt
-) {
-  if (!schedule) {
-    return fallbackReadyAt
-  }
-
-  const currentDay = Math.max(
-    1,
-    Number(world?.day ?? 1) || 1
-  )
-
-  const currentHour = Math.max(
-    0,
-    Math.min(
-      23,
-      Number(world?.hour ?? 0) || 0
-    )
-  )
-
-  const currentMinute = Math.max(
-    0,
-    Math.min(
-      59,
-      Number(world?.minute ?? 0) || 0
-    )
-  )
-
-  const targetWeekday = Math.max(
-    0,
-    Math.min(
-      6,
-      Number(schedule.weekday ?? 0) || 0
-    )
-  )
-
-  const targetHour = Math.max(
-    0,
-    Math.min(
-      23,
-      Number(schedule.hour ?? 20) || 0
-    )
-  )
-
-  const targetMinute = Math.max(
-    0,
-    Math.min(
-      59,
-      Number(schedule.minute ?? 0) || 0
-    )
-  )
-
-  const minDays = Math.max(
-    0,
-    Number(schedule.minDays ?? 0) || 0
-  )
-
-  // Dia 1 da crônica = domingo.
-  const currentWeekday =
-    (currentDay - 1) % 7
-
-  let daysAhead =
-    (
-      targetWeekday -
-      currentWeekday +
-      7
-    ) % 7
-
-  while (daysAhead < minDays) {
-    daysAhead += 7
-  }
-
-  const currentClock =
-    currentHour * 60 +
-    currentMinute
-
-  const targetClock =
-    targetHour * 60 +
-    targetMinute
-
-  if (
-    daysAhead === 0 &&
-    targetClock <= currentClock
-  ) {
-    daysAhead += 7
-  }
-
-  return (
-    (currentDay - 1 + daysAhead) *
-      1440 +
-    targetClock
-  )
 }
 
 function applyOutcome(
@@ -851,30 +666,7 @@ function applyOutcome(
       : {}),
   }
 
-  
-  const legacyRelationshipReadyAt =
-    now +
-    minutes +
-    (
-      outcome.delayDays ??
-      choice.delayDays ??
-      0
-    ) *
-      1440
-
-  const nextSchedule =
-    outcome.nextSchedule ??
-    choice.nextSchedule ??
-    null
-
-  const calculatedRelationshipReadyAt =
-    scheduledRelationshipReadyAt(
-      game.world,
-      nextSchedule,
-      legacyRelationshipReadyAt
-    )
-
-const nextState = {
+  const nextState = {
     ...enrichedState,
 
     metrics,
@@ -890,7 +682,15 @@ const nextState = {
 
     ending,
 
-    readyAt: calculatedRelationshipReadyAt,
+    readyAt:
+      now +
+      minutes +
+      (
+        outcome.delayDays ??
+        choice.delayDays ??
+        0
+      ) *
+        1440,
 
     deadlineAt:
       (

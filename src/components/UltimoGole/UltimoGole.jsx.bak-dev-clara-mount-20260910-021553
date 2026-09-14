@@ -157,41 +157,6 @@ export default function UltimoGole({
       [game]
     )
 
-  const devClaraWarp =
-    Boolean(
-      game?.devRelationshipWarp?.token &&
-      game?.devRelationshipWarp?.venueId ===
-        'ultimo_gole' &&
-      game?.devRelationshipWarp?.npcId ===
-        'clara'
-    )
-
-  useEffect(
-    () => {
-      if (!devClaraWarp) {
-        return
-      }
-
-      setAreaId(
-        game?.devRelationshipWarp?.areaId ??
-          'stage'
-      )
-
-      setEncounter(
-        null
-      )
-
-      setMessage(
-        null
-      )
-    },
-    [
-      devClaraWarp,
-      game?.devRelationshipWarp?.token,
-      game?.devRelationshipWarp?.areaId,
-    ]
-  )
-
   function persistArea(
     nextAreaId,
     nextGame =
@@ -463,14 +428,9 @@ export default function UltimoGole({
               A exploração mostra somente o botão de conversa;
               o retrato aparece apenas depois de iniciar o diálogo. */}
           {areaId === 'stage' &&
-            (
-              devClaraWarp ||
-              (
-                venueStoryRelationships.length > 0 &&
-                activeAppointments.length === 0 &&
-                !encounter
-              )
-            ) && (
+            venueStoryRelationships.length > 0 &&
+            activeAppointments.length === 0 &&
+            !encounter && (
             <section className="ultimo-gole-interactions">
               <span className="ultimo-gole-section-label">
                 INTERAÇÕES

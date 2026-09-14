@@ -74,8 +74,6 @@ const CLARA_DARK_SIDE_VIDEO = {
   videoId: 'HIGuTCY--xc',
   title: 'The Dark Side of the Moon — show',
   startSeconds: 1,
-  preferredVolume: 90,
-  startUnmuted: true,
   loop: false,
   playbackRate: 1,
   opacity: 0.58,
@@ -851,13 +849,8 @@ const baseSceneVisual =
       ? CLARA_WAR_PIGS_VIDEO
       : null
   const claraDarkSideVideo =
-    game?.world?.location?.id ===
-      'ultimo_gole' &&
-    String(
-      claraRelationshipNode ?? ''
-    ).startsWith(
-      'clara_oct31_'
-    )
+    game?.world?.location?.id === 'ultimo_gole' &&
+    CLARA_DARK_SIDE_VIDEO_NODES.has(claraRelationshipNode)
       ? CLARA_DARK_SIDE_VIDEO
       : null
 

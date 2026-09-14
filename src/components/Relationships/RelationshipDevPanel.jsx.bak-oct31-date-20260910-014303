@@ -322,15 +322,6 @@ export default function RelationshipDevPanel({
                   'Pinheiros',
               },
 
-              ...(npcId === 'clara' &&
-              nodeId === 'clara_oct31_arrival'
-                ? {
-                    // world.day 1 = 11/10/2026; portanto 21 = 31/10/2026.
-                    day:
-                      21,
-                  }
-                : {}),
-
               hour:
                 22,
 

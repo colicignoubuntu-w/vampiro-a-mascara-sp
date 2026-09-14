@@ -322,15 +322,6 @@ export default function RelationshipDevPanel({
                   'Pinheiros',
               },
 
-              ...(npcId === 'clara' &&
-              nodeId === 'clara_oct31_arrival'
-                ? {
-                    // world.day 1 = 11/10/2026; portanto 21 = 31/10/2026.
-                    day:
-                      21,
-                  }
-                : {}),
-
               hour:
                 22,
 
@@ -563,20 +554,6 @@ export default function RelationshipDevPanel({
             }
           >
             War Pigs — Segundo encontro
-          </button>
-        )}
-
-        {npcId === 'clara' &&
-          npc.scenes?.clara_oct31_arrival && (
-          <button
-            type="button"
-            onClick={() =>
-              warpToRelationshipScene(
-                'clara_oct31_arrival'
-              )
-            }
-          >
-            Dark Side — 3º encontro (31 de outubro)
           </button>
         )}
       </div>

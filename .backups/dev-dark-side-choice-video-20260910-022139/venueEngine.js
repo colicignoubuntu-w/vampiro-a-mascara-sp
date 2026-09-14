@@ -67,36 +67,6 @@ function relationshipGameAtVenue(
   O JOGADOR ESTÁ FISICAMENTE NO VENUE?
   ============================================
 */
-function isDarkSideDevWarp(
-  game,
-  venueId,
-  npcId,
-  nodeId
-) {
-  const warp =
-    game?.devRelationshipWarp
-
-  return Boolean(
-    warp?.token &&
-    warp.venueId ===
-      'ultimo_gole' &&
-    warp.npcId ===
-      'clara' &&
-    venueId ===
-      'ultimo_gole' &&
-    npcId ===
-      'clara' &&
-    String(
-      nodeId ?? ''
-    ).startsWith(
-      'clara_oct31_'
-    ) &&
-    game?.relationships?.clara?.node ===
-      nodeId
-  )
-}
-
-
 function isAtVenue(
   game,
   venueId,
@@ -223,16 +193,7 @@ export function prepareVenueRelationshipTest(
       venueId
     )
 
-  const devDarkSide =
-    isDarkSideDevWarp(
-      game,
-      venueId,
-      npcId,
-      nodeId
-    )
-
   if (
-    !devDarkSide &&
     !available.some(
       npc =>
         npc.id === npcId
@@ -345,16 +306,7 @@ export function performVenueChoice(
       venueId
     )
 
-  const devDarkSide =
-    isDarkSideDevWarp(
-      game,
-      venueId,
-      npcId,
-      nodeId
-    )
-
   if (
-    !devDarkSide &&
     !available.some(
       npc =>
         npc.id === npcId

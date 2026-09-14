@@ -1057,43 +1057,17 @@ const processedDevWarp =
         )
     )
 
-  const devClaraWarp =
-    Boolean(
-      game?.devRelationshipWarp?.token &&
-      game?.devRelationshipWarp?.venueId ===
-        'ultimo_gole' &&
-      game?.devRelationshipWarp?.npcId ===
-        'clara'
-    )
-
   const venue =
     venues.find(
       item =>
         item.id ===
         opened
-    ) ??
-    (
-      devClaraWarp &&
-      opened ===
-        'ultimo_gole'
-        ? {
-            id:
-              'ultimo_gole',
-            name:
-              'Último Gole',
-            district:
-              'Pinheiros',
-          }
-        : null
     )
 
   const visible =
     Boolean(
       venue &&
-      (
-        !blocked ||
-        devClaraWarp
-      )
+      !blocked
     )
 
   const encounters =

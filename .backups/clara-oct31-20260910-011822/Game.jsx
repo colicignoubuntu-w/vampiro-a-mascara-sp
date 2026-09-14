@@ -48,43 +48,6 @@ import {
 
 import scenes from '../data/scenes'
 
-
-// CLARA_DARK_SIDE_VIDEO_V1
-const CLARA_DARK_SIDE_VIDEO_NODES = new Set([
-  'clara_oct31_arrival',
-  'clara_oct31_show_start',
-  'clara_oct31_time',
-  'clara_oct31_great_gig',
-  'clara_oct31_joint',
-  'clara_oct31_joint_success',
-  'clara_oct31_joint_fail',
-  'clara_oct31_money',
-  'clara_oct31_2758',
-  'clara_oct31_2758_success',
-  'clara_oct31_caroline',
-  'clara_oct31_caroline_offer',
-  'clara_oct31_return',
-  'clara_oct31_us_them',
-  'clara_oct31_eclipse',
-])
-
-const CLARA_DARK_SIDE_VIDEO = {
-  id: 'clara-dark-side',
-  type: 'youtube',
-  videoId: 'HIGuTCY--xc',
-  title: 'The Dark Side of the Moon — show',
-  startSeconds: 1,
-  preferredVolume: 90,
-  startUnmuted: true,
-  loop: false,
-  playbackRate: 1,
-  opacity: 0.58,
-  scale: 1.2,
-  filter: 'brightness(0.48) saturate(0.72) contrast(1.08)',
-  fallbackBackground: '/images/places/ultimo-gole-stage.jpg',
-  openUrl: 'https://www.youtube.com/watch?v=HIGuTCY--xc',
-}
-
 const CLARA_WAR_PIGS_VIDEO_NODES =
   new Set([
   'second_night',
@@ -850,21 +813,8 @@ const baseSceneVisual =
     )
       ? CLARA_WAR_PIGS_VIDEO
       : null
-  const claraDarkSideVideo =
-    game?.world?.location?.id ===
-      'ultimo_gole' &&
-    String(
-      claraRelationshipNode ?? ''
-    ).startsWith(
-      'clara_oct31_'
-    )
-      ? CLARA_DARK_SIDE_VIDEO
-      : null
-
-
 
   const activeVideo =
-  claraDarkSideVideo ??
   claraWarPigsVideo ??
   sceneVisual?.backgroundVideo ??
   explorationVisual?.video ??

@@ -46,10 +46,6 @@ export default function CityVideoPlayer({
 }) {
   const hostRef = useRef(null)
   const playerRef = useRef(null)
-
-  const youtubeVideoId =
-    video?.videoId ??
-    video?.id
   const state = useSyncExternalStore(
     youtubeEngine.subscribe,
     youtubeEngine.getSnapshot,
@@ -61,9 +57,8 @@ export default function CityVideoPlayer({
   }, [onModeChange, state.watching])
 
   useEffect(() => {
-    if (!youtubeVideoId || !hostRef.current) return
+    if (!video?.id || !hostRef.current) return
     let cancelled = false
-    const audioCleanup = []
 
     loadYoutubeApi().then((YT) => {
       if (cancelled || !hostRef.current) return
@@ -71,7 +66,7 @@ export default function CityVideoPlayer({
       const player = new YT.Player(
         hostRef.current,
         {
-          videoId: youtubeVideoId,
+          videoId: video.id,
           playerVars: {
             autoplay: 1,
             cc_load_policy: 0,
@@ -79,7 +74,7 @@ export default function CityVideoPlayer({
             disablekb: 0,
             iv_load_policy: 3,
             loop: 1,
-            playlist: youtubeVideoId,
+            playlist: video.id,
             playsinline: 1,
             rel: 0,
             start:
@@ -111,26 +106,14 @@ export default function CityVideoPlayer({
                 preferredVolume > 0
               ) {
                 const enableRequestedAudio = () => {
-                  if (
-                    cancelled ||
-                    playerRef.current !==
-                      event.target
-                  ) {
-                    return
-                  }
-
-                  try {
-                    youtubeEngine.setVolume(
-                      preferredVolume
-                    )
-                    event.target.unMute?.()
-                    event.target.setVolume?.(
-                      preferredVolume
-                    )
-                    event.target.playVideo?.()
-                  } catch {
-                    // O iframe pode ter sido destruído por HMR/troca de vídeo.
-                  }
+                  youtubeEngine.setVolume(
+                    preferredVolume
+                  )
+                  event.target.unMute?.()
+                  event.target.setVolume?.(
+                    preferredVolume
+                  )
+                  event.target.playVideo?.()
                 }
 
                 // Tenta imediatamente. Alguns navegadores
@@ -149,19 +132,6 @@ export default function CityVideoPlayer({
                   enableRequestedAudio,
                   { once: true }
                 )
-
-                audioCleanup.push(
-                  () =>
-                    window.removeEventListener(
-                      'pointerdown',
-                      enableRequestedAudio
-                    ),
-                  () =>
-                    window.removeEventListener(
-                      'keydown',
-                      enableRequestedAudio
-                    )
-                )
               }
             },
             onStateChange: (event) => {
@@ -178,38 +148,19 @@ export default function CityVideoPlayer({
 
     return () => {
       cancelled = true
-
-      for (
-        const cleanup of
-        audioCleanup
-      ) {
-        cleanup()
-      }
-
       const player = playerRef.current
       youtubeEngine.disconnect(player)
-
-      try {
-        player?.destroy?.()
-      } catch {
-        // O YouTube pode já ter destruído o iframe durante HMR.
-      }
-
-      if (
-        playerRef.current ===
-        player
-      ) {
-        playerRef.current = null
-      }
+      player?.destroy?.()
+      playerRef.current = null
     }
   }, [
-    youtubeVideoId,
+    video?.id,
     video?.title,
     video?.preferredVolume,
     video?.startUnmuted,
   ])
 
-  if (!youtubeVideoId) return null
+  if (!video?.id) return null
 
   return (
     <>

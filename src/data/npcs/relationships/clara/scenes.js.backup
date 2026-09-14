@@ -1325,6 +1325,7 @@ export default {
           text: 'Não segui-la.',
           next: 'second_night',
           minutes: 5,
+          nextSchedule: { weekday: 6, hour: 20, minute: 30, minDays: 1 },
           metrics: { respect: -1 },
           flags: {
             firstMeetingEndedBadly: true,
@@ -1469,6 +1470,7 @@ export default {
           text: 'Continuar a noite.',
           next: 'second_night',
           minutes: 5,
+          nextSchedule: { weekday: 6, hour: 20, minute: 30, minDays: 1 },
           metrics: { trust: 1 },
           flags: {
             claraFirstMeetingComplete: true,
@@ -1481,10 +1483,6 @@ export default {
     // SEGUNDO ENCONTRO: somente no próximo sábado, a partir de 20:30.
     second_night: {
       title: 'War Pigs',
-      availableDay: 7,
-      availableHour: 20,
-      availableMinute: 30,
-      calendarDate: '17/10/2026',
       place: 'Último Gole · Perto do palco · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
@@ -6004,6 +6002,7 @@ Depois olha para o chaveiro.`,
           text: '“Até semana que vem.”',
           next: 'third_night',
           minutes: 3,
+          nextSchedule: { weekday: 6, hour: 20, minute: 30, minDays: 1 },
           metrics: { trust: 2, respect: 2, affinity: 1 },
           flags: {
             claraSecondMeetingComplete: true,
@@ -6033,6 +6032,7 @@ Depois olha para o chaveiro.`,
           text: 'Deixar os dois irem.',
           next: 'third_night',
           minutes: 3,
+          nextSchedule: { weekday: 6, hour: 20, minute: 30, minDays: 1 },
           flags: {
             claraSecondMeetingComplete: true,
             claraSecondMeetingTense: true,
@@ -6058,6 +6058,7 @@ Depois olha para o chaveiro.`,
           text: 'Voltar para a cidade.',
           next: 'third_night',
           minutes: 5,
+          nextSchedule: { weekday: 6, hour: 20, minute: 30, minDays: 1 },
           flags: {
             claraSecondMeetingComplete: true,
             playerLeftSecondMeetingEarly: true,
@@ -6185,18 +6186,14 @@ Depois olha para o chaveiro.`,
         'O telefone vibra de novo. Desta vez, o nome de Rafael aparece antes que ela vire a tela.',
       ],
       choices: [
-        { id: 'dont_compete', text: 'Não transformar a mensagem dele em uma disputa.', next: 'third_night', minutes: 5, metrics: { trust: 1, respect: 2 } },
-        { id: 'ask_stay', text: 'Perguntar se ela quer continuar conversando apesar da mensagem.', next: 'third_night', minutes: 10, metrics: { affinity: 1, trust: 1 } },
+        { id: 'dont_compete', text: 'Não transformar a mensagem dele em uma disputa.', next: 'third_night', minutes: 5, nextSchedule: { weekday: 6, hour: 20, minute: 30, minDays: 1 }, metrics: { trust: 1, respect: 2 } },
+        { id: 'ask_stay', text: 'Perguntar se ela quer continuar conversando apesar da mensagem.', next: 'third_night', minutes: 10, nextSchedule: { weekday: 6, hour: 20, minute: 30, minDays: 1 }, metrics: { affinity: 1, trust: 1 } },
       ],
     },
 
     // TERCEIRO ENCONTRO: somente no sábado seguinte ao segundo, a partir de 20:30.
     third_night: {
       title: 'Ele veio buscá-la',
-      availableDay: 14,
-      availableHour: 20,
-      availableMinute: 30,
-      calendarDate: '24/10/2026',
       place: 'Último Gole · Pinheiros',
       venueId: 'ultimo_gole',
       locations: ['pinheiros'],
