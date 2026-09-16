@@ -1608,3 +1608,26 @@ body.ultimo-gole-encounter-dialog-open
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+/* LIVIA COMPUTER LOGIN */
+.livia-login-computer{width:min(860px,100%);margin:30px auto}
+.livia-login-monitor{padding:18px 18px 0;border:1px solid #4c4a43;border-radius:17px;background:linear-gradient(145deg,#393832,#171714 50%,#2a2823);box-shadow:0 28px 70px #000b}
+.livia-login-screen{position:relative;min-height:440px;overflow:hidden;border:2px solid #050706;border-radius:7px;background:radial-gradient(circle at 50% 42%,#24483c,#102a22 25%,#07110e 65%,#030706);box-shadow:inset 0 0 70px #000}
+.livia-login-screen:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.14;background:repeating-linear-gradient(to bottom,transparent 0,transparent 2px,#000 3px,#000 4px)}
+.livia-login-topbar,.livia-login-footer{position:absolute;z-index:3;left:0;right:0;display:flex;justify-content:space-between;padding:0 14px;color:#91a99b;background:#06100c99;font:8px/28px Arial;letter-spacing:.13em}
+.livia-login-topbar{top:0;border-bottom:1px solid #7fa18d22}
+.livia-login-footer{bottom:0;border-top:1px solid #7fa18d22}
+.game-password-entry.livia-login-panel{position:absolute;z-index:5;top:50%;left:50%;display:flex;width:min(310px,calc(100% - 40px));box-sizing:border-box;flex-direction:column;margin:0;padding:26px 30px;border:1px solid #79918055;border-radius:5px;background:#08130fee;box-shadow:0 18px 55px #000b;transform:translate(-50%,-50%)}
+.livia-login-avatar{display:grid;width:66px;height:66px;place-items:center;align-self:center;margin-bottom:12px;border:1px solid #829b8a;border-radius:50%;color:#b9c9be;background:#17281f;font:35px Georgia}
+.livia-login-user{color:#e1e9e3;font:19px Georgia;text-align:center;letter-spacing:.08em}
+.livia-login-status{margin:5px 0 21px;color:#7f9b89;font:8px Arial;text-align:center;letter-spacing:.18em}
+.game-password-entry.livia-login-panel label{margin-bottom:5px;color:#9aac9f;font:9px Arial}
+.livia-login-password-row{display:grid;grid-template-columns:1fr 39px;gap:5px}
+.game-password-entry .livia-login-password-row input{min-width:0;width:100%;box-sizing:border-box;border:1px solid #637a6b;padding:10px;color:#dfe8e1;background:#020705;outline:none}
+.game-password-entry .livia-login-password-row button{width:39px;border:1px solid #698372;color:#dfe8e1;background:#2b4938;font-size:20px;cursor:pointer}
+.game-password-entry .livia-login-password-row button:hover:not(:disabled){background:#3d624b}
+.game-password-entry.livia-login-panel small{margin-top:9px;color:#65776b;font:8px Arial;text-align:center}
+.livia-login-monitor-bottom{display:flex;height:38px;align-items:center;color:#706f68;font:8px Arial;letter-spacing:.13em}
+.livia-login-monitor-bottom strong{margin-right:auto}
+.livia-login-led{width:5px;height:5px;border-radius:50%;background:#70b178;box-shadow:0 0 7px #70b178}
+@media(max-width:600px){.livia-login-monitor{padding:9px 9px 0}.livia-login-screen{min-height:390px}.game-password-entry.livia-login-panel{width:calc(100% - 28px);padding:22px 20px}}

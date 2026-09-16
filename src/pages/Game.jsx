@@ -1,3 +1,4 @@
+import { youtubeHeartbeatEngine } from '../engine/audio/youtubeHeartbeatEngine'
 import { getAsylumConversation, rememberAsylumConversation, leaveAsylum, getAsylumScene } from '../engine/travel/asylumVisit'
 import RelationshipPlaces from '../components/Relationships/RelationshipPlaces'
 import { getTravelArrivalScene } from '../engine/travel/arrivalScene'
@@ -357,6 +358,10 @@ import {
   getLocationVisual,
 } from '../data/visuals/locationVisualCatalog'
 
+import {
+  useMultiplayer,
+} from '../multiplayer/MultiplayerProvider.jsx'
+
 import './Game.css'
 
 function normalizePassword(value) {
@@ -371,6 +376,11 @@ export default function Game({
   onMenu,
   onOpenSheet,
 }) {
+  const {
+    setCurrentLocation:
+      setMultiplayerLocation,
+  } = useMultiplayer()
+
   const [videoMode, setVideoMode] =
     useState(false)
   /*
@@ -1087,6 +1097,25 @@ const hazard =
     getLocation(
       currentLocationId
     )
+
+  /*
+    ========================================
+    PRESENCE MULTIPLAYER
+    ========================================
+
+    O multiplayer observa a localização
+    que o jogo já utiliza. Ele não altera
+    campanha, viagem, combate ou save.
+  */
+  useEffect(() => {
+    setMultiplayerLocation(
+      currentLocationId
+    )
+  }, [
+    currentLocationId,
+    setMultiplayerLocation,
+  ])
+
   /*
     ========================================
     SOL GLOBAL NO FREE ROAM
@@ -2764,6 +2793,7 @@ useEffect(() => {
   }
 
   function clearFeeding() {
+    youtubeHeartbeatEngine.stop()
     setFeedingOpen(false)
     setFeedingVictim(null)
     setFeedingTotal(0)
@@ -3233,6 +3263,28 @@ function handleHavenDaySleep() {
             },
     })
   }
+
+  function handleLiviaComputerAction(choice, resultFlag) {
+    if (!choice || interactionBlocked) return
+
+    const computerChoice = {
+      ...choice,
+      nextScene: 'livia_computer_unlocked',
+      flags: {
+        ...(choice.flags ?? {}),
+        inspectedLiviaComputer: true,
+        unlockedLiviaComputer: true,
+        ...(resultFlag ? { [resultFlag]: true } : {}),
+      },
+    }
+
+    const updatedGame = applyChoice(game, scene, computerChoice)
+    setGame(updatedGame)
+    clearTest()
+    resetSceneTriggers()
+  }
+
+
 
   function handleChoice(
     choice
@@ -5506,6 +5558,10 @@ function handleTravelEventTestContinue() {
         amount,
       })
 
+    if (result.amountDrunk > 0) {
+      youtubeHeartbeatEngine.start()
+    }
+
     const newTotal =
       feedingTotal +
       result.amountDrunk
@@ -5853,6 +5909,10 @@ function handleTravelEventTestContinue() {
         amount:
           forcedAmount,
       })
+
+    if (result.amountDrunk > 0) {
+      youtubeHeartbeatEngine.start()
+    }
 
     const newTotal =
       feedingTotal +
@@ -7894,6 +7954,8 @@ game.world?.location?.id ===
     game={game}
     scene={scene}
     onChoice={handleChoice}
+    onComputerAction={handleLiviaComputerAction}
+                  onChange={persist}
     onExplore={handleHavenExplore}
     blocked={interactionBlocked || Boolean(pendingTest)}
   />
@@ -8022,48 +8084,42 @@ game.world?.location?.id ===
         )}
 
         {scene.passwordChallenge && (
-          <form
-            className="game-password-entry"
-            onSubmit={
-              handlePasswordSubmit
-            }
-          >
-            <label
-              htmlFor="livia-password"
-            >
-              Digitar senha
-            </label>
-
-            <div>
-              <input
-                id="livia-password"
-                type="text"
-                value={passwordAttempt}
-                autoComplete="off"
-                autoFocus
-                disabled={
-                  interactionBlocked
-                }
-                onChange={(event) =>
-                  setPasswordAttempt(
-                    event.target.value
-                  )
-                }
-                placeholder="Senha"
-                aria-label="Senha do computador de Lívia"
-              />
-
-              <button
-                type="submit"
-                disabled={
-                  interactionBlocked ||
-                  !passwordAttempt.trim()
-                }
-              >
-                Confirmar
-              </button>
+          <div className="livia-login-computer">
+            <div className="livia-login-monitor">
+              <div className="livia-login-screen">
+                <div className="livia-login-topbar">
+                  <span>LIVIA OS</span><span>SESSÃO LOCAL</span>
+                </div>
+                <form className="game-password-entry livia-login-panel" onSubmit={handlePasswordSubmit}>
+                  <div className="livia-login-avatar">L</div>
+                  <div className="livia-login-user">LÍVIA</div>
+                  <div className="livia-login-status">ACESSO PROTEGIDO</div>
+                  <label htmlFor="livia-password">Senha</label>
+                  <div className="livia-login-password-row">
+                    <input
+                      id="livia-password"
+                      type="password"
+                      value={passwordAttempt}
+                      autoComplete="off"
+                      autoFocus
+                      disabled={interactionBlocked}
+                      onChange={(event) => setPasswordAttempt(event.target.value)}
+                      placeholder="••••••••••"
+                      aria-label="Senha do computador de Lívia"
+                    />
+                    <button type="submit" disabled={interactionBlocked || !passwordAttempt.trim()}>→</button>
+                  </div>
+                  <small>Digite a senha para iniciar a sessão.</small>
+                </form>
+                <div className="livia-login-footer">
+                  <span>ORPHEUS SYSTEMS</span><span>● REDE LOCAL</span>
+                </div>
+              </div>
+              <div className="livia-login-monitor-bottom">
+                <strong>ORPHEUS</strong><span className="livia-login-led" />
+              </div>
             </div>
-          </form>
+          </div>
         )}
 
         {scene.choices?.length >

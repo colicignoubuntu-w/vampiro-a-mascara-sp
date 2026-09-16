@@ -13,6 +13,8 @@ import {
   calculateTravel,
 } from '../../engine/travel/travelEngine'
 
+import TextChannel from '../Multiplayer/TextChannel/TextChannel.jsx'
+
 import './CityMap.css'
 
 function formatLevel(value) {
@@ -161,6 +163,13 @@ export default function CityMap({
           </div>
 
           <aside className="city-map-sidebar">
+            <div className="city-map-global-chat">
+              <TextChannel
+                channelId="global"
+                title="# GLOBAL"
+                subtitle="São Paulo Online"
+              />
+            </div>
             {!selectedLocation && (
               <div className="city-map-empty">
                 <p>

@@ -1,0 +1,334 @@
+import { useState } from 'react'
+import { getHavenInvestigations } from '../../engine/haven/havenEngine'
+import './LiviaFiles.css'
+
+const INVESTIGATIONS = [
+  {
+    id: 'organs',
+    choiceId: 'investigate_organ_traffic',
+    action: 'Analisar planilhas de cirurgias e funerárias',
+    file: 'PECAS_DE_REPOSICAO.txt',
+    flag: 'foundOrganTrafficLead',
+    icon: '📊',
+    content: [
+      'As planilhas ligam cirurgias, funerárias e clínicas particulares por códigos repetidos.',
+      'Alguns órgãos possuem dois destinos: o declarado no prontuário e outro acompanhado de valor, data e intermediário.',
+      'Os documentos provam desvios, mas ainda não revelam quem controla a operação ou quem recebe os órgãos.',
+      'ANOTAÇÃO DE LÍVIA: VENDIDO.',
+    ],
+  },
+  {
+    id: 'blood',
+    choiceId: 'investigate_blood_traffic',
+    action: 'Cruzar estoques e transferências de sangue',
+    file: 'ESTOQUE_NOTURNO.txt',
+    flag: 'foundBloodTrafficLead',
+    icon: '🩸',
+    content: [
+      'As perdas de sangue seguem horários e rotas regulares demais para serem furtos ocasionais.',
+      'Funcionários diferentes autorizam as saídas, mas as placas incompletas apontam para o mesmo pequeno grupo de veículos.',
+      'Lívia suspeitava de compradores que não aparecem em qualquer registro hospitalar.',
+      'ANOTAÇÃO DE LÍVIA: Roubar sangue é uma coisa. Manter uma cadeia regular de fornecimento é outra.',
+    ],
+  },
+  {
+    id: 'missing',
+    choiceId: 'investigate_missing_people',
+    action: 'Cruzar a lista de pessoas desaparecidas',
+    file: 'NOMES_AUSENTES.txt',
+    flag: 'foundMissingPeopleLead',
+    icon: '👤',
+    content: [
+      'Pessoas desaparecidas reaparecem como números em registros de clínicas, transportadoras e alojamentos clandestinos.',
+      'Algumas foram vistas pela última vez perto de casas noturnas. Outras passaram por hospitais, delegacias ou abrigos.',
+      'Nem todos os casos precisam ter a mesma causa.',
+      'O que importa são as repetições documentais.',
+    ],
+  },
+  {
+    id: 'drugs',
+    choiceId: 'investigate_drug_network',
+    action: 'Comparar apreensões, medicamentos e distribuidores',
+    file: 'CARGA_DESVIADA.txt',
+    flag: 'foundDrugNetworkLead',
+    icon: '📄',
+    content: [
+      'Apreensões registradas são maiores que as quantidades efetivamente entregues.',
+      'Medicamentos hospitalares e drogas ilegais atravessam empresas de segurança, distribuidores e casas noturnas.',
+      'Os intermediários mudam. Alguns médicos e policiais voltam a aparecer.',
+      'ANOTAÇÃO DE LÍVIA: Não seguir o produto. Seguir quem consegue fazer o produto desaparecer do sistema.',
+    ],
+  },
+  {
+    id: 'influence',
+    choiceId: 'investigate_influence_network',
+    action: 'Montar a rede de influência',
+    file: 'A_REDE.txt',
+    flag: 'foundInfluenceNetworkLead',
+    icon: '🗂️',
+    content: [
+      'Empresários, diretores hospitalares, advogados, delegados, assessores e intermediários aparecem ligados por contratos, encontros, serviços e doações.',
+      'Isso não significa que todos saibam da mesma coisa.',
+      'Uma rede em que cada pessoa protege outra por um motivo diferente é mais difícil de destruir que uma organização centralizada.',
+    ],
+  },
+  {
+    id: 'films',
+    choiceId: 'investigate_macabre_films',
+    action: 'Recuperar referências da pasta FILMES',
+    file: 'FILMES.txt',
+    flag: 'foundMacabreFilmsLead',
+    icon: '🎞️',
+    content: [
+      'Fóruns antigos mencionam vídeos sem créditos que aparecem e desaparecem.',
+      'Lívia comparou cenários, roupas, ferimentos, datas e pessoas desaparecidas.',
+      'Uma postagem dizia reconhecer um prédio abandonado de São Paulo.',
+      'ANOTAÇÃO DE LÍVIA: NINGUÉM ATUA ASSIM.',
+      'NÃO É EFEITO. ENCONTRAR O ORIGINAL.',
+    ],
+  },
+  {
+    id: 'hatter',
+    choiceId: 'investigate_david_hatter',
+    action: 'Pesquisar David Hatter nos arquivos',
+    file: 'DAVID_HATTER.txt',
+    flag: 'foundDavidHatterLead',
+    icon: '📜',
+    content: [
+      'David Hatter é humano, gerente de hotel e aspirante a roteirista.',
+      'Não há confirmação de que esteja ligado à produção dos filmes.',
+      'O problema é o que ele sabe sobre sociedades vampíricas, criadores, crias e a criatura interior.',
+      'ANOTAÇÃO DE LÍVIA: Ele sabe demais. Quem contou?',
+    ],
+  },
+  {
+    id: 'hunters',
+    choiceId: 'investigate_hunters',
+    action: 'Comparar fotografias dos observadores',
+    file: 'OBSERVADORES.txt',
+    flag: 'foundHunterSurveillanceLead',
+    icon: '📷',
+    content: [
+      'Pessoas repetidas aparecem perto de clubes, bares e outros pontos frequentados por vampiros.',
+      'Algumas parecem policiais à paisana. Outras não.',
+      'A mesma pessoa foi identificada em pelo menos três estabelecimentos diferentes.',
+      'ANOTAÇÃO DE LÍVIA: Eles não estão procurando pessoas desaparecidas. Estão procurando a gente.',
+    ],
+  },
+]
+
+function DesktopIcon({ icon, label, subtitle, onClick, disabled, badge }) {
+  return (
+    <button type="button" className="livia-desktop-icon" onClick={onClick} disabled={disabled} title={subtitle || label}>
+      <span className="livia-desktop-icon-art" aria-hidden="true">{icon}</span>
+      <span className="livia-desktop-icon-label">{label}</span>
+      {badge && <span className="livia-desktop-icon-badge">{badge}</span>}
+    </button>
+  )
+}
+
+function FileViewer({ file }) {
+  return (
+    <article className="livia-notepad">
+      <div className="livia-notepad-menu">Arquivo&nbsp;&nbsp; Editar&nbsp;&nbsp; Exibir</div>
+      <div className="livia-notepad-paper">
+        <h2>{file.file}</h2>
+        {file.content.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+      </div>
+    </article>
+  )
+}
+
+export default function LiviaFiles({
+  game,
+  scene,
+  onChoice,
+  onComputerAction,
+  onExplore,
+  blocked,
+}) {
+  const [windowId, setWindowId] = useState(null)
+  const [openFile, setOpenFile] = useState(null)
+
+  const flags = game?.flags ?? {}
+  const choices = scene?.choices ?? []
+  const research = getHavenInvestigations(game).find(q => q.id === 'strange_hospitals')
+  const hospitalChoice = choices.find(c => c.id === 'investigate_hospital_files')
+  const knownConnection = Boolean(
+    flags.discoveredHospitalConnection ||
+    flags.liviaHospitalConnection ||
+    game?.quests?.livia_legacy?.objectives?.discover_hospital_connection?.completed
+  )
+
+  const unlockedFiles = INVESTIGATIONS.filter(item => Boolean(flags[item.flag]))
+  const pendingActions = INVESTIGATIONS.filter(item => !flags[item.flag])
+  const world = game?.world ?? {}
+  const hour = String(world.hour ?? 0).padStart(2, '0')
+  const minute = String(world.minute ?? 0).padStart(2, '0')
+  const day = world.day ?? 1
+
+  function closeWindow() {
+    setOpenFile(null)
+    setWindowId(null)
+  }
+
+  function runAction(item) {
+    const choice = choices.find(c => c.id === item.choiceId)
+    if (!choice) return
+    if (onComputerAction) {
+      onComputerAction(choice, item.flag)
+      setWindowId('files')
+      return
+    }
+    onChoice?.(choice)
+  }
+
+  function runHospitalAction() {
+    if (!hospitalChoice) return
+    if (onComputerAction) {
+      onComputerAction(hospitalChoice, 'discoveredHospitalConnection')
+      setWindowId('hospital')
+      return
+    }
+    onChoice?.(hospitalChoice)
+  }
+
+  return (
+    <section className="livia-computer" aria-label="Computador de Lívia">
+      <div className="livia-monitor">
+        <div className="livia-screen">
+          <div className="livia-wallpaper" aria-hidden="true">
+            <div className="livia-wallpaper-glow" />
+            <div className="livia-wallpaper-mark">L</div>
+          </div>
+
+          <div className="livia-desktop">
+            <div className="livia-desktop-icons">
+              <DesktopIcon icon="🔎" label="Investigações" onClick={() => { setOpenFile(null); setWindowId('actions') }} disabled={blocked} badge={pendingActions.length || null} />
+              <DesktopIcon icon="📁" label="Arquivos" onClick={() => { setOpenFile(null); setWindowId('files') }} disabled={blocked} badge={unlockedFiles.length || null} />
+              <DesktopIcon icon="🏥" label="Hospitais" onClick={() => { setOpenFile(null); setWindowId('hospital') }} disabled={blocked} badge={knownConnection ? '✓' : '!'} />
+              <DesktopIcon icon="📝" label="LEIA-ME" onClick={() => { setOpenFile(null); setWindowId('notes') }} disabled={blocked} />
+              <DesktopIcon icon="🗑️" label="Lixeira" onClick={() => { setOpenFile(null); setWindowId('trash') }} disabled={blocked} />
+            </div>
+
+            {windowId && (
+              <div className="livia-window" role="dialog" aria-modal="false">
+                <header className="livia-window-titlebar">
+                  <div className="livia-window-title">
+                    <span>{windowId === 'actions' ? '🔎' : windowId === 'files' ? '📁' : windowId === 'hospital' ? '🏥' : '▣'}</span>
+                    <span>{windowId === 'actions' ? 'Investigações' : windowId === 'files' ? 'Arquivos liberados' : windowId === 'hospital' ? 'Hospitais e desaparecimentos' : windowId === 'notes' ? 'LEIA-ME.txt' : 'Lixeira'}</span>
+                  </div>
+                  <button type="button" className="livia-window-close" onClick={closeWindow}>×</button>
+                </header>
+
+                <div className="livia-window-toolbar">
+                  <button type="button" onClick={() => openFile ? setOpenFile(null) : closeWindow()}>← {openFile ? 'Arquivos' : 'Área de trabalho'}</button>
+                  <span>C:\LIVIA\{windowId === 'actions' ? 'INVESTIGACOES' : windowId === 'files' ? 'ARQUIVOS' : windowId.toUpperCase()}\</span>
+                </div>
+
+                <div className="livia-window-content">
+                  {openFile && <FileViewer file={openFile} />}
+
+                  {!openFile && windowId === 'actions' && (
+                    <div className="livia-folder-view">
+                      <div className="livia-folder-heading"><span>Ação</span><span>Status</span></div>
+                      {INVESTIGATIONS.map(item => {
+                        const done = Boolean(flags[item.flag])
+                        const choice = choices.find(c => c.id === item.choiceId)
+                        if (!choice) return null
+                        return (
+                          <button type="button" className={`livia-file-row livia-action-row ${done ? 'is-complete' : ''}`} key={item.id} disabled={blocked || done} onClick={() => runAction(item)}>
+                            <span className="livia-file-row-icon">{done ? '✓' : '⌕'}</span>
+                            <span className="livia-file-row-copy">
+                              <strong>{item.action}</strong>
+                              <small>{done ? `${item.file} foi liberado em Arquivos.` : `${choice.timeMinutes ?? '?'} min · analisar dados`}</small>
+                            </span>
+                            <span className={done ? 'is-read' : 'is-unread'}>{done ? 'Concluído' : 'Investigar'}<small>{done ? 'Arquivo liberado' : 'Executar →'}</small></span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {!openFile && windowId === 'files' && (
+                    <div className="livia-folder-view">
+                      <div className="livia-folder-heading"><span>Nome</span><span>Status</span></div>
+                      {unlockedFiles.length === 0 ? (
+                        <div className="livia-empty-folder"><span>📁</span><h2>Nenhum arquivo liberado</h2><p>Use Investigações para analisar os dados encontrados.</p></div>
+                      ) : unlockedFiles.map(item => (
+                        <button type="button" className="livia-file-row" key={item.id} onClick={() => setOpenFile(item)}>
+                          <span className="livia-file-row-icon">{item.icon}</span>
+                          <span className="livia-file-row-copy"><strong>{item.file}</strong><small>Resultado salvo pela investigação.</small></span>
+                          <span className="is-read">Disponível<small>Abrir</small></span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {!openFile && windowId === 'hospital' && (
+                    <article className="livia-computer-investigation">
+                      <span className="livia-computer-kicker">INVESTIGAÇÃO PRINCIPAL</span>
+                      <h2>Hospitais e desaparecimentos</h2>
+                      {!knownConnection ? (
+                        <>
+                          <p>Cruze prontuários, transferências e desaparecimentos sem sair do computador.</p>
+                          <div className="livia-computer-actions">
+                            {hospitalChoice && <button className="is-primary" disabled={blocked} onClick={runHospitalAction}>Cruzar registros hospitalares · {hospitalChoice.timeMinutes} min →</button>}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <p>{research?.summary ?? 'O cruzamento revelou uma ligação recorrente entre desaparecimentos e registros hospitalares.'}</p>
+                          <div className="livia-terminal-note">
+                            <b>ARQUIVO LIBERADO: HOSPITAIS.txt</b>
+                            <p>Pacientes oficialmente mortos aparecem novamente em registros posteriores.</p>
+                            <p>Bolsas de sangue desaparecem. Cadáveres são transferidos sem documentação completa.</p>
+                            <p>“NÃO É TRÁFICO COMUM.”</p>
+                            <p>“ELES SABEM O QUE SOMOS.”</p>
+                          </div>
+                          {research?.next?.sceneId && <div className="livia-computer-actions"><button className="is-primary" disabled={blocked} onClick={() => onExplore(research.next.sceneId)}>Continuar investigação fora do computador →</button></div>}
+                        </>
+                      )}
+                    </article>
+                  )}
+
+                  {!openFile && windowId === 'notes' && (
+                    <article className="livia-notepad">
+                      <div className="livia-notepad-menu">Arquivo&nbsp;&nbsp; Editar&nbsp;&nbsp; Exibir</div>
+                      <div className="livia-notepad-paper">
+                        <p>Se você chegou até esta pasta procurando uma resposta única, vai se decepcionar.</p>
+                        <p>Eu não tenho uma. Tenho padrões.</p>
+                        <p>FATO = documento, fotografia, registro ou repetição verificável.</p>
+                        <p>HIPÓTESE = explicação possível.</p>
+                        <p>PERGUNTA = coisa que ainda preciso descobrir.</p>
+                        <p>— L.V.</p>
+                      </div>
+                    </article>
+                  )}
+
+                  {!openFile && windowId === 'trash' && <div className="livia-empty-folder"><span>🗑️</span><h2>Lixeira</h2><p>Alguns arquivos foram removidos.</p></div>}
+                </div>
+              </div>
+            )}
+
+            <div className="livia-taskbar">
+              <button type="button" className="livia-start"><span>◆</span> iniciar</button>
+              <div className="livia-taskbar-current">{windowId && <button type="button">{windowId === 'actions' ? '🔎 Investigações' : windowId === 'files' ? '📁 Arquivos' : '▣ LIVIA OS'}</button>}</div>
+              <div className="livia-tray"><span>◖))</span><span>⌁</span><time>{hour}:{minute}</time></div>
+            </div>
+          </div>
+        </div>
+        <div className="livia-monitor-bottom">
+          <span className="livia-monitor-brand">ORPHEUS</span>
+          <span className="livia-monitor-led" />
+          <span className="livia-monitor-day">NOITE {day}</span>
+        </div>
+      </div>
+
+      <div className="livia-computer-controls">
+        <span>Computador de Lívia · sessão desbloqueada</span>
+        <button type="button" disabled={blocked} onClick={() => onExplore('free_roam')}>Levantar e voltar ao refúgio · 1 min</button>
+      </div>
+    </section>
+  )
+}

@@ -1,0 +1,322 @@
+.voice-channel {
+  margin-top: 18px;
+
+  padding: 17px 18px;
+
+  border:
+    1px solid
+    rgba(112, 34, 41, 0.32);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(8, 8, 8, 0.72),
+      rgba(18, 7, 9, 0.48)
+    );
+
+  box-sizing: border-box;
+}
+
+.voice-channel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding-bottom: 13px;
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.06);
+}
+
+.voice-channel-heading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.voice-channel-heading > div > span {
+  color: #9d7778;
+
+  font-family:
+    Georgia,
+    'Times New Roman',
+    serif;
+
+  font-size: 0.66rem;
+
+  letter-spacing: 0.18em;
+}
+
+.voice-channel-heading small {
+  color: #625b59;
+
+  font-family:
+    Arial,
+    sans-serif;
+
+  font-size: 0.52rem;
+
+  letter-spacing: 0.08em;
+}
+
+.voice-connected {
+  color: #819674;
+
+  font-family:
+    Arial,
+    sans-serif;
+
+  font-size: 0.5rem;
+  font-weight: 700;
+
+  letter-spacing: 0.13em;
+}
+
+.voice-channel-disconnected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding-top: 15px;
+}
+
+.voice-channel-disconnected > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.voice-channel-disconnected strong {
+  color: #a69c98;
+
+  font-family:
+    Arial,
+    sans-serif;
+
+  font-size: 0.56rem;
+
+  letter-spacing: 0.14em;
+}
+
+.voice-channel-disconnected span {
+  color: #625b59;
+
+  font-family:
+    Georgia,
+    'Times New Roman',
+    serif;
+
+  font-size: 0.68rem;
+}
+
+.voice-channel-disconnected button,
+.voice-channel-controls button {
+  padding: 9px 13px;
+
+  border:
+    1px solid
+    rgba(117, 34, 42, 0.62);
+
+  color: #b9aeaa;
+
+  background:
+    rgba(55, 14, 19, 0.45);
+
+  font-family:
+    Arial,
+    sans-serif;
+
+  font-size: 0.52rem;
+
+  letter-spacing: 0.12em;
+
+  cursor: pointer;
+}
+
+.voice-channel-disconnected button:hover,
+.voice-channel-controls button:hover {
+  border-color:
+    rgba(156, 48, 58, 0.85);
+
+  background:
+    rgba(75, 18, 24, 0.58);
+}
+
+.voice-channel-disconnected button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.voice-channel-participants {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  padding-top: 14px;
+}
+
+.voice-channel-count {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  margin-bottom: 3px;
+
+  color: #756d69;
+
+  font-family:
+    Arial,
+    sans-serif;
+
+  font-size: 0.5rem;
+
+  letter-spacing: 0.15em;
+}
+
+.voice-live-dot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: #819674;
+
+  box-shadow:
+    0 0 7px
+    rgba(129, 150, 116, 0.4);
+}
+
+.voice-participant {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  min-height: 36px;
+}
+
+.voice-participant-dot {
+  width: 6px;
+  height: 6px;
+
+  flex: 0 0 auto;
+
+  border-radius: 50%;
+
+  background: #748769;
+}
+
+.voice-participant > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.voice-participant strong {
+  color: #c9bfbb;
+
+  font-family:
+    Georgia,
+    'Times New Roman',
+    serif;
+
+  font-size: 0.72rem;
+
+  font-weight: 400;
+}
+
+.voice-participant small {
+  color: #5e5754;
+
+  font-family:
+    Arial,
+    sans-serif;
+
+  font-size: 0.47rem;
+
+  letter-spacing: 0.1em;
+}
+
+.voice-channel-controls {
+  display: flex;
+
+  gap: 8px;
+
+  margin-top: 14px;
+}
+
+.voice-channel-controls .leave {
+  border-color:
+    rgba(96, 38, 41, 0.38);
+
+  color: #827875;
+
+  background: transparent;
+}
+
+.voice-channel-error {
+  margin:
+    12px 0 0;
+
+  color: #b96d72;
+
+  font-family:
+    Georgia,
+    'Times New Roman',
+    serif;
+
+  font-size: 0.68rem;
+
+  line-height: 1.5;
+}
+
+/*
+ * O StartAudio pode aparecer quando
+ * o navegador bloquear autoplay.
+ */
+.voice-channel
+.lk-start-audio-button {
+  width: 100%;
+
+  margin-top: 12px;
+
+  padding: 9px;
+
+  border:
+    1px solid
+    rgba(117, 34, 42, 0.5);
+
+  color: #b9aeaa;
+
+  background:
+    rgba(55, 14, 19, 0.35);
+
+  font-size: 0.52rem;
+
+  letter-spacing: 0.12em;
+
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .voice-channel-disconnected {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .voice-channel-disconnected button {
+    width: 100%;
+  }
+
+  .voice-channel-controls {
+    flex-direction: column;
+  }
+}

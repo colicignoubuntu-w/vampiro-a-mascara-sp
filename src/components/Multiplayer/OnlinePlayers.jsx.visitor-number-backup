@@ -1,0 +1,231 @@
+import {
+  useEffect,
+  useState,
+} from 'react'
+
+import {
+  useMultiplayer,
+} from '../../multiplayer/MultiplayerProvider.jsx'
+
+import './OnlinePlayers.css'
+
+function formatLocation(location) {
+  if (!location) {
+    return 'Local desconhecido'
+  }
+
+  const knownLocations = {
+    menu: 'No menu',
+    creation: 'Criando personagem',
+    sheet: 'Na ficha',
+    prologue: 'Prólogo',
+    free_roam: 'São Paulo',
+    ultimo_gole: 'Último Gole',
+    vesuvius: 'Vesuvius',
+    asylum: 'Asylum',
+    paulista: 'Avenida Paulista',
+    galeria_do_rock: 'Galeria do Rock',
+  }
+
+  if (knownLocations[location]) {
+    return knownLocations[location]
+  }
+
+  return String(location)
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (letter) =>
+      letter.toUpperCase()
+    )
+}
+
+export default function OnlinePlayers({
+  user,
+}) {
+  const {
+    players,
+    connected,
+    profile,
+    error: multiplayerError,
+    setDisplayName,
+  } = useMultiplayer()
+
+  const [
+    editingName,
+    setEditingName,
+  ] = useState(false)
+
+  const [
+    name,
+    setName,
+  ] = useState('')
+
+  const [
+    localError,
+    setLocalError,
+  ] = useState('')
+
+  useEffect(() => {
+    setName(
+      profile?.display_name ===
+        'Desconhecido'
+        ? ''
+        : profile?.display_name || ''
+    )
+  }, [profile?.display_name])
+
+  async function saveName(event) {
+    event.preventDefault()
+
+    const cleanName =
+      name.trim()
+
+    if (!cleanName) {
+      setLocalError(
+        'Informe um nome.'
+      )
+
+      return
+    }
+
+    try {
+      setLocalError('')
+
+      const updated =
+        await setDisplayName(
+          cleanName
+        )
+
+      setName(
+        updated?.display_name ||
+          cleanName
+      )
+
+      setEditingName(false)
+    } catch (err) {
+      console.error(
+        'Erro ao salvar nome:',
+        err
+      )
+
+      setLocalError(
+        'Não foi possível salvar o nome.'
+      )
+    }
+  }
+
+  const visibleError =
+    localError ||
+    multiplayerError
+
+  return (
+    <aside className="online-players">
+      <header className="online-players-header">
+        <div>
+          <span
+            className={
+              connected
+                ? 'online-status-dot online'
+                : 'online-status-dot'
+            }
+          />
+
+          <span className="online-status-label">
+            {connected
+              ? 'ONLINE'
+              : 'CONECTANDO'}
+          </span>
+        </div>
+
+        <strong>
+          {players.length}
+        </strong>
+      </header>
+
+      <div className="online-players-title">
+        JOGADORES NA NOITE
+      </div>
+
+      {profile?.display_name ===
+        'Desconhecido' &&
+        !editingName && (
+          <button
+            type="button"
+            className="online-set-name"
+            onClick={() => {
+              setLocalError('')
+              setEditingName(true)
+            }}
+          >
+            DEFINIR SEU NOME
+          </button>
+        )}
+
+      {editingName && (
+        <form
+          className="online-name-form"
+          onSubmit={saveName}
+        >
+          <input
+            value={name}
+            onChange={(event) =>
+              setName(
+                event.target.value
+              )
+            }
+            maxLength={40}
+            placeholder="Nome do jogador"
+            autoFocus
+          />
+
+          <button type="submit">
+            SALVAR
+          </button>
+        </form>
+      )}
+
+      {visibleError && (
+        <p className="online-error">
+          {visibleError}
+        </p>
+      )}
+
+      <div className="online-players-list">
+        {players.length === 0 ? (
+          <p className="online-empty">
+            Nenhum jogador visível.
+          </p>
+        ) : (
+          players.map(
+            (player) => (
+              <div
+                className="online-player"
+                key={player.userId}
+              >
+                <span className="online-player-dot" />
+
+                <div>
+                  <strong>
+                    {player.displayName}
+
+                    {player.userId ===
+                      user?.id && (
+                      <small>
+                        VOCÊ
+                      </small>
+                    )}
+                  </strong>
+
+                  <span>
+                    {formatLocation(
+                      player.location
+                    )}
+                  </span>
+                </div>
+              </div>
+            )
+          )
+        )}
+      </div>
+    </aside>
+  )
+}

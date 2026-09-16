@@ -1,21 +1,105 @@
+import { useEffect, useState } from 'react'
+
 import {
   hasFinishedCharacter,
   loadFinalCharacter,
 } from '../utils/characterFinalizer'
+
 import AudioControls from '../components/AudioControls/AudioControls'
+
 import {
   useSceneAudio,
 } from '../engine/audio/useSceneAudio'
+
+const menuBackgroundModules = import.meta.glob('../assets/menu/background/*.{png,jpg,jpeg,webp,avif}', { eager: true, query: '?url', import: 'default' })
+const menuSlideModules = import.meta.glob('../assets/menu/slides/*.{png,jpg,jpeg,webp,avif}', { eager: true, query: '?url', import: 'default' })
+const menuBackgrounds = Object.values(menuBackgroundModules)
+const menuSlides = Object.values(menuSlideModules)
 
 export default function MainMenu({
   onNewGame,
   onContinue,
   onOpenSheet,
+  onSignOut,
+  signingOut = false,
+  user,
 }) {
   useSceneAudio(
     'main_menu',
     null
   )
+
+  const [menuSlideIndex, setMenuSlideIndex] = useState(0)
+  const [menuSlideVisible, setMenuSlideVisible] = useState(true)
+
+  const changeMenuSlide = () => {
+    if (menuSlides.length <= 1 || !menuSlideVisible) return
+
+    setMenuSlideVisible(false)
+
+    window.setTimeout(() => {
+      setMenuSlideIndex((current) => {
+        if (menuSlides.length <= 1) return current
+
+        let next = current
+
+        while (next === current) {
+          next = Math.floor(Math.random() * menuSlides.length)
+        }
+
+        return next
+      })
+
+      // A nova imagem entra escondida primeiro.
+      // Depois iniciamos o fade para ela aparecer suavemente.
+      window.setTimeout(() => {
+        setMenuSlideVisible(true)
+      }, 50)
+    }, 2500)
+  }
+
+  useEffect(() => {
+    if (menuSlides.length <= 1) {
+      return undefined
+    }
+
+    let changeTimeout = null
+
+    const interval = window.setInterval(() => {
+      // Fade rápido para fora.
+      setMenuSlideVisible(false)
+
+      changeTimeout = window.setTimeout(() => {
+        setMenuSlideIndex((current) => {
+          if (menuSlides.length <= 1) {
+            return current
+          }
+
+          let next = current
+
+          while (next === current) {
+            next = Math.floor(
+              Math.random() * menuSlides.length
+            )
+          }
+
+          return next
+        })
+
+        // Próxima imagem entra logo depois.
+        setMenuSlideVisible(true)
+      }, 2500)
+    }, 30000)
+
+    return () => {
+      window.clearInterval(interval)
+
+      if (changeTimeout) {
+        window.clearTimeout(changeTimeout)
+      }
+    }
+  }, [])
+
 
   const hasCharacter =
     hasFinishedCharacter()
@@ -37,9 +121,41 @@ export default function MainMenu({
     character?.identity?.generation ||
     ''
 
+  const isAnonymous =
+    Boolean(
+      user?.is_anonymous
+    )
+
+  const accountLabel =
+    isAnonymous
+      ? 'Desconhecido'
+      : (
+          user?.email ||
+          'Conta'
+        )
+
   return (
     <main className="main-menu">
-      <div className="main-menu-background" />
+      <div className="main-menu-background" aria-hidden="true" style={menuBackgrounds[0] ? { backgroundImage: `url("${menuBackgrounds[0]}")` } : undefined} />
+      <div
+        className="main-menu-slideshow"
+        aria-hidden="true"
+      >
+        {menuSlides.length > 0 && (
+          <img
+            key={menuSlides[menuSlideIndex]}
+            className={
+              menuSlideVisible
+                ? 'main-menu-slide is-visible'
+                : 'main-menu-slide'
+            }
+            src={menuSlides[menuSlideIndex]}
+            alt=""
+      onClick={changeMenuSlide}
+      title="Clique para trocar a imagem"
+          />
+        )}
+      </div>
 
       <div className="main-menu-overlay" />
 
@@ -126,6 +242,86 @@ export default function MainMenu({
           </p>
         )}
 
+        <div
+          style={{
+            marginTop: '24px',
+            paddingTop: '17px',
+            borderTop:
+              '1px solid rgba(110, 42, 50, 0.35)',
+          }}
+        >
+          <span
+            style={{
+              display: 'block',
+              marginBottom: '6px',
+              color: '#6d6263',
+              fontFamily:
+                'Arial, sans-serif',
+              fontSize: '0.52rem',
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {isAnonymous
+              ? 'Visitante'
+              : 'Conta'}
+          </span>
+
+          <strong
+            style={{
+              display: 'block',
+              maxWidth: '300px',
+              overflow: 'hidden',
+              marginBottom: '11px',
+              color: '#a99d9b',
+              fontFamily:
+                'Georgia, serif',
+              fontSize: '0.72rem',
+              fontWeight: 400,
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {accountLabel}
+          </strong>
+
+          <button
+            type="button"
+            onClick={
+              onSignOut
+            }
+            disabled={
+              signingOut
+            }
+            style={{
+              padding:
+                '7px 13px',
+              border:
+                '1px solid rgba(126, 47, 57, 0.65)',
+              color:
+                signingOut
+                  ? '#665d5e'
+                  : '#a76d73',
+              background:
+                'rgba(25, 8, 11, 0.5)',
+              fontFamily:
+                'Georgia, serif',
+              fontSize:
+                '0.62rem',
+              letterSpacing:
+                '0.13em',
+              cursor:
+                signingOut
+                  ? 'wait'
+                  : 'pointer',
+            }}
+          >
+            {signingOut
+              ? 'SAINDO...'
+              : 'SAIR'}
+          </button>
+        </div>
+
         <footer className="main-menu-footer">
           <span>
             Crônica de São Paulo
@@ -136,6 +332,7 @@ export default function MainMenu({
           </span>
         </footer>
       </section>
+
     </main>
   )
 }

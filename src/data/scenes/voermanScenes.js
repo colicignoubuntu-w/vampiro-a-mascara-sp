@@ -37,19 +37,19 @@ const voermanScenes = {
       'O Asylum ocupa um antigo teatro da Rua Augusta. Ferro retorcido, cortinas negras, fumaça e luzes vermelhas transformam a pista numa catedral profana.',
       'Jeanette Voerman surge entre a fumaça antes que você consiga procurar qualquer outra pessoa. No andar superior, uma porta de vidro fosco leva ao escritório de Therese.',
     ],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Ora, ora... o que temos aqui? Mais um brinquedinho recém-saído da vida e entrando direto no meu clube. Você cheira a novo, patinho. Eu não estou assustando você, estou?' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Ora, ora... olha só o que a noite trouxe para dentro do meu clube. Você ainda tem aquele cheiro de recém-morto, patinho. Quase dá para sentir a vida tentando descobrir por que foi deixada para trás. Não faça essa cara. Eu ainda nem comecei a assustar você.' },
     choices: [
       { id: 'meet_identity', text: '"Quem é você?"', nextScene: 'janette_identity', timeMinutes: 2, flags: { metJanette: true, voermanChainStarted: true } },
-      { id: 'meet_flirt', text: '"Está tentando me seduzir?"', nextScene: 'janette_flirt', timeMinutes: 2, flags: { metJanette: true, flirtedWithJanette: true } },
-      { id: 'meet_cold', text: '"Não estou interessado."', nextScene: 'janette_cold', timeMinutes: 2, flags: { metJanette: true, annoyedJanette: true } },
+      { id: 'meet_flirt', text: '"Está tentando me seduzir?"', nextScene: 'janette_flirt', timeMinutes: 2, flags: { metJanette: true, flirtedWithJanette: true, janetteFlirtAccepted: true }, relationshipMetrics: { attraction: 4, affection: 1 }, memory: { type: 'flirt', text: 'Você entrou na provocação de Jeanette no primeiro encontro.' } },
+      { id: 'meet_cold', text: '"Não estou interessado."', nextScene: 'janette_cold', timeMinutes: 2, flags: { metJanette: true, annoyedJanette: true, janetteRejectedFlirt: true }, relationshipMetrics: { affection: -2, anger: 3 }, memory: { type: 'rejection', text: 'Você rejeitou a provocação de Jeanette no primeiro encontro.' } },
       { id: 'meet_therese', text: '"Estou procurando Therese."', nextScene: 'janette_therese', timeMinutes: 2, flags: { metJanette: true } },
     ],
   },
 
   janette_identity: {
     id: 'janette_identity', chapter: 'ASYLUM', title: 'Quem É Aquela Garota?', location: asylum,
-    narration: ['Jeanette se aproxima como se estivesse prestes a contar um segredo que gostaria que todos ouvissem.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Jeanette. A garota sobre quem todos perguntam, mesmo quando sabem que seria melhor não perguntar.' },
+    narration: ['Jeanette leva uma mão ao peito, teatralmente ofendida.', 'O sorriso diz que ela gostou da pergunta. Ou de ter conseguido fazer você perguntar.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Entrou no meu clube sem saber meu nome? Isso é corajoso, adorável ou terrivelmente mal informado. Jeanette. Tente não gastar o nome todo de uma vez.' },
     choices: [
       { id: 'identity_club', text: '"O Asylum é seu?"', nextScene: 'janette_club', timeMinutes: 2 },
       { id: 'identity_therese', text: '"E Therese?"', nextScene: 'janette_therese', timeMinutes: 2 },
@@ -61,8 +61,8 @@ const voermanScenes = {
   janette_flirt: {
     id: 'janette_flirt', chapter: 'ASYLUM', title: 'Curiosidade', location: asylum,
     visual: { characters: { 'Jeanette Voerman': { src: '/images/npcs/janette-voerman/seductive.png', alt: 'Jeanette Voerman' } } },
-    narration: ['Jeanette reduz a distância até a conversa parecer íntima demais para um lugar tão cheio.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Você não está nem um pouquinho curioso sobre mim? Diga a coisa certa e talvez eu abra minha alma. Ou alguma outra porta.' },
+    narration: ['Jeanette reduz a distância sem pedir licença. Não chega a tocar em você; deixa apenas espaço suficiente para que recuar também pareça uma resposta.', 'Ao redor, o Asylum continua cheio. Ainda assim, ela consegue fazer a conversa parecer particular.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Seduzir? Que palavra tão séria. Eu só queria descobrir quanto tempo você consegue fingir que não está curioso. Diga a coisa certa e talvez eu abra minha alma. Ou alguma coisa bem mais interessante.' },
     choices: [
       { id: 'flirt_play', text: '"Talvez eu esteja curioso."', nextScene: 'janette_interest', timeMinutes: 2, flags: { janetteInterestRaised: true } },
       { id: 'flirt_therese', text: '"Estou curioso sobre sua irmã."', nextScene: 'janette_therese', timeMinutes: 2 },
@@ -76,7 +76,7 @@ const voermanScenes = {
     dialogue: { speaker: 'Jeanette Voerman', text: 'Que pena. Algumas coisas parecem doces até a primeira mordida.' },
     choices: [
       { id: 'cold_name', text: '"Só diga seu nome."', nextScene: 'janette_hostile', timeMinutes: 2 },
-      { id: 'cold_soften', text: '"Talvez eu tenha começado mal."', nextScene: 'janette_identity', timeMinutes: 2, flags: { apologizedToJanette: true } },
+      { id: 'cold_soften', text: '"Talvez eu tenha começado mal."', nextScene: 'janette_identity', timeMinutes: 2, flags: { apologizedToJanette: true, janetteRepairedBadStart: true }, relationshipMetrics: { trust: 2, anger: -3 }, memory: { type: 'repair', text: 'Você reconheceu que começou mal com Jeanette.' } },
       { id: 'cold_tung', text: '"Bertram Tung."', nextScene: 'janette_tung', timeMinutes: 2 },
     ],
   },
@@ -105,7 +105,7 @@ const voermanScenes = {
   janette_club: {
     id: 'janette_club', chapter: 'ASYLUM', title: 'Caos Certificável', location: asylum,
     narration: ['Jeanette abre os braços como se apresentasse um reino particular.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Therese cuida dos contratos e finge que eu sou decoração. Eu cuido das pessoas. Curiosamente, são elas que mantêm uma boate viva.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Therese cuida dos contratos, das contas e daquela expressão deliciosa de quem acabou de encontrar um erro numa planilha. Eu cuido das pessoas. Da música. Do desejo de voltar amanhã. Mas pergunte a ela e provavelmente vai descobrir que eu sou uma peça muito cara da decoração.' },
     choices: [
       { id: 'club_ownership', text: '"Então o clube pertence às duas?"', nextScene: 'janette_ownership', timeMinutes: 2 },
       { id: 'club_hate', text: '"Por que vocês se odeiam?"', nextScene: 'janette_therese', timeMinutes: 2 },
@@ -118,8 +118,8 @@ const voermanScenes = {
     narration: ['O humor dela muda quando a conversa passa de charme para propriedade.'],
     dialogue: { speaker: 'Jeanette Voerman', text: 'No papel, Therese adora explicar como tudo é dela. No mundo real, metade das pessoas entra por minha causa.' },
     choices: [
-      { id: 'ownership_sympathy', text: '"Parece que ela apaga sua participação."', nextScene: 'janette_hurt', timeMinutes: 2, flags: { sympathizedWithJanette: true } },
-      { id: 'ownership_challenge', text: '"Atrair clientes não é administrar um negócio."', nextScene: 'janette_defensive', timeMinutes: 2, flags: { challengedJanette: true } },
+      { id: 'ownership_sympathy', text: '"Parece que ela apaga sua participação."', nextScene: 'janette_hurt', timeMinutes: 2, flags: { sympathizedWithJanette: true, janetteShowedVulnerability: true, janetteEmpathyShown: true }, relationshipMetrics: { trust: 5, affection: 3, safety: 2 }, memory: { type: 'positive', text: 'Você reconheceu a dor de Jeanette em ser diminuída por Therese.' } },
+      { id: 'ownership_challenge', text: '"Atrair clientes não é administrar um negócio."', nextScene: 'janette_defensive', timeMinutes: 2, flags: { challengedJanette: true }, relationshipMetrics: { respect: 2, anger: 2 }, memory: { type: 'challenge', text: 'Você confrontou Jeanette sobre sua participação na administração do Asylum.' } },
       { id: 'ownership_therese', text: '"Vou ouvir a versão dela."', nextScene: 'therese_first', timeMinutes: 2 },
     ],
   },
@@ -127,7 +127,7 @@ const voermanScenes = {
   janette_therese: {
     id: 'janette_therese', chapter: 'ASYLUM', title: 'Sua Majestade', location: asylum,
     narration: ['A provocação fica mais afiada quando o nome de Therese aparece.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Therese é a responsável. A inteligente. A favorita. A bem-sucedida. Pelo menos é assim que ela conta a história.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Therese. Claro. A responsável, a inteligente, a respeitável, a bem-sucedida... escolha o elogio, ela provavelmente já mandou gravá-lo numa placa. Minha irmã sempre foi muito boa em contar uma história na qual ela é a parte que funciona.' },
     choices: [
       { id: 'therese_hate', text: '"Por que vocês se odeiam?"', nextScene: 'janette_hurt', timeMinutes: 2 },
       { id: 'therese_twins', text: '"Vocês são mesmo gêmeas?"', nextScene: 'janette_twins', timeMinutes: 2 },
@@ -138,8 +138,8 @@ const voermanScenes = {
 
   janette_hurt: {
     id: 'janette_hurt', chapter: 'ASYLUM', title: 'A Favorita', location: asylum,
-    narration: ['Por um momento, a pose provocadora desmonta.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Ela sempre foi a favorita. A que fazia tudo certo. Eu era a coisa que precisava ser escondida, corrigida ou perdoada.' },
+    narration: ['Jeanette abre a boca para responder com outra piada, mas nenhuma vem.', 'Por alguns segundos, a mulher que domina o salão desaparece. Quando fala novamente, a voz está mais baixa.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Ela sempre foi a favorita. A menina certa, com as respostas certas, fazendo tudo do jeito certo. E eu... eu era a coisa que precisava ser escondida, corrigida ou perdoada. Engraçado como certas famílias conseguem transformar uma criança inteira num erro de comportamento.' },
     choices: [
       { id: 'hurt_father', text: '"Favorita de quem?"', nextScene: 'janette_father', timeMinutes: 2 },
       { id: 'hurt_tung', text: '"Bertram ficou do seu lado?"', nextScene: 'janette_tung_relationship', timeMinutes: 2 },
@@ -150,7 +150,7 @@ const voermanScenes = {
   janette_defensive: {
     id: 'janette_defensive', chapter: 'ASYLUM', title: 'Não Sou Inocente', location: asylum,
     narration: ['Jeanette sorri, mas não há leveza.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Eu nunca disse que sou inocente. Só não aceite a versão de Therese como se fosse escritura.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Não me confunda com inocente, querido. Eu minto, manipulo e estrago coisas quando tenho vontade. Só não aceite a versão de Therese como escritura porque ela fala baixo e usa palavras caras.' },
     choices: [
       { id: 'def_tung', text: '"Então me conte sua versão sobre Tung."', nextScene: 'janette_tung', timeMinutes: 2 },
       { id: 'def_father', text: '"O que aconteceu na família de vocês?"', nextScene: 'janette_father', timeMinutes: 2 },
@@ -161,7 +161,7 @@ const voermanScenes = {
   janette_twins: {
     id: 'janette_twins', chapter: 'ASYLUM', title: 'Gêmeas', location: asylum,
     narration: ['Ela responde rápido demais.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Idênticas. Pelo menos por fora. Por dentro, somos dois lados de uma moeda que nunca parou de girar.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Idênticas. Pelo menos era isso que o espelho dizia. Por dentro... bem, duas faces podem passar uma eternidade discutindo qual delas é a frente da moeda.' },
     choices: [
       { id: 'twins_difference', text: '"Qual a maior diferença entre vocês?"', nextScene: 'janette_twins_difference', timeMinutes: 2 },
       { id: 'twins_strange', text: '"Você fala como se não fossem duas pessoas."', nextScene: 'janette_janus', timeMinutes: 2, flags: { noticedVoermanContradiction: true } },
@@ -172,7 +172,7 @@ const voermanScenes = {
   janette_twins_difference: {
     id: 'janette_twins_difference', chapter: 'ASYLUM', title: 'Morder ou Servir', location: asylum,
     narration: ['Jeanette mostra discretamente os dentes.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Therese precisa que tudo seja limpo, controlado, servido num copo. Eu prefiro sentir os dentes entrando.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Therese gosta de tudo limpo, controlado, medido e servido num copo. Até a fome precisa pedir licença para ela. Eu prefiro lembrar que tenho dentes.' },
     choices: [
       { id: 'twinsdiff_tung', text: '"E Bertram prefere qual de vocês?"', nextScene: 'janette_tung_relationship', timeMinutes: 2 },
       { id: 'twinsdiff_therese', text: '"Vou subir."', nextScene: 'therese_first', timeMinutes: 2 },
@@ -202,17 +202,17 @@ const voermanScenes = {
   janette_father: {
     id: 'janette_father', chapter: 'ASYLUM', title: 'Pai', location: asylum,
     narration: ['A mudança é imediata.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Therese aprendeu cedo como ser aquilo que nosso pai queria. Eu aprendi cedo que algumas pessoas chamam controle de amor.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Therese aprendeu cedo a ser exatamente aquilo que nosso pai queria. Eu aprendi outra coisa: algumas pessoas conseguem chamar controle de amor por tanto tempo que uma criança acaba acreditando nelas.' },
     choices: [
       { id: 'father_press', text: '"O que ele fez?"', nextScene: 'janette_father_end', timeMinutes: 2 },
-      { id: 'father_stop', text: '"Não precisa continuar."', nextScene: 'janette_tung', timeMinutes: 2 },
+      { id: 'father_stop', text: '"Não precisa continuar."', nextScene: 'janette_tung', timeMinutes: 2, flags: { janetteBoundaryRespected: true }, relationshipMetrics: { trust: 4, safety: 5 }, memory: { type: 'positive', text: 'Você respeitou o limite de Jeanette quando o assunto chegou ao pai.' } },
     ],
   },
 
   janette_father_end: {
     id: 'janette_father_end', chapter: 'ASYLUM', title: 'Coisas Que Não Morrem', location: asylum,
     narration: ['Ela não responde diretamente.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Algumas famílias deixam heranças. Outras deixam quartos que você continua tentando sair mesmo décadas depois de morrer.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Algumas famílias deixam joias, fotografias, sobrenomes. Outras deixam um quarto dentro da sua cabeça. Você pode morrer, atravessar décadas, trocar de cidade... e ainda acordar tentando encontrar a porta.' },
     choices: [
       { id: 'fatherend_therese', text: '"Therese fala dele do mesmo jeito?"', nextScene: 'therese_first', timeMinutes: 2 },
       { id: 'fatherend_tung', text: '"Mudando de assunto. Tung."', nextScene: 'janette_tung', timeMinutes: 2 },
@@ -243,7 +243,7 @@ const voermanScenes = {
   janette_tung: {
     id: 'janette_tung', chapter: 'ASYLUM', title: 'Bertram Tung', location: asylum,
     narration: ['Ao ouvir o nome, Jeanette deixa de parecer entediada.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Passei algumas noites com Bertram e, de repente, Therese decidiu que ele era a peste. Ela chama de política. Eu chamo de paranoia.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Passei algumas noites com Bertram e, de repente, ele virou a peste de São Paulo. Therese chama isso de prudência política. Eu chamaria de ciúme, mas ela provavelmente prepararia uma apresentação explicando por que estou errada.' },
     choices: [
       { id: 'tung_relationship', text: '"Que tipo de relação vocês têm?"', nextScene: 'janette_tung_relationship', timeMinutes: 2 },
       { id: 'tung_therese', text: '"Por que Therese o quer escondido?"', nextScene: 'janette_tung_therese', timeMinutes: 2 },
@@ -265,7 +265,7 @@ const voermanScenes = {
   janette_tung_relationship: {
     id: 'janette_tung_relationship', chapter: 'ASYLUM', title: 'A Bela e a Fera', location: asylum,
     narration: ['Ela sorri com satisfação calculada.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Bertram é inteligente, desagradável, feio como pecado e muito menos previsível do que Therese gostaria.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Bertram é inteligente, desagradável, feio como um pecado que ninguém teve coragem de confessar e, principalmente, impossível de colocar numa caixinha. Therese detesta coisas que não cabem nas caixas dela.' },
     choices: [
       { id: 'tungrel_romance', text: '"Vocês são amantes?"', nextScene: 'janette_tung_romance', timeMinutes: 2 },
       { id: 'tungrel_conspiracy', text: '"Therese acha que vocês conspiram?"', nextScene: 'janette_tung_therese', timeMinutes: 2 },
@@ -276,7 +276,7 @@ const voermanScenes = {
   janette_tung_romance: {
     id: 'janette_tung_romance', chapter: 'ASYLUM', title: 'Rumores', location: asylum,
     narration: ['Jeanette sorri.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Algumas noites são mais interessantes quando ninguém define exatamente o que aconteceu nelas.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Você quer mesmo que eu estrague uma lembrança perfeitamente indecente colocando um rótulo nela? Algumas noites ficam muito melhores quando ninguém concorda sobre o que exatamente aconteceu.' },
     choices: [
       { id: 'romance_conspiracy', text: '"Então não há conspiração?"', nextScene: 'janette_tung_therese', timeMinutes: 2 },
       { id: 'romance_location', text: '"Onde ele está?"', nextScene: 'janette_tung_location', timeMinutes: 2 },
@@ -286,7 +286,7 @@ const voermanScenes = {
   janette_tung_therese: {
     id: 'janette_tung_therese', chapter: 'ASYLUM', title: 'Paranoia', location: asylum,
     narration: ['Jeanette tamborila os dedos no balcão.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Therese acredita que Bertram compromete a autoridade dela. Talvez comprometa. Mas qualquer pessoa que não obedece parece ameaça quando alguém vive de controle.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Therese acha que Bertram compromete a autoridade dela. Talvez comprometa. O problema é que, quando alguém precisa controlar tudo, qualquer pessoa que diga “não” começa a parecer uma conspiração.' },
     choices: [
       { id: 'tungtherese_business', text: '"Ele sabotou negócios dela?"', nextScene: 'janette_tung_business', timeMinutes: 2 },
       { id: 'tungtherese_location', text: '"Onde ele está?"', nextScene: 'janette_tung_location', timeMinutes: 2 },
@@ -317,7 +317,7 @@ const voermanScenes = {
   janette_gallery_offer: {
     id: 'janette_gallery_offer', chapter: 'ASYLUM', title: 'Uma Noite na Galeria', location: asylum,
     narration: ['Jeanette tira uma faca fina da bolsa e a deixa sobre o balcão.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Galeria Noir. Evento beneficente, gente influente e um Membro montando seu próprio círculo de poder. Quero que você estrague a noite.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Galeria Noir. Uma noite beneficente cheia de gente influente, dinheiro e um Membro tentando transformar bons modos em poder. Estrague a festa para mim e eu ajudo você a chegar até Bertram.' },
     choices: [
       { id: 'gallery_details', text: '"O que exatamente devo fazer?"', nextScene: 'janette_gallery_details', timeMinutes: 2 },
       { id: 'gallery_motive', text: '"Por que isso importa para você?"', nextScene: 'janette_gallery_motive', timeMinutes: 2 },
@@ -328,7 +328,7 @@ const voermanScenes = {
   janette_gallery_motive: {
     id: 'janette_gallery_motive', chapter: 'ASYLUM', title: 'Poder', location: asylum,
     narration: ['O tom continua leve, mas a resposta revela cálculo político.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Territórios mudam quando favores, dinheiro e pessoas começam a fluir para outro centro. Uma festa hoje pode virar uma corte em seis meses.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Poder não começa com alguém sentado num trono, querido. Começa quando dinheiro, favores e pessoas importantes passam a circular pela mesma sala. Hoje é uma festa. Em seis meses pode ser uma corte. Eu prefiro estragar a decoração antes que alguém comece a medir o lugar para o trono.' },
     choices: [
       { id: 'motive_smart', text: '"Você entende mais de política do que finge."', nextScene: 'janette_gallery_smart', timeMinutes: 2 },
       { id: 'motive_details', text: '"Explique a missão."', nextScene: 'janette_gallery_details', timeMinutes: 2 },
@@ -338,7 +338,7 @@ const voermanScenes = {
   janette_gallery_smart: {
     id: 'janette_gallery_smart', chapter: 'ASYLUM', title: 'A Piada', location: asylum,
     narration: ['Jeanette ergue uma sobrancelha.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Não conte para Therese. Ela investiu duas vidas na ideia de que eu sou a irmã burra.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Shhh. Não conte para Therese. Ela investiu duas vidas inteiras na ideia de que eu sou a irmã burra. Seria cruel destruir uma crença tão antiga de uma vez só.' },
     choices: [
       { id: 'smart_details', text: '"O trabalho."', nextScene: 'janette_gallery_details', timeMinutes: 2 },
       { id: 'smart_therese', text: '"Talvez eu conte."', nextScene: 'therese_first', timeMinutes: 2 },
@@ -377,7 +377,7 @@ const voermanScenes = {
   janette_gallery_refusal: {
     id: 'janette_gallery_refusal', chapter: 'ASYLUM', title: 'Sem Mel', location: asylum,
     narration: ['Jeanette cruza os braços.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Recuse, se quiser. Só não confunda liberdade de escolha com ausência de consequências.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Pode dizer não. Eu adoro consentimento; torna o ressentimento posterior muito mais elegante. Só não confunda liberdade de escolha com um universo obrigado a recompensar todas as suas escolhas.' },
     choices: [
       { id: 'refusal_reconsider', text: '"Certo. Explique de novo."', nextScene: 'janette_gallery_details', timeMinutes: 1 },
       { id: 'refusal_therese', text: '"Vou negociar com Therese."', nextScene: 'therese_first', timeMinutes: 2 },
@@ -440,7 +440,7 @@ const voermanScenes = {
   janette_gallery_return: {
     id: 'janette_gallery_return', chapter: 'ASYLUM', title: 'Bom Trabalho', location: asylum,
     narration: ['Jeanette percebe sua chegada antes que você consiga chamá-la.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Você voltou sem polícia e sem cadáveres. Estou impressionada.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Olha só você... voltou inteiro, sem sirenes atrás e sem uma pilha de cadáveres para explicar. Estou genuinamente impressionada. Não se acostume; elogios meus criam dependência.' },
     choices: [
       { id: 'return_box', text: '"Também trouxe a caixa."', nextScene: 'janette_gallery_after', timeMinutes: 2 },
       { id: 'return_tung', text: '"Agora cumpra sua parte sobre Tung."', nextScene: 'janette_gallery_after', timeMinutes: 2 },
@@ -461,7 +461,7 @@ const voermanScenes = {
   janette_gallery_calledout: {
     id: 'janette_gallery_calledout', chapter: 'ASYLUM', title: 'O Que Eu Não Disse', location: asylum,
     narration: ['Jeanette não pergunta o que você descobriu.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Eu disse o que precisava para você fazer o trabalho. Se contasse cada detalhe político, você ainda estaria decidindo qual pecado parecia mais educado.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Eu contei a verdade suficiente para você fazer o trabalho. Não faça essa cara. Se eu colocasse cada detalhe político na mesa, você ainda estaria escolhendo qual pecado parecia mais educado enquanto a festa terminava sozinha.' },
     choices: [
       { id: 'calledout_therese', text: '"Era um evento de Therese, não era?"', nextScene: 'janette_gallery_admission', timeMinutes: 2 },
       { id: 'calledout_tung', text: '"Chega. Quero Tung."', nextScene: 'janette_gallery_after', timeMinutes: 2 },
@@ -471,9 +471,9 @@ const voermanScenes = {
   janette_gallery_admission: {
     id: 'janette_gallery_admission', chapter: 'ASYLUM', title: 'Irmãs', location: asylum,
     narration: ['Jeanette não demonstra culpa.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Sim. Parte do evento era dela. Agora entende por que seria menos divertido se eu começasse por isso.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Sim. Therese tinha interesses ali. Agora entende por que começar por essa parte teria estragado toda a diversão? Você teria transformado uma pequena travessura numa crise moral antes mesmo de eu entregar a faca.' },
     choices: [
-      { id: 'admission_used', text: '"Você me usou."', nextScene: 'janette_gallery_after', timeMinutes: 2, flags: { realizedJanetteUsedPlayer: true } },
+      { id: 'admission_used', text: '"Você me usou."', nextScene: 'janette_gallery_after', timeMinutes: 2, flags: { realizedJanetteUsedPlayer: true, janetteManipulationRecognized: true, janetteTrustDamaged: true }, relationshipMetrics: { trust: -7, anger: 5, respect: 2 }, memory: { type: 'betrayal', text: 'Você percebeu que Jeanette omitiu a ligação de Therese com a Galeria Noir para usar você.' } },
       { id: 'admission_tung', text: '"Quero o que foi prometido."', nextScene: 'janette_gallery_after', timeMinutes: 2 },
     ],
   },
@@ -766,7 +766,7 @@ const voermanScenes = {
   janette_ocean_intercept: {
     id: 'janette_ocean_intercept', chapter: 'ASYLUM', title: 'Antes de Subir', location: asylum,
     narration: ['Jeanette percebe imediatamente que você trouxe alguma coisa.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Então voltou inteiro. Therese pediu alguma lembrancinha?' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Então o hotel não engoliu você. Que decepcionante para o hotel. Therese mandou buscar alguma lembrancinha ou só provar que consegue entrar num lugar assombrado e voltar com todos os membros?' },
     choices: [
       { id: 'intercept_show', text: 'Mostrar o pingente.', nextScene: 'janette_ocean_object', timeMinutes: 2 },
       { id: 'intercept_hide', text: '"Isso é entre mim e Therese."', nextScene: 'therese_ocean_return', timeMinutes: 2 },
@@ -789,7 +789,7 @@ const voermanScenes = {
     narration: ['Jeanette observa o pingente com seriedade incomum.'],
     dialogue: { speaker: 'Jeanette Voerman', text: 'Me dê isso. Eu tiro o objeto do alcance de Therese e do hotel. O mar pode ficar com ele.' },
     choices: [
-      { id: 'object_give', text: 'Entregar a Jeanette.', nextScene: 'janette_ocean_destroy', timeMinutes: 2, flags: { oceanObjectGivenToJanette: true, trustedJanetteOverTherese: true } },
+      { id: 'object_give', text: 'Entregar a Jeanette.', nextScene: 'janette_ocean_destroy', timeMinutes: 2, flags: { oceanObjectGivenToJanette: true, trustedJanetteOverTherese: true, janetteMajorTrustChoice: true }, relationshipMetrics: { trust: 8, affection: 4 }, memory: { type: 'positive', text: 'Você confiou o objeto do Ocean House a Jeanette em vez de entregá-lo a Therese.' } },
       { id: 'object_question', text: '"Como sei que não é só para prejudicar Therese?"', nextScene: 'janette_ocean_honesty', timeMinutes: 2 },
       { id: 'object_refuse', text: '"Fiz um acordo com Therese."', nextScene: 'therese_ocean_return', timeMinutes: 2 },
     ],
@@ -798,7 +798,7 @@ const voermanScenes = {
   janette_ocean_honesty: {
     id: 'janette_ocean_honesty', chapter: 'ASYLUM', title: 'Motivos Misturados', location: asylum,
     narration: ['Jeanette sorri de lado.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Talvez eu queira libertar um fantasma. Talvez queira irritar minha irmã. Talvez as duas coisas sejam verdade.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Talvez eu queira libertar um fantasma. Talvez eu queira irritar Therese. Talvez eu tenha a maturidade emocional necessária para querer as duas coisas ao mesmo tempo. Motivos misturados ainda podem produzir uma escolha certa.' },
     choices: [
       { id: 'honesty_give', text: 'Entregar o pingente.', nextScene: 'janette_ocean_destroy', timeMinutes: 2 },
       { id: 'honesty_therese', text: 'Procurar Therese.', nextScene: 'therese_ocean_return', timeMinutes: 2 },
@@ -1230,7 +1230,7 @@ const voermanScenes = {
   janette_malkavian: {
     id: 'janette_malkavian', chapter: 'ASYLUM', title: 'Duas Mentes', location: asylum,
     narration: ['Jeanette para de brincar por um instante.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Oh. Um Malkaviano. Duas mentes quebradas conseguem ouvir ruídos que pessoas inteiras confundem com silêncio.' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Oh... Malkaviano. Então talvez eu devesse tomar cuidado com você. Duas mentes rachadas às vezes escutam coisas que pessoas inteiras passam a eternidade chamando de silêncio.' },
     choices: [
       { id: 'malk_janus', text: '"Janus olha para mim com duas faces, mas eu só vejo um pescoço."', nextScene: 'janette_malkavian_janus', timeMinutes: 2 },
       { id: 'malk_tung', text: '"Só preciso de Tung."', nextScene: 'janette_tung', timeMinutes: 2 },
@@ -1240,9 +1240,9 @@ const voermanScenes = {
   janette_malkavian_janus: {
     id: 'janette_malkavian_janus', chapter: 'ASYLUM', title: 'Janus Sorri', location: asylum,
     narration: ['O sorriso de Jeanette congela por um instante.'],
-    dialogue: { speaker: 'Jeanette Voerman', text: 'Janus. Duas faces, uma passagem. Você enxerga coisas desagradáveis quando olha de lado, não enxerga?' },
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Janus... duas faces guardando a mesma passagem. Você olha de lado e encontra coisas que deveriam permanecer atrás dos olhos, não encontra? Cuidado com essa curiosidade. Algumas portas aprendem o nome de quem bate nelas.' },
     choices: [
-      { id: 'malk_press', text: '"Qual das duas está falando comigo agora?"', nextScene: 'janette_malkavian_end', timeMinutes: 2 },
+      { id: 'malk_press', text: '"Qual das duas está falando comigo agora?"', nextScene: 'janette_malkavian_end', timeMinutes: 2, flags: { janetteJanusSuspicion: true }, relationshipMetrics: { safety: -3 }, memory: { type: 'identity-pressure', text: 'Como Malkaviano, você pressionou Jeanette sobre Janus e as duas faces.' } },
       { id: 'malk_drop', text: '"Não importa. Ainda."', nextScene: 'janette_tung', timeMinutes: 2 },
     ],
   },
@@ -1253,6 +1253,245 @@ const voermanScenes = {
     dialogue: { speaker: 'Jeanette Voerman', text: 'A mais bonita, obviamente. Não estrague a surpresa tentando abrir o presente pelo fundo.' },
     choices: [{ id: 'malkend_tung', text: '"Então guardo a pergunta."', nextScene: 'janette_tung', timeMinutes: 2 }],
   },
+
+  // ============================================================
+  // JEANETTE — RETORNOS E MEMÓRIA AUTORAL
+  // ============================================================
+
+  janette_return_flirt: {
+    id: 'janette_return_flirt', chapter: 'ASYLUM', title: 'Ela Lembrou', location: asylum,
+    visual: { characters: { 'Jeanette Voerman': { src: '/images/npcs/janette-voerman/seductive.png', alt: 'Jeanette Voerman' } } },
+    narration: [
+      'Jeanette percebe você antes que você consiga decidir se vai procurá-la.',
+      'O sorriso surge devagar. Não é exatamente o mesmo sorriso que ela oferece ao salão inteiro.',
+    ],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Olha quem voltou. Eu estava começando a achar que toda aquela curiosidade era só conversa. Não diga que passou a noite pensando em mim. Deixe pelo menos um pouco de mistério.' },
+    choices: [
+      { id: 'return_flirt_play', text: '"Talvez eu tenha pensado."', nextScene: 'janette_return_flirt_play', timeMinutes: 2, flags: { janetteFlirtContinued: true }, relationshipMetrics: { attraction: 3, affection: 1 } },
+      { id: 'return_flirt_business', text: '"Não se anime. Vim falar de negócios."', nextScene: 'janette_return_business', timeMinutes: 2 },
+      { id: 'return_flirt_therese', text: '"Na verdade, preciso falar com Therese."', nextScene: 'janette_return_therese_after_flirt', timeMinutes: 2 },
+    ],
+  },
+
+  janette_return_flirt_play: {
+    id: 'janette_return_flirt_play', chapter: 'ASYLUM', title: 'Um Jogo Conhecido', location: asylum,
+    narration: ['Jeanette inclina a cabeça, satisfeita por você ter aceitado o jogo uma segunda vez.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Muito melhor. Pessoas que fingem não querer nada são exaustivas. Pelo menos você está aprendendo a mentir de um jeito divertido.' },
+    choices: [
+      { id: 'return_flirt_play_tung', text: '"E você está aprendendo a responder sobre Bertram?"', nextScene: 'janette_tung', timeMinutes: 2 },
+      { id: 'return_flirt_play_personal', text: '"Talvez eu tenha voltado para ver você."', nextScene: 'janette_return_flirt_personal', timeMinutes: 2, flags: { janettePersonalInterestShown: true }, relationshipMetrics: { attraction: 4, affection: 2 } },
+    ],
+  },
+
+  janette_return_flirt_personal: {
+    id: 'janette_return_flirt_personal', chapter: 'ASYLUM', title: 'Perigoso Demais', location: asylum,
+    narration: ['Por uma fração de segundo, Jeanette parece genuinamente surpresa.', 'Ela cobre a reação com um sorriso antes que você tenha certeza de ter visto.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Cuidado. Continue dizendo coisas assim e eu posso cometer o erro terrível de acreditar em você.' },
+    choices: [
+      { id: 'personal_tung', text: '"Então não estrague o momento. Me ajude com Tung."', nextScene: 'janette_tung', timeMinutes: 2 },
+      { id: 'personal_end', text: 'Deixar o comentário no ar.', nextScene: 'free_roam', timeMinutes: 1, flags: { janettePersonalMoment: true }, relationshipMetrics: { trust: 2, affection: 2 } },
+    ],
+  },
+
+  janette_return_cold: {
+    id: 'janette_return_cold', chapter: 'ASYLUM', title: 'Memória Longa', location: asylum,
+    narration: ['Jeanette vê você se aproximar e não faz esforço algum para esconder que lembra da primeira conversa.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Você de novo. Que bom. Eu estava preocupada que tivesse desperdiçado toda aquela antipatia numa pessoa que nunca mais pisaria aqui.' },
+    choices: [
+      { id: 'return_cold_apologize', text: '"Eu comecei mal."', nextScene: 'janette_return_apology', timeMinutes: 2, flags: { apologizedToJanette: true, janetteRepairedBadStart: true }, relationshipMetrics: { trust: 3, anger: -4 } },
+      { id: 'return_cold_stay_cold', text: '"Ainda não vim fazer amizade."', nextScene: 'janette_return_cold_business', timeMinutes: 2, flags: { janetteColdRelationshipContinued: true }, relationshipMetrics: { anger: 2 } },
+    ],
+  },
+
+  janette_return_apology: {
+    id: 'janette_return_apology', chapter: 'ASYLUM', title: 'Segunda Primeira Impressão', location: asylum,
+    narration: ['Jeanette observa seu rosto como se procurasse a armadilha na frase.', 'Então o canto da boca sobe.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Uma desculpa espontânea? Nesta cidade? Agora você realmente conseguiu minha atenção. Está bem. Podemos fingir que sua primeira impressão morreu antes de você.' },
+    choices: [
+      { id: 'apology_restart', text: '"Então começamos de novo."', nextScene: 'janette_identity', timeMinutes: 2, flags: { janetteSecondChance: true }, relationshipMetrics: { trust: 2, affection: 1 } },
+      { id: 'apology_tung', text: '"Começamos por Bertram."', nextScene: 'janette_tung', timeMinutes: 2 },
+    ],
+  },
+
+  janette_return_cold_business: {
+    id: 'janette_return_cold_business', chapter: 'ASYLUM', title: 'Sem Charme', location: asylum,
+    narration: ['Jeanette cruza os braços. Desta vez ela não tenta diminuir a distância.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Ótimo. Sem charme, sem brincadeira, sem fingir que gostamos um do outro. Você quer alguma coisa. Diga.' },
+    choices: [
+      { id: 'coldbusiness_tung', text: '"Bertram Tung."', nextScene: 'janette_tung_hostile', timeMinutes: 2 },
+      { id: 'coldbusiness_therese', text: '"Therese."', nextScene: 'janette_therese', timeMinutes: 2 },
+    ],
+  },
+
+  janette_return_empathy: {
+    id: 'janette_return_empathy', chapter: 'ASYLUM', title: 'Você Prestou Atenção', location: asylum,
+    narration: ['Quando Jeanette percebe você, a provocação habitual aparece por reflexo.', 'Ela hesita antes de usá-la.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Você é inconveniente, sabia? A maioria das pessoas escuta uma história triste e imediatamente procura uma maneira de usá-la. Você simplesmente... escutou.' },
+    choices: [
+      { id: 'empathy_no_debt', text: '"Você não me deve nada por isso."', nextScene: 'janette_return_empathy_soft', timeMinutes: 2, flags: { janetteEmpathyDeepened: true }, relationshipMetrics: { trust: 5, safety: 4, affection: 2 } },
+      { id: 'empathy_ask_therese', text: '"Ainda quero entender o que aconteceu entre vocês."', nextScene: 'janette_return_therese_vulnerable', timeMinutes: 2 },
+    ],
+  },
+
+  janette_return_empathy_soft: {
+    id: 'janette_return_empathy_soft', chapter: 'ASYLUM', title: 'Sem Dívida', location: asylum,
+    narration: ['Jeanette olha para você em silêncio.', 'Desta vez, quando sorri, não parece estar apresentando nada para ninguém.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Não diga coisas sensatas para mim desse jeito. Eu tenho uma reputação cuidadosamente irresponsável para manter.' },
+    choices: [
+      { id: 'empathysoft_tung', text: '"Sua reputação sobrevive. E Bertram?"', nextScene: 'janette_tung', timeMinutes: 2 },
+      { id: 'empathysoft_end', text: 'Não pressioná-la.', nextScene: 'free_roam', timeMinutes: 1, flags: { janetteBoundaryRespected: true }, relationshipMetrics: { trust: 3, safety: 3 } },
+    ],
+  },
+
+  janette_return_therese_vulnerable: {
+    id: 'janette_return_therese_vulnerable', chapter: 'ASYLUM', title: 'A Parte Que Dói', location: asylum,
+    narration: ['Jeanette olha para o escritório no andar superior.', 'Não há piada desta vez.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'O problema não é odiar Therese. Seria muito mais fácil se fosse. O problema é lembrar de todas as vezes em que eu quis que ela me escolhesse... e de todas as vezes em que ela escolheu ser aquilo que esperavam dela.' },
+    choices: [
+      { id: 'vulnerable_dont_choose', text: '"Talvez vocês não precisem continuar escolhendo lados."', nextScene: 'janette_return_vulnerable_react', timeMinutes: 2, flags: { janetteReconciliationIdeaRaised: true } },
+      { id: 'vulnerable_stop', text: '"Não precisa falar mais."', nextScene: 'free_roam', timeMinutes: 1, flags: { janetteBoundaryRespected: true }, relationshipMetrics: { trust: 3, safety: 4 } },
+    ],
+  },
+
+  janette_return_vulnerable_react: {
+    id: 'janette_return_vulnerable_react', chapter: 'ASYLUM', title: 'Uma Ideia Irritante', location: asylum,
+    narration: ['Jeanette solta uma risada curta, mas não parece achar graça.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Que ideia irritantemente saudável. Não faça disso um hábito ou vou precisar expulsar você do Asylum.' },
+    choices: [{ id: 'vulnerablereact_end', text: '"Vou correr o risco."', nextScene: 'free_roam', timeMinutes: 1 }],
+  },
+
+  janette_return_manipulation: {
+    id: 'janette_return_manipulation', chapter: 'ASYLUM', title: 'Sem Fingimento', location: asylum,
+    narration: ['Jeanette percebe imediatamente que você não esqueceu a Galeria Noir.', 'Desta vez ela não tenta fingir inocência.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Antes que comece: sim, eu usei você. Você percebeu, eu percebi que você percebeu e agora podemos poupar uns cinco minutos de indignação teatral. A pergunta interessante é se ainda pretende conversar comigo.' },
+    choices: [
+      { id: 'manipulation_angry', text: '"Não confio mais em você."', nextScene: 'janette_return_trust_damaged', timeMinutes: 2, flags: { janetteDistrusted: true }, relationshipMetrics: { trust: -4, anger: 3 } },
+      { id: 'manipulation_accept', text: '"Só não minta para mim de novo."', nextScene: 'janette_return_new_terms', timeMinutes: 2, flags: { janetteDemandedHonesty: true }, relationshipMetrics: { respect: 2 } },
+      { id: 'manipulation_admire', text: '"Foi uma boa manipulação."', nextScene: 'janette_return_admired_scheme', timeMinutes: 2, flags: { janetteSchemeAdmired: true }, relationshipMetrics: { respect: 4, attraction: 2 } },
+    ],
+  },
+
+  janette_return_trust_damaged: {
+    id: 'janette_return_trust_damaged', chapter: 'ASYLUM', title: 'Confiança', location: asylum,
+    narration: ['Jeanette sustenta seu olhar.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Ótimo. Confiança demais deixa as pessoas preguiçosas. Só não confunda não confiar em mim com não precisar de mim.' },
+    choices: [
+      { id: 'trustdamaged_tung', text: '"Então seja útil. Tung."', nextScene: 'janette_tung', timeMinutes: 2 },
+      { id: 'trustdamaged_leave', text: 'Encerrar a conversa.', nextScene: 'free_roam', timeMinutes: 1 },
+    ],
+  },
+
+  janette_return_new_terms: {
+    id: 'janette_return_new_terms', chapter: 'ASYLUM', title: 'Novos Termos', location: asylum,
+    narration: ['Jeanette passa a língua discretamente sobre um dos caninos.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Não posso prometer uma vida sem mentiras. Seria contra minha natureza e, francamente, muito entediante. Posso prometer que da próxima vez você saberá que existe uma segunda intenção. O conteúdo dela continua sendo surpresa.' },
+    choices: [
+      { id: 'newterms_accept', text: '"É um começo."', nextScene: 'free_roam', timeMinutes: 1, flags: { janetteNewTermsAccepted: true }, relationshipMetrics: { trust: 2, respect: 2, anger: -2 } },
+      { id: 'newterms_no', text: '"Não é suficiente."', nextScene: 'janette_return_trust_damaged', timeMinutes: 1 },
+    ],
+  },
+
+  janette_return_admired_scheme: {
+    id: 'janette_return_admired_scheme', chapter: 'ASYLUM', title: 'Péssima Influência', location: asylum,
+    narration: ['Jeanette parece genuinamente encantada.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Ah, não. Não faça isso. Se começar a elogiar minhas piores qualidades, vou acabar gostando de você por motivos completamente irresponsáveis.' },
+    choices: [
+      { id: 'admiredscheme_end', text: '"Talvez esse seja o objetivo."', nextScene: 'free_roam', timeMinutes: 1, flags: { janetteFlirtAfterManipulation: true }, relationshipMetrics: { attraction: 4, affection: 2 } },
+      { id: 'admiredscheme_business', text: '"Não exagere. Só reconheço competência."', nextScene: 'janette_tung', timeMinutes: 2, relationshipMetrics: { respect: 2 } },
+    ],
+  },
+
+  janette_return_therese_after_flirt: {
+    id: 'janette_return_therese_after_flirt', chapter: 'ASYLUM', title: 'A Outra Irmã', location: asylum,
+    narration: ['O sorriso permanece, mas a temperatura da conversa muda.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Claro. Você volta, me dá esperança e então pergunta por Therese. Existe uma lição sobre expectativas aqui, mas estou ocupada demais sendo dramaticamente ofendida.' },
+    choices: [
+      { id: 'thereseafterflirt_tease', text: '"Está com ciúmes?"', nextScene: 'janette_return_jealous_tease', timeMinutes: 2, flags: { teasedJanetteJealousy: true }, relationshipMetrics: { attraction: 1, anger: 1 } },
+      { id: 'thereseafterflirt_business', text: '"É só negócio."', nextScene: 'therese_first', timeMinutes: 2 },
+    ],
+  },
+
+  janette_return_jealous_tease: {
+    id: 'janette_return_jealous_tease', chapter: 'ASYLUM', title: 'Ciúmes', location: asylum,
+    narration: ['Jeanette ri, mas os olhos continuam avaliando você.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Ciúmes? De Therese? Querido, eu tenho defeitos muito mais interessantes. Mas se pretende subir, tente não parecer tão encantado quando voltar.' },
+    choices: [
+      { id: 'jealoustease_therese', text: 'Subir para falar com Therese.', nextScene: 'therese_first', timeMinutes: 2 },
+      { id: 'jealoustease_stay', text: '"Talvez eu fique aqui."', nextScene: 'janette_interest', timeMinutes: 2, flags: { choseJanetteOverThereseMoment: true }, relationshipMetrics: { attraction: 3, affection: 2 } },
+    ],
+  },
+
+  janette_return_business: {
+    id: 'janette_return_business', chapter: 'ASYLUM', title: 'Negócios, Então', location: asylum,
+    narration: ['Jeanette suspira como se você tivesse acabado de estragar uma brincadeira particularmente boa.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Negócios. Que palavra deprimente. Está bem, patinho. Diga o que quer antes que eu encontre uma maneira de tornar isso pessoal de novo.' },
+    choices: [
+      { id: 'returnbusiness_tung', text: '"Bertram Tung."', nextScene: 'janette_tung', timeMinutes: 2 },
+      { id: 'returnbusiness_therese', text: '"Therese."', nextScene: 'janette_therese', timeMinutes: 2 },
+    ],
+  },
+
+  janette_return_malkavian_suspicion: {
+    id: 'janette_return_malkavian_suspicion', chapter: 'ASYLUM', title: 'Duas Faces', location: asylum,
+    narration: ['Jeanette para antes de fazer a primeira piada.', 'Por um instante, parece tentar descobrir exatamente o que você viu na última conversa.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Você está olhando para mim daquele jeito de novo. Como se estivesse esperando alguém responder por cima do meu ombro. Diga, Malkaviano... quantas pessoas você acha que estão nesta conversa?' },
+    choices: [
+      { id: 'malk_return_janus', text: '"Duas faces. Uma passagem."', nextScene: 'janette_return_malkavian_janus', timeMinutes: 2, flags: { janetteJanusPressedAgain: true } },
+      { id: 'malk_return_backoff', text: '"Esqueça."', nextScene: 'janette_tung', timeMinutes: 1, flags: { janetteBoundaryRespected: true }, relationshipMetrics: { safety: 2 } },
+    ],
+  },
+
+  janette_return_malkavian_janus: {
+    id: 'janette_return_malkavian_janus', chapter: 'ASYLUM', title: 'O Espelho Pisca', location: asylum,
+    narration: ['O sorriso de Jeanette desaparece.', 'Não há raiva. Há algo mais próximo de medo — e ele some tão rápido que poderia ter sido imaginação.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Janus olha para os dois lados porque nenhuma face consegue ver a outra sem um espelho. Talvez seja melhor deixar certos espelhos cobertos.' },
+    choices: [
+      { id: 'malkjanus_press', text: '"Qual delas está falando comigo agora?"', nextScene: 'janette_return_malkavian_boundary', timeMinutes: 2, flags: { janetteIdentityDirectlyQuestioned: true }, relationshipMetrics: { safety: -4, anger: 2 } },
+      { id: 'malkjanus_stop', text: '"Tudo bem. Não vou insistir."', nextScene: 'free_roam', timeMinutes: 1, flags: { janetteBoundaryRespected: true }, relationshipMetrics: { trust: 3, safety: 4 } },
+    ],
+  },
+
+  janette_return_malkavian_boundary: {
+    id: 'janette_return_malkavian_boundary', chapter: 'ASYLUM', title: 'Não Faça Isso', location: asylum,
+    narration: ['Jeanette se aproxima. Desta vez não há sedução no gesto.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Não faça isso. Você pode brincar comigo, pode me provocar, pode até tentar me entender. Mas não abra portas dentro da minha cabeça só porque consegue ouvir alguma coisa do outro lado.' },
+    choices: [
+      { id: 'malkboundary_respect', text: '"Tudo bem. Eu paro."', nextScene: 'free_roam', timeMinutes: 1, flags: { janetteBoundaryRespected: true, janetteMalkavianTrustPreserved: true }, relationshipMetrics: { trust: 4, safety: 5 } },
+      { id: 'malkboundary_push', text: '"Então existe alguma coisa do outro lado."', nextScene: 'janette_return_malkavian_push', timeMinutes: 2, flags: { janetteBoundaryViolated: true }, relationshipMetrics: { trust: -7, safety: -8, anger: 6 } },
+    ],
+  },
+
+  janette_return_malkavian_push: {
+    id: 'janette_return_malkavian_push', chapter: 'ASYLUM', title: 'Porta Fechada', location: asylum,
+    narration: ['Jeanette recua.', 'O sorriso retorna, mas agora funciona apenas como uma fechadura.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'E aí está você estragando uma coisa interessante. Conversa encerrada, patinho.' },
+    choices: [{ id: 'malkpush_leave', text: 'Deixá-la em paz.', nextScene: 'free_roam', timeMinutes: 1, flags: { janetteMalkavianTrustDamaged: true } }],
+  },
+
+  janette_return_major_trust: {
+    id: 'janette_return_major_trust', chapter: 'ASYLUM', title: 'Você Escolheu Meu Lado', location: asylum,
+    narration: ['Jeanette não menciona o pingente imediatamente.', 'A maneira como olha para você deixa claro que não esqueceu.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Você me entregou aquilo quando poderia ter subido as escadas e feito exatamente o que Therese pediu. Não vou fingir que isso não significou nada.' },
+    choices: [
+      { id: 'majortrust_her', text: '"Eu confiei em você."', nextScene: 'janette_return_major_trust_answer', timeMinutes: 2, flags: { janetteTrustExplicit: true }, relationshipMetrics: { trust: 5, affection: 3 } },
+      { id: 'majortrust_spirit', text: '"Eu fiz pelo espírito, não por você."', nextScene: 'janette_return_major_trust_spirit', timeMinutes: 2 },
+    ],
+  },
+
+  janette_return_major_trust_answer: {
+    id: 'janette_return_major_trust_answer', chapter: 'ASYLUM', title: 'Uma Palavra Perigosa', location: asylum,
+    narration: ['Jeanette fica séria.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Confiança é uma palavra perigosa para usar comigo. Mas... obrigada. Não faça eu me arrepender de ter levado isso a sério.' },
+    choices: [{ id: 'majortrustanswer_end', text: '"Não pretendo."', nextScene: 'free_roam', timeMinutes: 1, flags: { janetteRelationshipDeepened: true }, relationshipMetrics: { trust: 4, affection: 4, safety: 2 } }],
+  },
+
+  janette_return_major_trust_spirit: {
+    id: 'janette_return_major_trust_spirit', chapter: 'ASYLUM', title: 'Mesmo Assim', location: asylum,
+    narration: ['Jeanette aceita a correção com um pequeno sorriso.'],
+    dialogue: { speaker: 'Jeanette Voerman', text: 'Justo. Ainda assim, quando precisou escolher o que fazer, acreditou mais na minha resposta do que na de Therese. Vou guardar só essa parte.' },
+    choices: [{ id: 'majortrustspirit_end', text: 'Encerrar a conversa.', nextScene: 'free_roam', timeMinutes: 1 }],
+  },
+
 }
 
 export default voermanScenes

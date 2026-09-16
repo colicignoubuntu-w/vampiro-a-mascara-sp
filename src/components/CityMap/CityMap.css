@@ -419,3 +419,18 @@
       1px solid #35242a;
   }
 }
+
+
+/* ========================================
+   CHAT GLOBAL
+   ======================================== */
+
+.city-map-global-chat {
+  margin-bottom: 20px;
+}
+
+.city-map-global-chat
+.text-channel {
+  width: 100%;
+}
+

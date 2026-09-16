@@ -13,6 +13,13 @@ import {
 
 import CityMap from '../CityMap/CityMap'
 
+import TextChannel from '../Multiplayer/TextChannel/TextChannel.jsx'
+import VoiceChannel from '../Multiplayer/VoiceChannel/VoiceChannel.jsx'
+
+import {
+  useMultiplayer,
+} from '../../multiplayer/MultiplayerProvider.jsx'
+
 import RelationshipPlaces from '../Relationships/RelationshipPlaces'
 
 import {
@@ -40,11 +47,50 @@ function pad(value) {
   )
 }
 
+const ULTIMO_GOLE_CHAT_CHANNELS = {
+  main: {
+    title: '# SALÃO PRINCIPAL',
+    subtitle: 'Mesas, balcão e pista',
+  },
+
+  stage: {
+    title: '# PERTO DO PALCO',
+    subtitle: 'Grade e lateral do palco',
+  },
+
+  bar: {
+    title: '# BALCÃO',
+    subtitle: 'Balcão do Último Gole',
+  },
+
+  vip: {
+    title: '# ÁREA VIP',
+    subtitle: 'Camarote reservado',
+  },
+
+  stairs: {
+    title: '# ESCADAS',
+    subtitle: 'Escadas dos fundos',
+  },
+
+  basement: {
+    title: '# PORÃO',
+    subtitle: 'Área reservada aos membros',
+  },
+}
+
 export default function UltimoGole({
   game,
   onGameChange,
   onTravel,
 }) {
+  const {
+    setCurrentLocation:
+      setMultiplayerLocation,
+    setCurrentArea:
+      setMultiplayerArea,
+  } = useMultiplayer()
+
   const [
     areaId,
     setAreaId,
@@ -80,6 +126,21 @@ export default function UltimoGole({
     useRef(
       null
     )
+
+  useEffect(() => {
+    setMultiplayerLocation(
+      'ultimo_gole'
+    )
+
+    setMultiplayerArea(
+      areaId
+    )
+  }, [
+    areaId,
+    setMultiplayerLocation,
+    setMultiplayerArea,
+  ])
+
   // RELATIONSHIP_BODY_CLASS_ENCOUNTER_V4
   useEffect(() => {
     document.body.classList.toggle(
@@ -124,6 +185,12 @@ export default function UltimoGole({
     getUltimoGoleArea(
       areaId
     )
+
+  const localChatChannel =
+    ULTIMO_GOLE_CHAT_CHANNELS[
+      areaId
+    ] ??
+    ULTIMO_GOLE_CHAT_CHANNELS.main
 
   const presentRelationships =
     useMemo(
@@ -214,6 +281,18 @@ export default function UltimoGole({
       nextAreaId
     )
 
+    /*
+     * A movimentação dentro do local
+     * também precisa ser persistida
+     * imediatamente no multiplayer.
+     *
+     * Não dependemos somente do
+     * useEffect de areaId para isso.
+     */
+    setMultiplayerArea(
+      nextAreaId
+    )
+
     onGameChange(
       updated
     )
@@ -267,6 +346,14 @@ export default function UltimoGole({
   }
 
   function leaveBar() {
+    setMultiplayerArea(
+      null
+    )
+
+    setMultiplayerLocation(
+      'pinheiros'
+    )
+
     const updated = {
       ...game,
 
@@ -584,6 +671,38 @@ export default function UltimoGole({
                   }
                 )}
               </div>
+            </section>
+          )}
+
+          {!encounter && (
+            <section className="ultimo-gole-local-chat">
+              <div className="ultimo-gole-local-chat-label">
+                <span>
+                  INTERPRETAÇÃO ONLINE
+                </span>
+
+                <small>
+                  Somente jogadores nesta área
+                </small>
+              </div>
+
+              <TextChannel
+                key={`ultimo-gole-${areaId}`}
+                channelId={`venue:ultimo_gole:${areaId}`}
+                title={
+                  localChatChannel.title
+                }
+                subtitle={
+                  localChatChannel.subtitle
+                }
+              />
+
+              <VoiceChannel
+                key={`ultimo-gole-voice-${areaId}`}
+                locationId="ultimo_gole"
+                areaId={areaId}
+                title="CONVERSA POR VOZ"
+              />
             </section>
           )}
         </div>

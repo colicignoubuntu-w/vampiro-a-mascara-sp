@@ -2046,3 +2046,245 @@ body,
     width: 100%;
   }
 }
+
+/* ===== MENU CINEMATOGRAFICO - INICIO ===== */
+
+.main-menu {
+  isolation: isolate;
+}
+
+/* CIDADE FIXA */
+.main-menu-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  background-color: #050506;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  pointer-events: none;
+}
+
+/* CAMADA DAS CENAS/PERSONAGENS */
+.main-menu-slideshow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/*
+A arte fica PARADA.
+Nada de zoom ou movimento.
+
+A máscara dissolve:
+- lado esquerdo
+- parte de cima
+- parte de baixo
+
+Isso faz a arte se misturar visualmente
+com a cidade fixa.
+*/
+.main-menu-slide {
+  position: absolute;
+
+  left: 65%;
+  top: 59%;
+
+  /* Um pouco maior */
+  width: min(88vw, 1450px);
+  height: min(115vh, 1300px);
+
+  object-fit: contain;
+  object-position: center;
+
+  opacity: 0;
+
+  /*
+    Centro permanece nítido.
+    A dissolução começa antes e acontece
+    muito mais gradualmente.
+  */
+
+
+
+  /*
+    Dissolve a imagem nos QUATRO lados.
+
+    O centro continua nítido.
+    As bordas ficam fortemente transparentes.
+  */
+
+  -webkit-mask-image:
+    linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(0,0,0,0.12) 2%,
+      rgba(0,0,0,0.40) 5%,
+      rgba(0,0,0,0.72) 8%,
+      rgba(0,0,0,0.94) 11%,
+      black 14%,
+      black 86%,
+      rgba(0,0,0,0.94) 89%,
+      rgba(0,0,0,0.72) 92%,
+      rgba(0,0,0,0.40) 95%,
+      rgba(0,0,0,0.12) 98%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0,0,0,0.12) 2%,
+      rgba(0,0,0,0.42) 5%,
+      rgba(0,0,0,0.74) 8%,
+      rgba(0,0,0,0.95) 11%,
+      black 14%,
+      black 86%,
+      rgba(0,0,0,0.95) 89%,
+      rgba(0,0,0,0.74) 92%,
+      rgba(0,0,0,0.42) 95%,
+      rgba(0,0,0,0.12) 98%,
+      transparent 100%
+    );
+
+  -webkit-mask-composite: source-in;
+
+  mask-image:
+    linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(0,0,0,0.12) 2%,
+      rgba(0,0,0,0.40) 5%,
+      rgba(0,0,0,0.72) 8%,
+      rgba(0,0,0,0.94) 11%,
+      black 14%,
+      black 86%,
+      rgba(0,0,0,0.94) 89%,
+      rgba(0,0,0,0.72) 92%,
+      rgba(0,0,0,0.40) 95%,
+      rgba(0,0,0,0.12) 98%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0,0,0,0.12) 2%,
+      rgba(0,0,0,0.42) 5%,
+      rgba(0,0,0,0.74) 8%,
+      rgba(0,0,0,0.95) 11%,
+      black 14%,
+      black 86%,
+      rgba(0,0,0,0.95) 89%,
+      rgba(0,0,0,0.74) 92%,
+      rgba(0,0,0,0.42) 95%,
+      rgba(0,0,0,0.12) 98%,
+      transparent 100%
+    );
+
+  mask-composite: intersect;
+
+  transform: translate(-50%, -50%);
+
+  transition: opacity 2.5s ease-in-out;
+
+  will-change: opacity;
+}
+
+.main-menu-slide.is-visible {
+  opacity: 1;
+}
+
+/*
+Sombras adicionais integram a imagem
+com o cenário, principalmente nas bordas.
+*/
+
+
+/* ESCURECIMENTO PARA O MENU */
+.main-menu-overlay {
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(2,2,3,0.94) 0%,
+      rgba(3,3,4,0.80) 22%,
+      rgba(3,3,4,0.38) 43%,
+      rgba(0,0,0,0.08) 68%,
+      rgba(0,0,0,0.16) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,0.18),
+      transparent 48%,
+      rgba(0,0,0,0.42)
+    );
+}
+
+.main-menu-content {
+  position: relative;
+  z-index: 3;
+}
+
+@media (max-width: 700px) {
+
+  .main-menu-slide {
+    width: 100vw;
+    height: 88vh;
+
+    opacity: 0;
+
+    -webkit-mask-image:
+      linear-gradient(
+        to bottom,
+        transparent 0%,
+        black 18%,
+        black 72%,
+        transparent 100%
+      );
+
+    mask-image:
+      linear-gradient(
+        to bottom,
+        transparent 0%,
+        black 18%,
+        black 72%,
+        transparent 100%
+      );
+  }
+
+  .main-menu-slide.is-visible {
+    opacity: 0.68;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .main-menu-slide {
+    transition: none;
+  }
+}
+
+/* ===== MENU CINEMATOGRAFICO - FIM ===== */
+
+/* Imagem do menu pode ser clicada para trocar */
+.main-menu-slide {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* ===== CAIXA ULTIMO PERSONAGEM MAIS CURTA ===== */
+.main-menu-save {
+  width: min(360px, 100%);
+  max-width: 360px;
+  box-sizing: border-box;
+}

@@ -1,0 +1,501 @@
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+
+import {
+  connectPresence,
+  getPlayerProfile,
+  updatePlayerProfile,
+} from '../engine/multiplayer/presenceEngine.js'
+
+const MultiplayerContext =
+  createContext(null)
+
+function getAnonymousDisplayName(user) {
+  if (!user?.id) {
+    return 'Desconhecido'
+  }
+
+  const compactId =
+    String(user.id)
+      .replace(/[^a-fA-F0-9]/g, '')
+
+  const tail =
+    compactId
+      .slice(-8)
+
+  const numericValue =
+    Number.parseInt(
+      tail || '0',
+      16
+    )
+
+  const number =
+    String(
+      numericValue % 10000
+    ).padStart(4, '0')
+
+  return `Desconhecido ${number}`
+}
+
+export function MultiplayerProvider({
+  user,
+  children,
+}) {
+  const [
+    players,
+    setPlayers,
+  ] = useState([])
+
+  const [
+    status,
+    setStatus,
+  ] = useState(
+    'CONNECTING'
+  )
+
+  const [
+    profile,
+    setProfile,
+  ] = useState(null)
+
+  const [
+    currentLocation,
+    setCurrentLocationState,
+  ] = useState('menu')
+
+  const [
+    currentArea,
+    setCurrentAreaState,
+  ] = useState(null)
+
+  const [
+    error,
+    setError,
+  ] = useState('')
+
+  const presenceRef =
+    useRef(null)
+
+  const locationRef =
+    useRef('menu')
+
+  const areaRef =
+    useRef(null)
+
+  const profileRef =
+    useRef(null)
+
+  useEffect(() => {
+    profileRef.current =
+      profile
+  }, [profile])
+
+  useEffect(() => {
+    if (!user?.id) {
+      return undefined
+    }
+
+    let cancelled = false
+    let connection = null
+
+    async function start() {
+      try {
+        setError('')
+
+        const loadedProfile =
+          await getPlayerProfile(
+            user.id
+          )
+
+        if (cancelled) {
+          return
+        }
+
+        let safeProfile =
+          loadedProfile ?? {
+            id: user.id,
+            display_name:
+              'Desconhecido',
+            current_location:
+              'menu',
+            current_area:
+              null,
+            location_visibility:
+              'broad',
+          }
+
+        const isAnonymous =
+          Boolean(
+            user?.is_anonymous
+          )
+
+        const needsAnonymousName =
+          isAnonymous &&
+          (
+            !safeProfile.display_name ||
+            safeProfile.display_name ===
+              'Desconhecido'
+          )
+
+        if (needsAnonymousName) {
+          const anonymousName =
+            getAnonymousDisplayName(
+              user
+            )
+
+          const updatedProfile =
+            await updatePlayerProfile(
+              user.id,
+              {
+                displayName:
+                  anonymousName,
+              }
+            )
+
+          if (updatedProfile) {
+            safeProfile =
+              updatedProfile
+          } else {
+            safeProfile = {
+              ...safeProfile,
+              display_name:
+                anonymousName,
+            }
+          }
+        }
+
+        if (cancelled) {
+          return
+        }
+
+        setProfile(
+          safeProfile
+        )
+
+        profileRef.current =
+          safeProfile
+
+        connection =
+          connectPresence({
+            user,
+
+            profile:
+              safeProfile,
+
+            location:
+              locationRef.current,
+
+            area:
+              areaRef.current,
+
+            onPlayersChange:
+              setPlayers,
+
+            onStatusChange:
+              setStatus,
+          })
+
+        presenceRef.current =
+          connection
+      } catch (startError) {
+        console.error(
+          'Erro ao iniciar multiplayer:',
+          startError
+        )
+
+        if (!cancelled) {
+          setError(
+            startError?.message ||
+              'Não foi possível conectar ao multiplayer.'
+          )
+
+          setStatus('ERROR')
+        }
+      }
+    }
+
+    start()
+
+    return () => {
+      cancelled = true
+
+      if (
+        presenceRef.current ===
+        connection
+      ) {
+        presenceRef.current =
+          null
+      }
+
+      if (connection) {
+        connection
+          .disconnect()
+          .catch((disconnectError) => {
+            console.error(
+              'Erro ao desconectar Presence:',
+              disconnectError
+            )
+          })
+      }
+    }
+  }, [user?.id])
+
+  const setCurrentLocation =
+    useCallback(async (
+      nextLocation
+    ) => {
+    const normalized =
+      String(
+        nextLocation || 'menu'
+      ).trim() || 'menu'
+
+    if (
+      normalized ===
+      locationRef.current
+    ) {
+      setCurrentLocationState(
+        normalized
+      )
+
+      return
+    }
+
+    locationRef.current =
+      normalized
+
+    setCurrentLocationState(
+      normalized
+    )
+
+    try {
+      if (user?.id) {
+        const updated =
+          await updatePlayerProfile(
+            user.id,
+            {
+              location:
+                normalized,
+            }
+          )
+
+        if (updated) {
+          setProfile(
+            updated
+          )
+
+          profileRef.current =
+            updated
+        }
+      }
+
+      if (
+        presenceRef.current
+      ) {
+        await presenceRef.current
+          .updatePresence({
+            displayName:
+              profileRef.current
+                ?.display_name ||
+              'Desconhecido',
+
+            location:
+              normalized,
+          })
+      }
+    } catch (locationError) {
+      console.error(
+        'Erro ao atualizar localização multiplayer:',
+        locationError
+      )
+
+      setError(
+        locationError?.message ||
+          'Não foi possível atualizar sua localização online.'
+      )
+    }
+  }, [user?.id])
+
+  const setCurrentArea =
+    useCallback(async (
+      nextArea
+    ) => {
+      const normalized =
+        nextArea == null ||
+        String(nextArea).trim() === ''
+          ? null
+          : String(nextArea).trim()
+
+      /*
+       * Não retornamos antecipadamente
+       * apenas porque o estado local já
+       * contém esta área.
+       *
+       * O banco é a autoridade usada
+       * pela Edge Function de voz.
+       *
+       * Portanto, mesmo quando
+       * areaRef.current já é igual à
+       * área solicitada, confirmamos a
+       * gravação em player_profiles.
+       */
+      areaRef.current =
+        normalized
+
+      setCurrentAreaState(
+        normalized
+      )
+
+      try {
+        if (user?.id) {
+          const updated =
+            await updatePlayerProfile(
+              user.id,
+              {
+                area:
+                  normalized,
+              }
+            )
+
+          if (updated) {
+            setProfile(
+              updated
+            )
+
+            profileRef.current =
+              updated
+          }
+        }
+
+        if (
+          presenceRef.current
+        ) {
+          await presenceRef.current
+            .updatePresence({
+              displayName:
+                profileRef.current
+                  ?.display_name ||
+                'Desconhecido',
+
+              location:
+                locationRef.current,
+
+              area:
+                normalized,
+            })
+        }
+      } catch (areaError) {
+        console.error(
+          'Erro ao atualizar área multiplayer:',
+          areaError
+        )
+
+        setError(
+          areaError?.message ||
+            'Não foi possível atualizar sua área online.'
+        )
+      }
+    }, [user?.id])
+
+  const setDisplayName =
+    useCallback(async (
+      nextName
+    ) => {
+    const normalized =
+      String(nextName ?? '')
+        .trim()
+
+    if (!normalized) {
+      throw new Error(
+        'Informe um nome.'
+      )
+    }
+
+    const updated =
+      await updatePlayerProfile(
+        user.id,
+        {
+          displayName:
+            normalized,
+        }
+      )
+
+    setProfile(updated)
+    profileRef.current =
+      updated
+
+    if (
+      presenceRef.current
+    ) {
+      await presenceRef.current
+        .updatePresence({
+          displayName:
+            normalized,
+
+          location:
+            locationRef.current,
+        })
+    }
+
+    return updated
+  }, [user?.id])
+
+  const value =
+    useMemo(
+      () => ({
+        players,
+        status,
+        profile,
+        error,
+        currentLocation,
+        currentArea,
+        setCurrentLocation,
+        setCurrentArea,
+        setDisplayName,
+
+        connected:
+          status ===
+          'SUBSCRIBED',
+      }),
+      [
+        players,
+        status,
+        profile,
+        error,
+        currentLocation,
+        currentArea,
+        setCurrentLocation,
+        setCurrentArea,
+        setDisplayName,
+      ]
+    )
+
+  return (
+    <MultiplayerContext.Provider
+      value={value}
+    >
+      {children}
+    </MultiplayerContext.Provider>
+  )
+}
+
+export function useMultiplayer() {
+  const context =
+    useContext(
+      MultiplayerContext
+    )
+
+  if (!context) {
+    throw new Error(
+      'useMultiplayer precisa estar dentro de MultiplayerProvider.'
+    )
+  }
+
+  return context
+}

@@ -308,6 +308,7 @@ function Icon({ type }) {
     messages: '✉',
     calendar: '▦',
     internet: '◎',
+    social: 'V',
   }
 
   return (
@@ -353,6 +354,11 @@ function HomeApp({ unread, onOpen }) {
         <button type="button" onClick={() => onOpen('internet')}>
           <Icon type="internet" />
           <span>Internet</span>
+        </button>
+
+        <button type="button" onClick={() => onOpen('social')}>
+          <Icon type="social" />
+          <span>Vitta</span>
         </button>
       </div>
     </div>
@@ -1552,6 +1558,30 @@ function CalendarApp({ game }) {
   )
 }
 
+const VITTA_POSTS = [
+  { id:'clara-01', npcId:'clara', name:'Clara', handle:'@clarafotos', text:'mais uma noite atrás das lentes.', meta:'Fotografia de show · São Paulo' },
+  { id:'gole-01', name:'Último Gole', handle:'@ultimogole', text:'Programação da semana atualizada.', meta:'Evento público · São Paulo' },
+]
+
+function VittaApp({ game }) {
+  const [profile,setProfile]=useState(null)
+  const visible=VITTA_POSTS.filter(p=>!p.npcId || Boolean(game?.relationships?.[p.npcId]))
+  if(profile){
+    return <section className="phone-app-screen phone-vitta">
+      <button type="button" className="phone-browser-back" onClick={()=>setProfile(null)}>‹ feed</button>
+      <div className="phone-vitta-profile"><span className="phone-vitta-avatar">{profile.name[0]}</span><div><h3>{profile.name}</h3><span>{profile.handle}</span></div></div>
+      {visible.filter(p=>p.handle===profile.handle).map(p=><article className="phone-vitta-post" key={p.id}><p>{p.text}</p><small>{p.meta}</small></article>)}
+    </section>
+  }
+  return <section className="phone-app-screen phone-vitta">
+    <div className="phone-app-title"><span>Vitta</span><strong>feed</strong></div>
+    {visible.map(p=><article className="phone-vitta-post" key={p.id}>
+      <button type="button" className="phone-vitta-author" onClick={()=>setProfile(p)}><span className="phone-vitta-avatar">{p.name[0]}</span><span><strong>{p.name}</strong><small>{p.handle}</small></span></button>
+      <p>{p.text}</p><small>{p.meta}</small><div className="phone-vitta-actions"><span>♡</span><span>comentários</span><span>compartilhar</span></div>
+    </article>)}
+  </section>
+}
+
 function InternetApp() {
   const [page, setPage] = useState(null)
 
@@ -1743,6 +1773,10 @@ export default function Smartphone({
 
                   {app === 'internet' && (
                     <InternetApp />
+                  )}
+
+                  {app === 'social' && (
+                    <VittaApp game={game} />
                   )}
                 </div>
 
