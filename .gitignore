@@ -23,3 +23,37 @@ dist-ssr
 *.sln
 *.sw?
 .env.local
+
+# ==========================================
+# SEGREDOS / VARIAVEIS DE AMBIENTE
+# ==========================================
+.env
+.env.*
+!.env.example
+
+# LiveKit - nunca enviar credenciais
+tmp/
+*livekit-secrets.env
+
+# Supabase - arquivos locais/temporarios
+supabase/.temp/
+
+# Build
+dist/
+
+# ==========================================
+# SEGREDOS / VARIAVEIS DE AMBIENTE
+# ==========================================
+.env
+.env.*
+!.env.example
+
+# LiveKit - nunca enviar credenciais
+tmp/
+*livekit-secrets.env
+
+# Supabase - arquivos locais/temporarios
+supabase/.temp/
+
+# Build
+dist/
