@@ -232,6 +232,20 @@ export default function MainMenu({
             Ficha
           </button>
 
+          <button
+            type="button"
+            className="main-menu-button"
+            onClick={() => {
+              window.open(
+                'https://sites.google.com/view/vampiro-a-mascara-sp/in%C3%ADcio?authuser=0',
+                '_blank',
+                'noopener,noreferrer'
+              )
+            }}
+          >
+            Wiki
+          </button>
+
           <AudioControls />
         </nav>
 
