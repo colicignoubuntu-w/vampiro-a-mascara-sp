@@ -59,3 +59,9 @@ supabase/.temp/
 dist/
 .vercel
 .env*
+
+# Backups e arquivos temporarios locais
+*.backup-*
+*.bak
+*.tmp
+pc_livia_para_chatgpt.txt
