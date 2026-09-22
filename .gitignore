@@ -57,3 +57,5 @@ supabase/.temp/
 
 # Build
 dist/
+.vercel
+.env*

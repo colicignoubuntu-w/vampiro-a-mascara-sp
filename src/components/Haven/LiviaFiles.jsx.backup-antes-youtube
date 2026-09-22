@@ -138,19 +138,6 @@ const SOCIAL_POSTS = [
   { who: 'Último Gole', handle: '@ultimogole', text: 'Programação da semana atualizada.', meta: 'Evento público · São Paulo' },
 ]
 
-const YOUTUBE_VIDEOS = [
-  { id: 'SyfNM3YGqI8', title: 'Vampiro: A Máscara 3E' },
-  { id: 'h-A4VWwb71k', title: 'Vampiro: A Máscara 3E · Vídeo 2' },
-  { id: 'UOr84Ysv09c', title: 'Vampiro: A Máscara 3E · Vídeo 3' },
-  { id: 'V3BjEi_0cY4', title: 'Vampiro: A Máscara 3E · Vídeo 4' },
-  { id: 'Isy-36u3yEI', title: 'Vampiro: A Máscara 3E · Vídeo 5' },
-  { id: '4aAO9NyrN5M', title: 'Vampiro: A Máscara 3E · Vídeo 6' },
-  { id: 'ud3C8W7Za0A', title: 'Vampiro: A Máscara 3E · Vídeo 7' },
-  { id: 'b9mNHHXJB_Q', title: 'Vampiro: A Máscara 3E · Vídeo 8' },
-  { id: '6w-8IZDBH4Y', title: 'Vampiro: A Máscara 3E · Vídeo 9', start: 13 },
-  { id: 'mgNwNBSnLG8', title: 'Vampiro: A Máscara 3E · Vídeo 10', start: 1314 },
-]
-
 const TERMINAL_TOOLS = [
   { id: 'camera', label: 'CROW', desc: 'Câmeras conhecidas pela investigação', command: 'crow --list-known-nodes' },
   { id: 'people', label: 'GHOST', desc: 'Cruzar pessoas já conhecidas', command: 'ghost --index known_people' },
@@ -250,7 +237,6 @@ export default function LiviaFiles({
   const [windowId, setWindowId] = useState(null)
   const [openFile, setOpenFile] = useState(null)
   const [browserPage, setBrowserPage] = useState('home')
-  const [youtubeVideo, setYoutubeVideo] = useState(YOUTUBE_VIDEOS[0])
   const [mailAccount, setMailAccount] = useState('player')
   const [terminalLines, setTerminalLines] = useState(['ORPHEUS SHELL 3.7', 'Sessão local: LIVIA', 'Selecione uma ferramenta.'])
   const pcDownloads = game?.digital?.devices?.liviaPc?.downloads ?? []
@@ -467,7 +453,6 @@ export default function LiviaFiles({
                           <button onClick={() => setWindowId('mail')}>✉️ <b>Webmail</b><small>Contas online</small></button>
                           <button onClick={() => setBrowserPage('search')}>🔎 <b>Pesquisa</b><small>Internet e notícias</small></button>
                         <button onClick={() => setBrowserPage('clans')}>🩸 <b>Os 7 Clãs</b><small>Arquivo sobre a Camarilla</small></button>
-                        <button onClick={() => setBrowserPage('youtube')}>▶️ <b>YouTube</b><small>Vampiro: A Máscara 3E</small></button>
                         </div>
                       </>}
                       {browserPage === 'social' && <>
@@ -483,102 +468,6 @@ export default function LiviaFiles({
                         <input className="livia-search-input" placeholder="Pesquisar na web..." />
                         <div className="livia-placeholder-card">A busca narrativa poderá usar NPCs, locais e pistas já descobertos.</div>
                       </>}
-
-                      {browserPage === 'youtube' && (
-                        <div className="livia-youtube">
-                          <div className="livia-youtube-toolbar">
-                            <button
-                              type="button"
-                              className="livia-back-link"
-                              onClick={() => setBrowserPage('home')}
-                            >
-                              ← início
-                            </button>
-
-                            <div className="livia-youtube-address">
-                              youtube.com/@vampiroamascara3e
-                            </div>
-
-                            <button
-                              type="button"
-                              className="livia-youtube-external"
-                              title="Abrir canal em nova aba"
-                              onClick={() => window.open(
-                                'https://www.youtube.com/@vampiroamascara3e',
-                                '_blank',
-                                'noopener,noreferrer'
-                              )}
-                            >
-                              ↗
-                            </button>
-                          </div>
-
-                          <div className="livia-youtube-header">
-                            <div className="livia-youtube-logo">▶</div>
-
-                            <div>
-                              <h2>Vampiro: A Máscara 3E</h2>
-                              <p>@vampiroamascara3e</p>
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() => window.open(
-                                'https://www.youtube.com/@vampiroamascara3e',
-                                '_blank',
-                                'noopener,noreferrer'
-                              )}
-                            >
-                              Ver canal ↗
-                            </button>
-                          </div>
-
-                          <div className="livia-youtube-player">
-                            <iframe
-                              key={youtubeVideo.id}
-                              src={`https://www.youtube.com/embed/${youtubeVideo.id}?rel=0${youtubeVideo.start ? `&start=${youtubeVideo.start}` : ''}`}
-                              title={youtubeVideo.title}
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                              allowFullScreen
-                            />
-                          </div>
-
-                          <div className="livia-youtube-now">
-                            <strong>{youtubeVideo.title}</strong>
-                            <span>Vampiro: A Máscara 3E</span>
-                          </div>
-
-                          <h3 className="livia-youtube-section-title">
-                            Vídeos
-                          </h3>
-
-                          <div className="livia-youtube-grid">
-                            {YOUTUBE_VIDEOS.map((video, index) => (
-                              <button
-                                type="button"
-                                key={video.id}
-                                className={youtubeVideo.id === video.id ? 'active' : ''}
-                                onClick={() => setYoutubeVideo(video)}
-                              >
-                                <div className="livia-youtube-thumb">
-                                  <img
-                                    src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
-                                    alt=""
-                                    loading="lazy"
-                                  />
-                                  <span>▶</span>
-                                </div>
-
-                                <div className="livia-youtube-video-info">
-                                  <strong>{video.title}</strong>
-                                  <small>Vampiro: A Máscara 3E</small>
-                                  <small>Vídeo {index + 1}</small>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
 
                       {browserPage === 'clans' && (
                         <div className="livia-clans-browser">
